@@ -1,18 +1,19 @@
 === Wordbooker ===
 
 Contributors: SteveAtty
-Tags: facebook, minifeed, newsfeed, crosspost
+Tags: facebook, minifeed, newsfeed, crosspost, WPMU
 Requires at least: 2.7
-Tested up to: 2.9.
-Stable tag: 1.2
+Tested up to: 2.9
+Stable tag: 1.3
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall. 
 
 == Description ==
 
-This plugin allows you to cross-post your blog posts to your Facebook Wall. You can also "cross polinate" comment between Facebook and your Wordpres blog.
+This plugin allows you to cross-post your blog posts to your Facebook Wall. You can also "cross polinate" comments between Facebook and your Wordpres blog.
 
 Various options including "attribute" lines and polling for comments and automatic re-posting on edit can be configured.
+
 
 == Installation ==
 
@@ -22,13 +23,16 @@ Various options including "attribute" lines and polling for comments and automat
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 1. Navigate to `Options` &rarr; `Wordbooker` for configuration and follow the on-screen prompts.
 
+
 == Features ==
+
 For more details on the various features please read the additional Features.txt file
 
 - Works with a complementary [Facebook application](http://www.facebook.com/apps/application.php?id=254577506873) to update your Facebook Wall and friends' News Feeds about your blog and page postings.
 - Supports multi-author blogs: each blog author notifies only their own friends of their blog/page posts.
 - Supports posting of Comments from your blog to the corresponsding Facebook wall article.
 - Supports the pulling of comments FROM blogs posted to your Facebook wall, back into your blog. 
+- Supports the posting of blog posts to Fan Pages (if you are an administrator of that page). This is currently experimental and there is bug in the API
 
 
 == Frequently Asked Questions ==
@@ -83,10 +87,22 @@ Do *not* use the Review Wall for support or feature requests. People are unable 
 
 Alternatively, leave a comment on [my blog](http://blogs.canalplan.org.uk/steve).
 
+
 == Screenshots ==
 
 1. Wordbooker Options/Configuration Screen
 2. Wordbooker Options overrides when posting
 
+
 == Upgrade Notice ==
-If you've upgrading from my forked version of Roberts Wordbook plugin then you'll have to remove the old version first as its a new application. If you dont want to lose track of any posts you've published with my version then BEFORE you de-install, export the wordbook_postcomments table. Then remove the old app, install this one, set up your configuration and then import the wordbook_postcomments table.
+If you've upgrading from my forked version of Robert's  Wordbook plugin ( http://wordpress.org/extend/plugins/wordbook ) then you'll have to remove the old version first as it's a new application and uses different API keys. If you dont want to lose track of any posts you've published with my version then BEFORE you de-install, export the wordbook_postcomments table. Then remove the old app, install this one, set up your configuration and then import the wordbook_postcomments table.
+
+If you are upgrading from an earlier version of wordbooker then DO NOT deactivate the plugin before you upgrade as this will remove the tables. Simply delete the contents of the wordbooker folder and upload the new version.
+
+
+== Changelog == 
+
+- Version 1.3 -  03/01/2010 - Removal of stray debugging code, tidy up and recoding of cron job
+- Version 1.2 -  02/01/2010 - URL fixes, code tweaks
+- Version 1.1 -  02/01/2010 - Minor bug fix
+- version 1.0 -  02/01/2010 - Base Release
