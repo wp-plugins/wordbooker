@@ -1,4 +1,4 @@
-=== Wordbook ===
+=== Wordbooker ===
 
 Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost
