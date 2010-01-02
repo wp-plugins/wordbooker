@@ -5,7 +5,7 @@ Plugin URI: http://blogs.canalplan.org.uk/steve/wordbook/
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="admin.php?page=wordbook">Settings &rarr; Wordbook</a> for configuration.
 Author: Steve Atty 
 Author URI: http://blogs.canalplan.org.uk/steve/
-Version: 1.0
+Version: 1.1
 */
 
  /*
@@ -60,7 +60,7 @@ define('WORDBOOK_EXCERPT_WIDEBOX', 96);
 define('WORDBOOK_EXCERPT_NARROWBOX', 40);
 
 define('WORDBOOK_MINIMUM_ADMIN_LEVEL', 2);	/* Author role or above. */
-define('WORDBOOK_SETTINGS_PAGENAME', 'wordbook');
+define('WORDBOOK_SETTINGS_PAGENAME', 'wordbooker');
 define('WORDBOOK_SETTINGS_URL', 'admin.php?page=' . WORDBOOK_SETTINGS_PAGENAME);
 
 define('WORDBOOK_SCHEMA_VERSION', 1);
@@ -195,6 +195,7 @@ function wordbook_fbclient_publishaction_impl($fbclient, $post_data) {
 		if ($_POST["wordbook_page_post"]==-100) {
 			$result = $fbclient->stream_publish($message,json_encode($attachment), json_encode($action_links));
 		} else {
+			#$result = $fbclient->stream_publish($message, json_encode($attachment), json_encode($action_links), $_POST["wordbook_page_post"],$_POST["wordbook_page_post"]);
 			$result = $fbclient->stream_publish($message, json_encode($attachment), json_encode($action_links), $_POST["wordbook_page_post"]);
 		}
 
