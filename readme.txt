@@ -1,10 +1,10 @@
-=== Wordbook ===
+=== Wordbooker ===
 
 Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost
 Requires at least: 2.7
 Tested up to: 2.9.
-Stable tag: 1.0
+Stable tag: 1.2
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall. 
 

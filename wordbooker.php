@@ -5,7 +5,7 @@ Plugin URI: http://blogs.canalplan.org.uk/steve/wordbook/
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="admin.php?page=wordbook">Settings &rarr; Wordbook</a> for configuration.
 Author: Steve Atty 
 Author URI: http://blogs.canalplan.org.uk/steve/
-Version: 1.0
+Version: 1.2
 */
 
  /*
@@ -60,7 +60,7 @@ define('WORDBOOK_EXCERPT_WIDEBOX', 96);
 define('WORDBOOK_EXCERPT_NARROWBOX', 40);
 
 define('WORDBOOK_MINIMUM_ADMIN_LEVEL', 2);	/* Author role or above. */
-define('WORDBOOK_SETTINGS_PAGENAME', 'wordbook');
+define('WORDBOOK_SETTINGS_PAGENAME', 'wordbooker');
 define('WORDBOOK_SETTINGS_URL', 'admin.php?page=' . WORDBOOK_SETTINGS_PAGENAME);
 
 define('WORDBOOK_SCHEMA_VERSION', 1);
@@ -195,6 +195,9 @@ function wordbook_fbclient_publishaction_impl($fbclient, $post_data) {
 		if ($_POST["wordbook_page_post"]==-100) {
 			$result = $fbclient->stream_publish($message,json_encode($attachment), json_encode($action_links));
 		} else {
+			# This is the call that should be used to publish to fan pages but there would seem to be a bug in the API
+
+			#$result = $fbclient->stream_publish($message, json_encode($attachment), json_encode($action_links), $_POST["wordbook_page_post"],$_POST["wordbook_page_post"]);
 			$result = $fbclient->stream_publish($message, json_encode($attachment), json_encode($action_links), $_POST["wordbook_page_post"]);
 		}
 
@@ -208,7 +211,6 @@ function wordbook_fbclient_publishaction_impl($fbclient, $post_data) {
 function wordbook_fbclient_getinfo($fbclient, $fields) {
 	try {
 		$uid = $fbclient->users_getLoggedInUser();
-		#echo "UID = ".$uid." !! <br>";
 		$users = $fbclient->users_getInfo(array($uid), $fields);
 		$error_code = null;
 		$error_msg = null;
@@ -346,7 +348,6 @@ function wordbook_upgrade() {
 				WORDBOOK_POSTCOMMENTS,
 				$table_prefix . 'wordbook_onetimecode',
 				) as $tablename) {
-		#	echo "Drop ".$tablename."<br>";
 			$result = $wpdb->query("
 				DROP TABLE IF EXISTS $tablename
 				");
@@ -490,7 +491,6 @@ function wordbook_set_userdata($use_facebook, $onetime_data, $facebook_error,
 function wordbook_set_userdata2($use_facebook, $onetime_data, $facebook_error,
 		$secret, $session_key) {
 	global $user_ID, $wpdb;
-	#wordbook_delete_userdata();
 	$sql= "Update " . WORDBOOK_USERDATA . " set
 		          use_facebook = " . ($use_facebook ? 1 : 0) . "
 			, onetime_data =  '" . serialize($onetime_data) . "'
@@ -498,7 +498,6 @@ function wordbook_set_userdata2($use_facebook, $onetime_data, $facebook_error,
 			, secret = '" . serialize($secret) . "'
 			, session_key = '" . serialize($session_key) . "'
 		 where user_id=".$user_ID;
-	#echo "!!".$sql."KK";
 $result = $wpdb->query($sql);
 }
 
@@ -549,11 +548,9 @@ function wordbook_trim_postlogs() {
 
 function wordbook_postlogged($postid) {
 	global $wpdb;
-	#var_dump($_POST);
 	// See if the user has overridden the repost on edit - i.e. they want to publish and be damned!
 	if (isset ($_POST["wordbook_publish_overridden"])) { return false;}
 	$wordbook_settings =get_option('wordbook_settings'); 
-	#var_dump($wordbook_settings);
 	// Does the user want us to ever publish on Edit? If not then return ture
 	if ( (! isset($wordbook_settings["wordbook_republish_time_obey"])) && ($_POST['original_post_status']=='publish')) { return true;}
 	#echo "Past the republish check";
@@ -641,8 +638,6 @@ function wordbook_appendto_errorlogs($method, $error_code, $error_msg,
 		$post = get_post($postid);
 		$user_id = $post->post_author;
 	}
-	#echo "!!".$error_code."!!<br>";
-	#echo "LLL".$error_msg."KKK<br>";
 		$result = $wpdb->insert(WORDBOOK_ERRORLOGS,
 			array('user_ID' => $user_id,
 				'method' => $method,
@@ -922,9 +917,6 @@ global  $wpdb;
 
 	$show_paypal = false;
 	$fbclient = wordbook_fbclient($wbuser);
-	#var_dump($wbuser);
-	#echo "<br><br><br>";
-	#var_dump ($fbclient);
 	list($fbuid, $users, $error_code, $error_msg) =
 		wordbook_fbclient_getinfo($fbclient, array(
 			'is_app_user',
@@ -976,8 +968,6 @@ global  $wpdb;
 
 
 			if ($user['is_app_user']) {
-		#		$show_paypal = true;
-			#	wordbook_fbclient_setfbml($wbuser, $fbclient,null, null);
 ?>
 
 		<p>Wordbooker appears to be configured and working just fine.</p>
@@ -1199,7 +1189,6 @@ function wordbook_option_support() {
 <?php
 }
 
-
 function wordbook_admin_menu() {
 	$hook = add_options_page('Wordbook Option Manager', 'Wordbooker',
 		WORDBOOK_MINIMUM_ADMIN_LEVEL, WORDBOOK_SETTINGS_PAGENAME,
@@ -1214,10 +1203,6 @@ function wordbook_admin_menu() {
 
 function wordbook_render_onetimeerror($wbuser) {
 $result = $wbuser->onetime_data;
-#var_dump($wbuser);
-#echo "<br>";
-#var_dump($result);
-
 	if (($result = $wbuser->onetime_data)) {
 ?>
 
@@ -1318,8 +1303,6 @@ function wordbook_fbclient_publishaction($wbuser, $fbuid, $fbname, $fbclient,
 		}
 	}
 $wordbook_settings =get_option('wordbook_settings'); 
-
-#$media = array_map('wordbook_fbclient_image_as_media', $images);
 	$post_data = array(
 		'media' => $images,
 		'post_link' => $post_link,
@@ -1375,10 +1358,6 @@ function wordbook_fbmltext($exclude_postid) {
   Blog posts from <a href="$blog_link" title="$blog_atitle" target="$blog_name">$blog_name</a>
 </fb:subtitle>
 EOM;
-
-# Backed up copy of the Subtitle   Blog posts from <a href="$author_link" title="$user_identity's posts at $blog_name" target="$blog_name">$user_identity</a> at <a href="$blog_link" title="$blog_atitle" target="$blog_name">$blog_name</a>
-
-
 	$posts_per_page = get_option('posts_per_page');
 	if ($posts_per_page <= 0) {
 		$posts_per_page = 10;
@@ -1467,7 +1446,6 @@ global $user_ID, $user_identity, $user_login, $wpdb;
 		} else {
 			$fbname = 'A friend';
 		}
-
 		# Lets see if they want to update their status. We do it this way so you can update your status without publishing!
 		if( $_POST["wordbook_status_update_override"]=="on"){ 
 			$status_text = $_POST['wordbook_status_update_text_override']." ".$post->post_title." - ".get_permalink($post->ID)."  ";
@@ -1490,8 +1468,6 @@ global $user_ID, $user_identity, $user_login, $wpdb;
 }
 
 function wordbook_transition_post_status($newstatus, $oldstatus, $post) {
-	#echo $newstatus;
-	#var_dump($_POST);
 	if ($newstatus == 'publish') {
 		return wordbook_publish_action($post);
 	}

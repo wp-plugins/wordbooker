@@ -205,13 +205,9 @@ function wordbook_add_custom_box() {
    
 /* Prints the inner fields for the custom post/page section */
 function wordbook_inner_custom_box() {
-
-  // Use nonce for verification
-
   echo '<input type="hidden" name="wordbook_noncename" id="wordbook_noncename" value="' . 
     wp_create_nonce( plugin_basename(__FILE__) ) . '" />';
 
-  // The actual fields for data entry
 
 global $wpdb;
 $wordbook_settings=get_option('wordbook_settings'); 
@@ -234,7 +230,6 @@ echo ' Or post to the following fan page :  <select name="wordbook_page_post" ><
 $fanpages=unserialize(stripslashes($wordbook_settings['wordbook_pages']));
 
 foreach ($fanpages as $fan_page) {
-#	echo "LLL".$fanpages[0][page_id]."!!!";	
 	$option = '<option value='.$fan_page[page_id].'>';
 	$option .= $fan_page[name]."&nbsp;&nbsp;";
 	$option .= '</option>';
