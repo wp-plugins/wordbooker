@@ -2,14 +2,15 @@
 /*
 Plugin Name: Wordbooker
 Plugin URI: http://blogs.canalplan.org.uk/steve/wordbook/
-Description: Provides integration between your blog and your Facebook account. Navigate to <a href="admin.php?page=wordbook">Settings &rarr; Wordbook</a> for configuration.
+Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://blogs.canalplan.org.uk/steve/
-Version: 1.0
+Version: 1.4
 */
 
  /*
  * Based on the Wordbook plugin by Robert Tsai (http://www.tsaiberspace.net/projects/wordpress/wordbook/ )
+ * All Credit to him for working out the basics of getting it working.
  *
  *
  * Copyright 2010 Steve Atty (email : posty@tty.org.uk)
@@ -60,14 +61,13 @@ define('WORDBOOK_EXCERPT_WIDEBOX', 96);
 define('WORDBOOK_EXCERPT_NARROWBOX', 40);
 
 define('WORDBOOK_MINIMUM_ADMIN_LEVEL', 2);	/* Author role or above. */
-define('WORDBOOK_SETTINGS_PAGENAME', 'wordbook');
+define('WORDBOOK_SETTINGS_PAGENAME', 'wordbooker');
 define('WORDBOOK_SETTINGS_URL', 'admin.php?page=' . WORDBOOK_SETTINGS_PAGENAME);
 
 define('WORDBOOK_SCHEMA_VERSION', 1);
 
 $wordbook_wp_version_tuple = explode('.', $wp_version);
-define('WORDBOOK_WP_VERSION', $wordbook_wp_version_tuple[0] * 10 +
-	$wordbook_wp_version_tuple[1]);
+define('WORDBOOK_WP_VERSION', $wordbook_wp_version_tuple[0] * 10 +$wordbook_wp_version_tuple[1]);
 
 if (function_exists('json_encode')) {
 	define('WORDBOOK_JSON_ENCODE', 'PHP');
@@ -75,17 +75,17 @@ if (function_exists('json_encode')) {
 	define('WORDBOOK_JSON_ENCODE', 'Wordbook');
 }
 
-if (function_exists('simplexml_load_string')) {
+#if (function_exists('simplexml_load_string')) {
 	define('WORDBOOK_SIMPLEXML', 'PHP');
-} else {
-	define('WORDBOOK_SIMPLEXML', 'Facebook');
-}
+#} else {
+#	define('WORDBOOK_SIMPLEXML', 'Facebook');
+#}
 
-if (substr(phpversion(), 0, 2) == '5.') {
+#if (substr(phpversion(), 0, 2) == '5.') {
 	define('FACEBOOK_PHP_API', 'PHP5');
-} else {
-	define('FACEBOOK_PHP_API', 'PHP4');
-}
+#} else {
+#	define('FACEBOOK_PHP_API', 'PHP4');
+#}
 
 function wordbook_debug($message) {
 	if (WORDBOOK_DEBUG) {
@@ -134,15 +134,14 @@ function wordbook_load_apis() {
 }
 
 
-function wordbook_rest_client($secret, $session_key) {
-	return new FacebookRestClient(WORDBOOK_FB_APIKEY, $secret,
-		$session_key);
-}
+#function wordbook_rest_client($secret, $session_key) {
+#	return new FacebookRestClient(WORDBOOK_FB_APIKEY, $secret,
+#		$session_key);
+#}
 
 function wordbook_fbclient_setfbml_impl($fbclient, $text) {
 	try {
-		$result = $fbclient->profile_setFBML(null, null, $text,
-			null, null, $text);
+		$result = $fbclient->profile_setFBML(null, null, $text,null, null, $text);
 		$error_code = null;
 		$error_msg = null;
 	} catch (Exception $e) {
@@ -157,28 +156,31 @@ function wordbook_fbclient_publishaction_impl($fbclient, $post_data) {
 	try {
 		$method = 'stream.publish';
 		$message=$_POST["wordbook_attribution"];
-		$post_data['post_excerpt']=str_replace('&#8220;', '"',$post_data['post_excerpt']);
-		$post_data['post_excerpt']=str_replace('&#8221;', '"',$post_data['post_excerpt']);
-		$post_data['post_excerpt']=str_replace('&#8243;', '"',$post_data['post_excerpt']);
-		$post_data['post_excerpt']=str_replace('&#8216;', "'",$post_data['post_excerpt']);
-		$post_data['post_excerpt']=str_replace('&#8217;', "'",$post_data['post_excerpt']);
-		$post_data['post_excerpt']=str_replace('&#8242;', "'",$post_data['post_excerpt']);
-		$post_data['post_excerpt']=str_replace('&#8211;', "-",$post_data['post_excerpt']);
-		$post_data['post_excerpt']=str_replace('&#8230;', "...",$post_data['post_excerpt']);
+		#$post_data['post_excerpt']=str_replace('&#8220;', '"',$post_data['post_excerpt']);
+		#$post_data['post_excerpt']=str_replace('&#8221;', '"',$post_data['post_excerpt']);
+		#$post_data['post_excerpt']=str_replace('&#8243;', '"',$post_data['post_excerpt']);
+		#$post_data['post_excerpt']=str_replace('&#8216;', "'",$post_data['post_excerpt']);
+		#$post_data['post_excerpt']=str_replace('&#8217;', "'",$post_data['post_excerpt']);
+		#$post_data['post_excerpt']=str_replace('&#8242;', "'",$post_data['post_excerpt']);
+		#$post_data['post_excerpt']=str_replace('&#8211;', "-",$post_data['post_excerpt']);
+		#$post_data['post_excerpt']=str_replace('&#8230;', "...",$post_data['post_excerpt']);
+		$post_data['post_excerpt']=html_entity_decode($post_data['post_excerpt']);
+		$post_data['post_excerpt']=html_entity_decode($post_data['post_excerpt'],ENT_QUOTES,'UTF-8');
 
-		$post_data['post_title']=str_replace('&#8220;', '"',$post_data['post_title']);
-		$post_data['post_title']=str_replace('&#8220;', '"',$post_data['post_title']);
-		$post_data['post_title']=str_replace('&#8243;', '"',$post_data['post_title']);
-		$post_data['post_title']=str_replace('&#8216;', "'",$post_data['post_title']);
-		$post_data['post_title']=str_replace('&#8217;', "'",$post_data['post_title']);
-		$post_data['post_title']=str_replace('&#8242;', "'",$post_data['post_title']);
-		$post_data['post_title']=str_replace('&#8211;', "-",$post_data['post_title']);
-		$post_data['post_title']=str_replace('&#8230;', "...",$post_data['post_title']);
+		#$post_data['post_title']=str_replace('&#8220;', '"',$post_data['post_title']);
+		#$post_data['post_title']=str_replace('&#8221;', '"',$post_data['post_title']);
+		#$post_data['post_title']=str_replace('&#8243;', '"',$post_data['post_title']);
+		#$post_data['post_title']=str_replace('&#8216;', "'",$post_data['post_title']);
+		#$post_data['post_title']=str_replace('&#8217;', "'",$post_data['post_title']);
+		#$post_data['post_title']=str_replace('&#8242;', "'",$post_data['post_title']);
+		#$post_data['post_title']=str_replace('&#8211;', "-",$post_data['post_title']);
+		#$post_data['post_title']=str_replace('&#8230;', "...",$post_data['post_title']);
+		$post_data['post_title']=html_entity_decode($post_data['post_title']);
+		$post_data['post_title']=html_entity_decode($post_data['post_title'],ENT_QUOTES,'UTF-8');
 		
-		# The following handle some character conversions which might be needed for some people.		
-		#$post_data['post_excerpt']=mb_convert_encoding($post_data['post_excerpt'], 'UTF-8', 'HTML-ENTITIES');
+		# The following handle some character conversions which might be needed for some people. I think this is down to what character set the DB tables are set to use 			#$post_data['post_excerpt']=mb_convert_encoding($post_data['post_excerpt'], 'UTF-8', 'HTML-ENTITIES');
 		#$post_data['post_title']=mb_convert_encoding($post_data['post_title'], 'UTF-8', 'HTML-ENTITIES');
-		
+
 		# Converts latin diacritics into two letters. This includes umlauted letters.
     		#$post_data['post_excerpt']= preg_replace(array('/&szlig;/','/&(..)lig;/','/&([aouAOU])uml;/','/&(.)[^;]*;/'),array('ss',"$1","$1".'e',"$1"), $post_data['post_excerpt']);
 
@@ -195,7 +197,10 @@ function wordbook_fbclient_publishaction_impl($fbclient, $post_data) {
 		if ($_POST["wordbook_page_post"]==-100) {
 			$result = $fbclient->stream_publish($message,json_encode($attachment), json_encode($action_links));
 		} else {
-			$result = $fbclient->stream_publish($message, json_encode($attachment), json_encode($action_links), $_POST["wordbook_page_post"]);
+			# This is the call that should be used to publish to fan pages but there would seem to be a bug in the API
+			#$result = $fbclient->stream_publish($message, json_encode($attachment), json_encode($action_links), $_POST["wordbook_page_post"],$_POST["wordbook_page_post"]);
+			
+			$result = $fbclient->stream_publish($message, json_encode($attachment), json_encode($action_links),$_POST["wordbook_page_post"]);
 		}
 
 	} catch (Exception $e) {
@@ -207,9 +212,11 @@ function wordbook_fbclient_publishaction_impl($fbclient, $post_data) {
 
 function wordbook_fbclient_getinfo($fbclient, $fields) {
 	try {
+		#echo "Getting UID from FB<br>";
 		$uid = $fbclient->users_getLoggedInUser();
-		#echo "UID = ".$uid." !! <br>";
-		$users = $fbclient->users_getInfo(array($uid), $fields);
+		#var_dump($uid);
+		#echo "<p><br> Getting user info<br>";
+		$users = $fbclient->users_getInfo($uid, $fields);
 		$error_code = null;
 		$error_msg = null;
 	} catch (Exception $e) {
@@ -346,10 +353,7 @@ function wordbook_upgrade() {
 				WORDBOOK_POSTCOMMENTS,
 				$table_prefix . 'wordbook_onetimecode',
 				) as $tablename) {
-		#	echo "Drop ".$tablename."<br>";
-			$result = $wpdb->query("
-				DROP TABLE IF EXISTS $tablename
-				");
+			$result = $wpdb->query("DROP TABLE IF EXISTS $tablename");
 			if ($result === false)
 				$errors[] = "Failed to drop $tablename";
 		}
@@ -425,9 +429,7 @@ function wordbook_delete_user($user_id) {
 			WORDBOOK_USERDATA,
 			WORDBOOK_ERRORLOGS,
 			) as $tablename) {
-		$result = $wpdb->query('
-			DELETE FROM ' . $tablename . '
-			WHERE user_ID = ' . $user_id . '
+		$result = $wpdb->query('DELETE FROM ' . $tablename . ' WHERE user_ID = ' . $user_id . '
 			');
 		if ($result === false)
 			$errors[] = "Failed to remove user $user_id from $tablename";
@@ -447,12 +449,8 @@ function wordbook_delete_user($user_id) {
 
 function wordbook_get_userdata($user_id) {
 	global $wpdb;
-
-	$rows = $wpdb->get_results('
-		SELECT *
-		FROM ' . WORDBOOK_USERDATA . '
-		WHERE user_ID = ' . $user_id . '
-		');
+	$sql='SELECT * FROM ' . WORDBOOK_USERDATA . ' WHERE user_ID = ' . $user_id ;
+	$rows = $wpdb->get_results($sql);
 	if ($rows) {
 		$rows[0]->onetime_data = unserialize($rows[0]->onetime_data);
 		$rows[0]->facebook_error =
@@ -490,7 +488,6 @@ function wordbook_set_userdata($use_facebook, $onetime_data, $facebook_error,
 function wordbook_set_userdata2($use_facebook, $onetime_data, $facebook_error,
 		$secret, $session_key) {
 	global $user_ID, $wpdb;
-	#wordbook_delete_userdata();
 	$sql= "Update " . WORDBOOK_USERDATA . " set
 		          use_facebook = " . ($use_facebook ? 1 : 0) . "
 			, onetime_data =  '" . serialize($onetime_data) . "'
@@ -498,7 +495,6 @@ function wordbook_set_userdata2($use_facebook, $onetime_data, $facebook_error,
 			, secret = '" . serialize($secret) . "'
 			, session_key = '" . serialize($session_key) . "'
 		 where user_id=".$user_ID;
-	#echo "!!".$sql."KK";
 $result = $wpdb->query($sql);
 }
 
@@ -549,11 +545,9 @@ function wordbook_trim_postlogs() {
 
 function wordbook_postlogged($postid) {
 	global $wpdb;
-	#var_dump($_POST);
 	// See if the user has overridden the repost on edit - i.e. they want to publish and be damned!
 	if (isset ($_POST["wordbook_publish_overridden"])) { return false;}
 	$wordbook_settings =get_option('wordbook_settings'); 
-	#var_dump($wordbook_settings);
 	// Does the user want us to ever publish on Edit? If not then return ture
 	if ( (! isset($wordbook_settings["wordbook_republish_time_obey"])) && ($_POST['original_post_status']=='publish')) { return true;}
 	#echo "Past the republish check";
@@ -641,8 +635,6 @@ function wordbook_appendto_errorlogs($method, $error_code, $error_msg,
 		$post = get_post($postid);
 		$user_id = $post->post_author;
 	}
-	#echo "!!".$error_code."!!<br>";
-	#echo "LLL".$error_msg."KKK<br>";
 		$result = $wpdb->insert(WORDBOOK_ERRORLOGS,
 			array('user_ID' => $user_id,
 				'method' => $method,
@@ -679,7 +671,7 @@ function wordbook_render_errorlogs() {
 	<div class="wordbook_errors">
 
 	<p>
-	Your blog is OK, but Wordbook was unable to update your Mini-Feed:
+	Your blog is OK, but Wordbooker was unable to update your Mini-Feed:
 	</p>
 
 	<table class="wordbook_errorlogs">
@@ -896,16 +888,13 @@ function wordbook_option_setup($wbuser) {
 			wordbook_update_userdata($wbuser);
 		}
 ?>
-
 		<p style="text-align: center;"><input type="submit" value="<?php _e('Submit &raquo;'); ?>" /></p>
 	</form>
-
 	<form action="<?php echo WORDBOOK_SETTINGS_URL; ?>" method="post">
 		<p>Or, if you don't use Facebook or don't want to post to Facebook:</p>
 		<input type="hidden" name="action" value="no_facebook" />
 		<p style="text-align: center;"><input type="submit" value="<?php _e('I don\'t want to use Facebook &raquo;'); ?>" /></p>
 	</form>
-
 	</div>
 
 <?php
@@ -914,17 +903,15 @@ function wordbook_option_setup($wbuser) {
 function wordbook_option_status($wbuser) {
 global  $wpdb;
 ?>
-
 	<h3><?php _e('Status'); ?></h3>
 	<div class="wordbook_status">
-
 <?php
-
 	$show_paypal = false;
-	$fbclient = wordbook_fbclient($wbuser);
 	#var_dump($wbuser);
-	#echo "<br><br><br>";
-	#var_dump ($fbclient);
+	#echo "<p><br></p>";
+	$fbclient = wordbook_fbclient($wbuser);
+	#var_dump($fbclient);
+	#echo "<p><br></p>";
 	list($fbuid, $users, $error_code, $error_msg) =
 		wordbook_fbclient_getinfo($fbclient, array(
 			'is_app_user',
@@ -934,62 +921,45 @@ global  $wpdb;
 			'pic',
 			));
 	$profile_url = "http://www.facebook.com/profile.php?id=$fbuid"; 
-
 	if ($fbuid) {
 		if (is_array($users)) {
 			$user = $users[0];
 
 			if ($user['pic']) {
 ?>
-
 		<div class="facebook_picture">
 		<a href="<?php echo $profile_url; ?>" target="facebook">
 		<img src="<?php echo $user['pic']; ?>" /></a>
 		</div>
-
 <?php
 			}
-
 			if (!($name = $user['first_name']))
 				$name = $user['name'];
-
 			if ($user['status']['message']) {
 ?>
-
 		<p>
 		<a href="<?php echo $profile_url; ?>"><?php echo $name; ?></a>
 		<i><?php echo $user['status']['message']; ?></i>
 		(<?php echo date('D M j, g:i a', $user['status']['time']); ?>).
 		</p>
-
 <?php
 			} else {
 ?>
-
 		<p>
 		Hi,
 		<a href="<?php echo $profile_url; ?>"><?php echo $name; ?></a>!
 		</p>
-
 <?php
 			}
-
-
 			if ($user['is_app_user']) {
-		#		$show_paypal = true;
-			#	wordbook_fbclient_setfbml($wbuser, $fbclient,null, null);
 ?>
-
 		<p>Wordbooker appears to be configured and working just fine.</p>
-
-
 <?php
 				list($has_permission, $error_code, $error_msg) =
 					wordbook_fbclient_has_app_permission(
 					$fbclient, WORDBOOK_FB_PUBLISH_STREAM);
 				if (!$has_permission) {
 ?>
-
 		<p>
 		Wordbooker requires authorization to publish content on Facebook. Click on the following link to grant permission
 		</p>
@@ -998,80 +968,58 @@ global  $wpdb;
 		<img src="http://static.ak.facebook.com/images/devsite/facebook_login.gif" />
 		</a><br>
 		</div>
-
 <?php
 				}
-
-
 				list($has_permission, $error_code, $error_msg) =
 					wordbook_fbclient_has_app_permission(
 					$fbclient, "read_stream");
 				if (!$has_permission) {
 ?>
-
 		<p>
 		Wordbooker requires authorization to access your News Feed and Wall.. Click on the following link to grant permission
 		</p>
 		<div style="text-align: center;">
-
 		<a href="http://www.facebook.com/authorize.php?v=<?php echo WORDBOOK_FB_APIVERSION; ?>&api_key=<?php echo WORDBOOK_FB_APIKEY; ?>&ext_perm=<?php echo WORDBOOK_FB_READ_STREAM; ?>" target="facebook">
 		<img src="http://static.ak.facebook.com/images/devsite/facebook_login.gif" />
 		</a><br>
-
 		</div>
-
 		<form action="<?php echo WORDBOOK_SETTINGS_URL; ?>" method="post">
 			<input type="hidden" name="action" value="" />
 			<p style="text-align: center;"><input type="submit" value="<?php _e('Save Configuration'); ?>" /></p>
 		</form>
-
 <?php
-}
-			
+}	
 ?>	
 		<p>If you like, you can start over from the beginning (this does not delete your posting and comment history):</p>
-
 <?php
 			} else {
 ?>
-
 		<p>Wordbooker is able to connect to Facebook.</p>
-
 		<p>Next, add the <a href="http://www.facebook.com/apps/application.php?id=254577506873" target="facebook">Wordbooker</a> application to your Facebook profile:</p>
-
 		<div style="text-align: center;"><a href="http://www.facebook.com/add.php?api_key=<?php echo WORDBOOK_FB_APIKEY; ?>" target="facebook"><img src="http://static.ak.facebook.com/images/devsite/facebook_login.gif" /></a></div>
-
 		<p>Or, you can start over from the beginning:</p>
-
 <?php
 			}
 		} else {
 ?>
-
 		<p>Wordbooker is configured and working, but <a href="http://developers.facebook.com/documentation.php?v=1.0&method=users.getInfo" target="facebook">facebook.users.getInfo</a> failed (no Facebook user for uid <?php echo $fbuid; ?>).</p>
-
 		<p>Try resetting the configuration:</p>
 
 <?php
 		}
 	} else {
 ?>
-
 		<p>Failed to communicate with Facebook: <a href="http://developers.facebook.com/documentation.php?v=1.0&method=users.getLoggedInUser" target="facebook">error_code = <?php echo $error_code; ?> (<?php echo $error_msg; ?>)</a>.</p>
-		
 		<p>Try resetting the configuration:</p>
 
 <?php
 	}
 ?>
-
 		<form action="<?php echo WORDBOOK_SETTINGS_URL; ?>" method="post">
 			<input type="hidden" name="action" value="delete_userdata" />
 			<p style="text-align: center;"><input type="submit" value="<?php _e('Reset Configuration'); ?>" /></p>
 		</form>
-
 	</div>
-
 <?php
 	return array($show_paypal);
 }
@@ -1092,33 +1040,25 @@ function wordbook_version_ok($currentvers, $minimumvers) {
 function wordbook_option_support() {
 	global $wp_version;
 ?>
-
 	<h3><?php _e('Support'); ?></h3>
 	<div class="wordbook_support">
-
 	For feature requests, bug reports, and general support:
-	
 	<ul>
-	
 		<li>Check the <a
 		href="http://wordpress.org/extend/plugins/wordbooker/other_notes/"
 		target="wordpress">WordPress.org Notes</a>.</li>
-		
 		<li>Try the <a
 		href="http://www.facebook.com/board.php?uid=254577506873"
 		target="facebook">Wordbooker Discussion Board</a>.</li>
-
 		<li>Consider upgrading to the <a
 		href="http://wordpress.org/download/">latest stable release</a>
 		of WordPress.</li>
-		
 	</ul>
 	
 	Please provide the following information about your installation:
 
 	<ul>
 <?php
-
 	$wb_version = 'Unknown';
 	if (($wordbook_php = file(__FILE__)) &&
 			(($versionlines = array_values(preg_grep('/^Version:/',
@@ -1134,7 +1074,7 @@ function wordbook_option_support() {
 		 'Unknown';
 
 	$info = array(
-		'Wordbook' => $wb_version,
+		'Wordbooker' => $wb_version,
 		'Facebook PHP API' => FACEBOOK_PHP_API,
 		'JSON library' => WORDBOOK_JSON_ENCODE,
 		'SimpleXML library' => WORDBOOK_SIMPLEXML,
@@ -1176,9 +1116,7 @@ function wordbook_option_support() {
 ?>
 
 	<div class="wordbook_errorcolor">
-	Your system does not meet the <a
-	href="http://wordpress.org/about/requirements/">WordPress minimum
-	reqirements</a>. Things are unlikely to work.
+	Your system does not meet the <a href="http://wordpress.org/about/requirements/">WordPress minimum reqirements</a>. Things are unlikely to work.
 	</div>
 
 <?php
@@ -1186,9 +1124,7 @@ function wordbook_option_support() {
 ?>
 
 	<div>
-	Please ensure that your system meets the <a
-	href="http://wordpress.org/about/requirements/">WordPress minimum
-	reqirements</a>.
+	Please ensure that your system meets the <a href="http://wordpress.org/about/requirements/">WordPress minimum reqirements</a>.
 	</div>
 
 <?php
@@ -1199,11 +1135,8 @@ function wordbook_option_support() {
 <?php
 }
 
-
 function wordbook_admin_menu() {
-	$hook = add_options_page('Wordbook Option Manager', 'Wordbooker',
-		WORDBOOK_MINIMUM_ADMIN_LEVEL, WORDBOOK_SETTINGS_PAGENAME,
-		'wordbook_option_manager');
+	$hook = add_options_page('Wordbook Option Manager', 'Wordbooker',WORDBOOK_MINIMUM_ADMIN_LEVEL, WORDBOOK_SETTINGS_PAGENAME,'wordbook_option_manager');
 	add_action("load-$hook", 'wordbook_admin_load');
 	add_action("admin_head-$hook", 'wordbook_admin_head');
 }
@@ -1213,17 +1146,11 @@ function wordbook_admin_menu() {
  */
 
 function wordbook_render_onetimeerror($wbuser) {
-$result = $wbuser->onetime_data;
-#var_dump($wbuser);
-#echo "<br>";
-#var_dump($result);
-
+	$result = $wbuser->onetime_data;
 	if (($result = $wbuser->onetime_data)) {
-?>
-
-	<p>There was a problem with the one-time code "<?php echo $result['onetimecode']; ?>": <a href="http://developers.facebook.com/documentation.php?v=1.0&method=auth.getSession" target="facebook">error_code = <?php echo $result['error_code']; ?> (<?php echo $result['error_msg']; ?>)</a>. Try re-submitting it, or try generating a new one-time code.</p>
-
-<?php
+		?>
+		<p>There was a problem with the one-time code "<?php echo $result['onetimecode']; ?>": <a href="http://wiki.developers.facebook.com/index.php/Auth.getSession" target="facebook">error_code = <?php echo $result['error_code']; ?> (<?php echo $result['error_msg']; ?>)</a>. Try re-submitting it, or try generating a new one-time code.</p>
+		<?php
 	}
 }
 
@@ -1239,51 +1166,44 @@ function wordbook_fbclient($wbuser) {
 		$secret = $wbuser->secret;
 		$session_key = $wbuser->session_key;
 	}
-	if (!$secret)
-		$secret = WORDBOOK_FB_SECRET;
-	if (!$session_key)
-		$session_key = '';
-	return wordbook_rest_client($secret, $session_key);
+	if (!$secret) $secret = WORDBOOK_FB_SECRET;
+	if (!$session_key) $session_key = '';
+	return new FacebookRestClient(WORDBOOK_FB_APIKEY, $secret,$session_key);
+	#return wordbook_rest_client($secret, $session_key);
 }
 
-function wordbook_fbclient_facebook_finish($wbuser, $result, $method,
-		$error_code, $error_msg, $postid) {
+function wordbook_fbclient_facebook_finish($wbuser, $result, $method,$error_code, $error_msg, $postid) 
+{
 	if ($error_code) {
-		wordbook_set_userdata_facebook_error($wbuser, $method,
-			$error_code, $error_msg, $postid);
+		wordbook_set_userdata_facebook_error($wbuser, $method, $error_code, $error_msg, $postid);
 	} else {
 		wordbook_clear_userdata_facebook_error($wbuser);
 	}
 	return $result;
 }
 
-function wordbook_fbclient_setfbml($wbuser, $fbclient, $postid,
-		$exclude_postid) {
-	list($result, $error_code, $error_msg) = wordbook_fbclient_setfbml_impl(
-		$fbclient, wordbook_fbmltext($exclude_postid));
-	return wordbook_fbclient_facebook_finish($wbuser, $result,
-		'profile.setFBML', $error_code, $error_msg, $postid);
+function wordbook_fbclient_setfbml($wbuser, $fbclient, $postid, $exclude_postid)
+{
+	list($result, $error_code, $error_msg) = wordbook_fbclient_setfbml_impl($fbclient, wordbook_fbmltext($exclude_postid));
+	return wordbook_fbclient_facebook_finish($wbuser, $result,'profile.setFBML', $error_code, $error_msg, $postid);
 }
 
-function wordbook_fbclient_publishaction($wbuser, $fbuid, $fbname, $fbclient,
-		$postid) {
+function wordbook_fbclient_publishaction($wbuser, $fbclient,$postid) 
+{
 	$post = get_post($postid);
 	$post_link = get_permalink($postid);
 	$post_title = get_the_title($postid);
 	$post_content = $post->post_content;
 
-/* Pull out images from <img/> tags. */
-	preg_match_all('/<img \s+ ([^>]*\s+)? src \s* = \s* "(.*?)"/ix',
-		$post_content, $matches);
+	/* Pull out images from <img/> tags. */
+	preg_match_all('/<img \s+ ([^>]*\s+)? src \s* = \s* "(.*?)"/ix',$post_content, $matches);
 	$images = array();
 	foreach ($matches[2] as $ii => $imgsrc) {
 		if ($imgsrc) {
-			if (stristr(substr($imgsrc, 0, 8), '://') ===
-					false) {
+			if (stristr(substr($imgsrc, 0, 8), '://') ===false) {
 				/* Fully-qualify src URL if necessary. */
 				$scheme = $_SERVER['HTTPS'] ? 'https' : 'http';
-				$new_imgsrc = "$scheme://"
-					. $_SERVER['SERVER_NAME'];
+				$new_imgsrc = "$scheme://". $_SERVER['SERVER_NAME'];
 				if ($imgsrc[0] == '/') {
 					$new_imgsrc .= $imgsrc;
 				}
@@ -1296,7 +1216,6 @@ function wordbook_fbclient_publishaction($wbuser, $fbuid, $fbname, $fbclient,
 				);
 		}
 	}
-
 	/* Pull out <wpg2> image tags. */
 	$wpg2_g2path = get_option('wpg2_g2paths');
 	if ($wpg2_g2path) {
@@ -1317,36 +1236,31 @@ function wordbook_fbclient_publishaction($wbuser, $fbuid, $fbname, $fbclient,
 			}
 		}
 	}
-$wordbook_settings =get_option('wordbook_settings'); 
-
-#$media = array_map('wordbook_fbclient_image_as_media', $images);
+	$post_content=wordbook_post_excerpt($post_content,WORDBOOK_EXCERPT_SHORTSTORY);
+	$wordbook_settings =get_option('wordbook_settings'); 
 	$post_data = array(
 		'media' => $images,
 		'post_link' => $post_link,
 		'post_title' => $post_title,
-		'post_excerpt' => wordbook_post_excerpt($post_content,
-			WORDBOOK_EXCERPT_SHORTSTORY),
+		'post_excerpt' => $post_content,
 		'post_attribute' => $_POST["wordbook_attribution"],
 		);
 	list($result, $error_code, $error_msg, $method) = wordbook_fbclient_publishaction_impl($fbclient, $post_data);
-	return wordbook_fbclient_facebook_finish($wbuser, $result,
-		$method, $error_code, $error_msg, $postid);
+	return wordbook_fbclient_facebook_finish($wbuser, $result,$method, $error_code, $error_msg, $postid);
 }
 
 /******************************************************************************
  * WordPress hooks: update Facebook when a blog entry gets published.
  */
 
-function wordbook_post_excerpt($content, $maxlength) {
-	
-	$excerpt = apply_filters('the_excerpt', $content);
+function wordbook_post_excerpt($excerpt, $maxlength) {
 	if (function_exists('strip_shortcodes')) {
 		$excerpt = strip_shortcodes($excerpt);
 	}
 	#$excerpt = strip_tags($excerpt,'<p></p>');
 	$excerpt = strip_tags($excerpt);
 	if (strlen($excerpt) > $maxlength) {
-	$excerpt=current(explode("\r", wordwrap($excerpt, $maxlength, "\r")))." ...";	
+	$excerpt=current(explode("SJA26666AJS", wordwrap($excerpt, $maxlength, "SJA26666AJS")))." ...";	
 	}
 	return $excerpt;
 }
@@ -1375,10 +1289,6 @@ function wordbook_fbmltext($exclude_postid) {
   Blog posts from <a href="$blog_link" title="$blog_atitle" target="$blog_name">$blog_name</a>
 </fb:subtitle>
 EOM;
-
-# Backed up copy of the Subtitle   Blog posts from <a href="$author_link" title="$user_identity's posts at $blog_name" target="$blog_name">$user_identity</a> at <a href="$blog_link" title="$blog_atitle" target="$blog_name">$blog_name</a>
-
-
 	$posts_per_page = get_option('posts_per_page');
 	if ($posts_per_page <= 0) {
 		$posts_per_page = 10;
@@ -1441,42 +1351,31 @@ EOM;
 }
 
 function wordbook_publish_action($post) {
-global $user_ID, $user_identity, $user_login, $wpdb;
+	global $user_ID, $user_identity, $user_login, $wpdb;
 	wordbook_deletefrom_errorlogs($post->ID);
 	if ($post->post_password != '') {
 		/* Don't publish password-protected posts to news feed. */
 		return 27;
 	}
-	if (!($wbuser = wordbook_get_userdata($_POST["wordbook_default_author_override"])) ||
-			!$wbuser->session_key) {
+	if (!($wbuser = wordbook_get_userdata($_POST["wordbook_default_author_override"])) || !$wbuser->session_key) {
 		return 28;
 	}
 	/* If publishing a new blog post, update text in "Wordbook" box. */
-
 	$fbclient = wordbook_fbclient($wbuser);
 	# This posts to the profile box which will be obosolete from early 2010.
-	if ($post->post_type == 'post' && !wordbook_fbclient_setfbml($wbuser,
-			$fbclient, $post->ID, null)) {
+	if ($post->post_type == 'post' && !wordbook_fbclient_setfbml($wbuser,$fbclient, $post->ID, null)) {
 		return 29;
 	}
 	if (!wordbook_postlogged($post->ID)) {
-		list($fbuid, $users, $error_code, $error_msg) =
-			wordbook_fbclient_getinfo($fbclient, array('name'));
-		if ($fbuid && is_array($users) && ($user = $users[0])) {
-			$fbname = $user['name'];
-		} else {
-			$fbname = 'A friend';
-		}
-
 		# Lets see if they want to update their status. We do it this way so you can update your status without publishing!
-		if( $_POST["wordbook_status_update_override"]=="on"){ 
+		if( $_POST["wordbook_status_update_override"]=="on") { 
 			$status_text = $_POST['wordbook_status_update_text_override']." ".$post->post_title." - ".get_permalink($post->ID)."  ";
 			$fbclient->users_setStatus($status_text);
 		}
 	// User has unchecked the publish to facebook option so lets just give up and go home
 	$wbpda=$_POST["wordbook_publish_default_action"];
 	if ($wbpda!="on") {return;}
-		$results=wordbook_fbclient_publishaction($wbuser, $fbuid, $fbname,$fbclient, $post->ID);
+		$results=wordbook_fbclient_publishaction($wbuser, $fbclient, $post->ID);
 		wordbook_insertinto_postlogs($post->ID);
 		$fb_post_id=$results;
 		// Has the user decided to collect comments for this post?
@@ -1490,31 +1389,22 @@ global $user_ID, $user_identity, $user_login, $wpdb;
 }
 
 function wordbook_transition_post_status($newstatus, $oldstatus, $post) {
-	#echo $newstatus;
-	#var_dump($_POST);
 	if ($newstatus == 'publish') {
 		return wordbook_publish_action($post);
 	}
-
 	$postid = $post->ID;
-	if (($wbuser = wordbook_get_userdata($post->post_author)) &&
-			$wbuser->session_key) {
+	if (($wbuser = wordbook_get_userdata($post->post_author)) && $wbuser->session_key) {
 		$fbclient = wordbook_fbclient($wbuser);
-		list($result, $error_code, $error_msg) =
-			wordbook_fbclient_setfbml($wbuser, $fbclient, $postid,
-			$postid);
+		list($result, $error_code, $error_msg) =wordbook_fbclient_setfbml($wbuser, $fbclient, $postid,$postid);
 	}
-return 31;	
+	return 31;	
 }
 
 function wordbook_delete_post($postid) {
 	$post = get_post($postid);
-	if (($wbuser = wordbook_get_userdata($post->post_author)) &&
-			$wbuser->session_key) {
+	if (($wbuser = wordbook_get_userdata($post->post_author)) && $wbuser->session_key) {
 		$fbclient = wordbook_fbclient($wbuser);
-		list($result, $error_code, $error_msg) =
-			wordbook_fbclient_setfbml($wbuser, $fbclient, $postid,
-			$postid);
+		list($result, $error_code, $error_msg) =wordbook_fbclient_setfbml($wbuser, $fbclient, $postid,$postid);
 	}
 	wordbook_deletefrom_errorlogs($postid);
 	wordbook_deletefrom_postlogs($postid);
@@ -1537,6 +1427,7 @@ add_action('delete_post', 'wordbook_delete_post');
 
 
 function wordbook_publish($postid) {
+	#var_dump($_POST);
 	$post = get_post($postid);
         if( get_post_type($postid) == 'page' ) {return ;}
 	$wordbook_settings = get_option('wordbook_settings'); 
@@ -1573,18 +1464,31 @@ function wordbook_post_comment($commentid) {
 	$ctext=$comment->comment_content;
 	$ctype=$comment->comment_type;
 	$caemail=$comment->comment_author_email;
+	$cauth=$comment->comment_author;
 	$cuid=$comment->user_id;
 	$real_comment=true;
 	if (($cuid==0) && ($caemail==get_bloginfo( 'admin_email' ))) {$real_comment=false;}
 	if ($real_comment) {
-		if (DEBUG) {$debug_string="FBID : ".$cpid."  stat:".$cstatus."text:".$ctext." type:".$ctype."!!\n";
-		fwrite($fp, $debug_string);}	
+		if (DEBUG) {
+			$debug_string="FBID : ".$cpid."  stat:".$cstatus."text:".$ctext." type:".$ctype."!!\n";
+			fwrite($fp, $debug_string);
+		}	
 		if ($cstatus==1) {
 			$post = get_post($cpid);
-			if (DEBUG) {$debug_string="Comment author: ".$post->post_author."\n";
-			fwrite($fp, $debug_string);}	
-			if (($wbuser = wordbook_get_userdata($post->post_author)) &&
-			$wbuser->session_key) {
+			#$ppermalink = get_permalink( $cpid );
+			if (DEBUG) {
+				$debug_string="Comment author: ".$post->post_author."\n";
+				fwrite($fp, $debug_string);
+			}
+$ctextblock = <<<CODEBLOX
+
+Name : $cauth
+Comment: [from blog ] : $ctext
+
+CODEBLOX;
+			#$ctextblock=$ctext."<p> [ ".$cauth." - from blog! ]</p>";
+			#echo "!!!!!!".$ctextblock."!!!!";
+			if (($wbuser = wordbook_get_userdata($post->post_author)) && $wbuser->session_key) {
 				$fbclient = wordbook_fbclient($wbuser);
 				$sql='Select fb_post_id from ' . WORDBOOK_POSTCOMMENTS . ' where wp_post_id ='.$cpid;
 				if (DEBUG) {$debug_string="Comment sql: ".$sql."\n";
@@ -1595,7 +1499,7 @@ function wordbook_post_comment($commentid) {
 				if (count($rows)>0) {
 					foreach ($rows as $comdata_row) {
 						$fb_post_id=$comdata_row->fb_post_id;
-						$result2=$fbclient->stream_addComment($fb_post_id , $ctext.'  (imported from my Wordpress blog)');
+						$result2=$fbclient->stream_addComment($fb_post_id , $ctextblock.' ');
 					} 
 				}
 			}

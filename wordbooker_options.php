@@ -32,8 +32,6 @@ function wbs_retrieve_hash() {
 
 
 function wordbook_option_manager() {
-
-
 	global $ol_flash, $wordbook_settings, $_POST, $wp_rewrite,$user_ID,$wpdb, $table_prefix;
 	//Set some defaults:
 	$wordbook_settings =get_option('wordbook_settings'); 
@@ -95,7 +93,6 @@ function wordbook_option_manager() {
 		$temp_hash = wbs_generate_hash();
 		wbs_store_hash($temp_hash);
 		$checked_flag=array('on'=>'checked','off'=>'');
-
 		echo '<div class="wrap">';
 		echo '<h2>WordBooker Plugin</h2><p><h3>Customisation</h3>';
 		echo'<form action="" name="wboptions" method="post">
@@ -113,7 +110,7 @@ function wordbook_option_manager() {
         		$option .= $wb_user->display_name;
         		$option .= '</option>';
         		echo $option;
-}
+		}
 		echo '</select><br>
                 <label for="wb_extract_length">Length of Extract :
                  <select id="wordbook_extract_length" name="wordbook_extract_length"  >';
@@ -143,111 +140,97 @@ function wordbook_option_manager() {
 		$fbclient = wordbook_fbclient($wbuser);
 		# obtain a list of pages which the current user is an admin for.
 		$result=$fbclient->fql_query('SELECT page_id FROM page_admin WHERE uid ='.$fbclient->users_getLoggedInUser());
-	if (is_array($result)) {
-		foreach($result as $res){
-			$fan_pages[]=$res['page_id'];
+		if (is_array($result)) {
+			foreach($result as $res){
+				$fan_pages[]=$res['page_id'];
+			}
+			$comma_separated = implode(",", $fan_pages);
+			$result=$fbclient->pages_getInfo($comma_separated,'name','','');
+			echo '<br><br>You can also post to the following Facebook pages : ';
+			$fbpages="";		
+			foreach($result as $fbpage) { 
+			$fbpages.=" ".$fbpage['name'].",";
+			}
+			$fbpages=trim($fbpages," ,");
+			echo $fbpages."</p><br>";	
+			$serialed=serialize($result);
+			echo "<input type='hidden' name='wordbook_pages' value='".$serialed."' />";
 		}
-		$comma_separated = implode(",", $fan_pages);
-		$result=$fbclient->pages_getInfo($comma_separated,'name','','');
-		echo '<br><br>You can also post to the following Facebook pages : ';
-		$fbpages="";		
-		foreach($result as $fbpage) { 
-		$fbpages.=" ".$fbpage['name'].",";
-		}
-		$fbpages=trim($fbpages," ,");
-		echo $fbpages."</p><br>";	
-		$serialed=serialize($result);
-		echo "<input type='hidden' name='wordbook_pages' value='".$serialed."' />";}
-
 		echo '<br><br><p><input type="submit" value="Save Options" class="button-primary"  /></p></form><br><hr>';
-		 wordbook_option_status($wbuser);
+		wordbook_option_status($wbuser);
 		wordbook_render_errorlogs();
         } else {
 		wordbook_option_setup($wbuser);
 	}
 	// Lets poll if they want to
-if ( isset($wordbook_settings["wordbook_comment_poll"])){
-	$dummy=wordbook_poll_facebook();
-}
-?>
-<br><br><hr><br><h3>Donate</h3>
-If you've found this extension useful then please feel free to donate to its support and future development<br><br>
-  
-<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
-<input type="hidden" name="cmd" value="_s-xclick">
-<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
-">
-<input type="image" src="https://www.paypal.com/en_US/GB/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online.">
-<img alt="" border="0" src="https://www.paypal.com/en_GB/i/scr/pixel.gif" width="1" height="1">
-</form>
-<br>
-<?php
-        echo "<hr>";
-        wordbook_option_support();
-        echo "</div>";
-
+	if ( isset($wordbook_settings["wordbook_comment_poll"])){
+		$dummy=wordbook_poll_facebook();
+	}
+	?>
+	<br><br><hr><br><h3>Donate</h3>
+	If you've found this extension useful then please feel free to donate to its support and future development<br><br>
+	  
+	<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+	<input type="hidden" name="cmd" value="_s-xclick">
+	<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----">
+	<input type="image" src="https://www.paypal.com/en_US/GB/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online.">
+	<img alt="" border="0" src="https://www.paypal.com/en_GB/i/scr/pixel.gif" width="1" height="1">
+	</form>
+	<br>
+	<?php
+	echo "<hr>";
+	wordbook_option_support();
+	echo "</div>";
 }
 
 /* Use the admin_menu action to define the custom boxes. Dont do this unless we have options set */
- if(get_option('wordbook_settings'))
-  {
-add_action('admin_menu', 'wordbook_add_custom_box');
+if(get_option('wordbook_settings')) {
+	add_action('admin_menu', 'wordbook_add_custom_box');
 }
-
 
 /* Adds a custom section to the "advanced" Post edit screens */
 function wordbook_add_custom_box() {
-
-
-    add_meta_box( 'wordbook_sectionid', __( 'WordBooker Options', 'wordbook_textdomain' ), 
-                'wordbook_inner_custom_box', 'post', 'advanced' );
+    add_meta_box( 'wordbook_sectionid', __( 'WordBooker Options', 'wordbook_textdomain' ),'wordbook_inner_custom_box', 'post', 'advanced' );
 }
    
 /* Prints the inner fields for the custom post/page section */
 function wordbook_inner_custom_box() {
+	echo '<input type="hidden" name="wordbook_noncename" id="wordbook_noncename" value="' . 
+	wp_create_nonce( plugin_basename(__FILE__) ) . '" />';
+	global $wpdb;
+	$wordbook_settings=get_option('wordbook_settings'); 
+	$checked_flag=array('on'=>'checked','off'=>'');
+	echo "The following options override the defaults set on the options page<br><br>";
+	$sql="select wpu.ID,wpu.display_name from $wpdb->users wpu,".WORDBOOK_USERDATA." wud where wpu.ID=wud.user_id and wud.use_facebook=1;";
+	$wb_users = $wpdb->get_results($sql);
+	echo 'Posts will be published on the Facebook belonging to : <select name="wordbook_default_author_override" >';
+	foreach ($wb_users as $wb_user) {	
+		if ($wb_user->ID==$wordbook_settings["wordbook_default_author"] ) {$option = '<option selected="yes" value='.$wb_user->ID.'>';} else {
+		$option = '<option value='.$wb_user->ID.'>';}
+		$option .= " ".$wb_user->display_name."&nbsp;&nbsp;";
+		$option .= '</option>';
+		echo $option;
+	}
+	echo '</select><br>';
+	echo '<input type="hidden" name="wordbook_page_post" value="-100" />';
+	if (strlen($wordbook_settings['wordbook_pages']) > 0 ){
+		echo ' Or post to the following fan page :  <select name="wordbook_page_post" ><option selected="yes" value=-100>Select Fan Page&nbsp;&nbsp;</option>';
+		$fanpages=unserialize(stripslashes($wordbook_settings['wordbook_pages']));
+		foreach ($fanpages as $fan_page) {
+			$option = '<option value='.$fan_page[page_id].'>';
+			$option .= $fan_page[name]."&nbsp;&nbsp;";
+			$option .= '</option>';
+			echo $option;
+		}
+		echo '</select><br>'; 
+	}
 
-  // Use nonce for verification
-
-  echo '<input type="hidden" name="wordbook_noncename" id="wordbook_noncename" value="' . 
-    wp_create_nonce( plugin_basename(__FILE__) ) . '" />';
-
-  // The actual fields for data entry
-
-global $wpdb;
-$wordbook_settings=get_option('wordbook_settings'); 
-$checked_flag=array('on'=>'checked','off'=>'');
-echo "The following options override the defaults set on the options page<br><br>";
-$sql="select wpu.ID,wpu.display_name from $wpdb->users wpu,".WORDBOOK_USERDATA." wud where wpu.ID=wud.user_id and wud.use_facebook=1;";
-$wb_users = $wpdb->get_results($sql);
-echo 'Posts will be published on the Facebook belonging to : <select name="wordbook_default_author_override" >';
-foreach ($wb_users as $wb_user) {	
-	if ($wb_user->ID==$wordbook_settings["wordbook_default_author"] ) {$option = '<option selected="yes" value='.$wb_user->ID.'>';} else {
-	$option = '<option value='.$wb_user->ID.'>';}
-	$option .= " ".$wb_user->display_name."&nbsp;&nbsp;";
-	$option .= '</option>';
-	echo $option;
-}
-echo '</select><br>';
-echo '<input type="hidden" name="wordbook_page_post" value="-100" />';
-if (strlen($wordbook_settings['wordbook_pages']) > 0 ){
-echo ' Or post to the following fan page :  <select name="wordbook_page_post" ><option selected="yes" value=-100>Select Fan Page&nbsp;&nbsp;</option>';
-$fanpages=unserialize(stripslashes($wordbook_settings['wordbook_pages']));
-
-foreach ($fanpages as $fan_page) {
-#	echo "LLL".$fanpages[0][page_id]."!!!";	
-	$option = '<option value='.$fan_page[page_id].'>';
-	$option .= $fan_page[name]."&nbsp;&nbsp;";
-	$option .= '</option>';
-	echo $option;
-}
-echo '</select><br>'; }
-
-echo '<input type="hidden" name="soupy" value="twist" />';
-echo '<INPUT TYPE=CHECKBOX NAME="wordbook_publish_default_action" '.$checked_flag[$wordbook_settings["wordbook_publish_default"]].' > Publish Post to Facebook</P><br>';
-echo '<INPUT TYPE=CHECKBOX NAME="wordbook_publish_overridden" '.$checked_flag[$wordbook_settings["wordbook_publish_override"]].' > Force Re-Publish Post to Facebook on Edit (overrides republish window)</P><br>';
-echo '<INPUT TYPE=CHECKBOX NAME="wordbook_comment_overridden" '.$checked_flag[$wordbook_settings["wordbook_comment_get"]].' > Fetch comments from Facebook for this post</P><br>';
-echo 'Facebook Post Attribute line: <INPUT NAME="wordbook_attribution" size=50 maxlength=50 value="'.$wordbook_settings["wordbook_attribute"].'"></P><br>';	
-echo 'Facebook Status Update<INPUT TYPE=CHECKBOX NAME="wordbook_status_update_override" '.$checked_flag[$wordbook_settings["wordbook_status_update"]].' > : <INPUT NAME="wordbook_status_update_text_override" size=50 maxlength=50 value="'.$wordbook_settings["wordbook_status_update_text"].'"><br>';
+	echo '<input type="hidden" name="soupy" value="twist" />';
+	echo '<INPUT TYPE=CHECKBOX NAME="wordbook_publish_default_action" '.$checked_flag[$wordbook_settings["wordbook_publish_default"]].' > Publish Post to Facebook</P><br>';
+	echo '<INPUT TYPE=CHECKBOX NAME="wordbook_publish_overridden" '.$checked_flag[$wordbook_settings["wordbook_publish_override"]].' > Force Re-Publish Post to Facebook on Edit (overrides republish window)</P><br>';
+	echo '<INPUT TYPE=CHECKBOX NAME="wordbook_comment_overridden" '.$checked_flag[$wordbook_settings["wordbook_comment_get"]].' > Fetch comments from Facebook for this post</P><br>';
+	echo 'Facebook Post Attribute line: <INPUT NAME="wordbook_attribution" size=50 maxlength=50 value="'.$wordbook_settings["wordbook_attribute"].'"></P><br>';	
+	echo 'Facebook Status Update<INPUT TYPE=CHECKBOX NAME="wordbook_status_update_override" '.$checked_flag[$wordbook_settings["wordbook_status_update"]].' > : <INPUT NAME="wordbook_status_update_text_override" size=50 maxlength=50 value="'.$wordbook_settings["wordbook_status_update_text"].'"><br>';
 
 }
 ?>
