@@ -5,7 +5,7 @@ Plugin URI: http://blogs.canalplan.org.uk/steve/wordbook/
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://blogs.canalplan.org.uk/steve/
-Version: 1.3
+Version: 1.4
 */
 
  /*
@@ -156,27 +156,31 @@ function wordbook_fbclient_publishaction_impl($fbclient, $post_data) {
 	try {
 		$method = 'stream.publish';
 		$message=$_POST["wordbook_attribution"];
-		$post_data['post_excerpt']=str_replace('&#8220;', '"',$post_data['post_excerpt']);
-		$post_data['post_excerpt']=str_replace('&#8221;', '"',$post_data['post_excerpt']);
-		$post_data['post_excerpt']=str_replace('&#8243;', '"',$post_data['post_excerpt']);
-		$post_data['post_excerpt']=str_replace('&#8216;', "'",$post_data['post_excerpt']);
-		$post_data['post_excerpt']=str_replace('&#8217;', "'",$post_data['post_excerpt']);
-		$post_data['post_excerpt']=str_replace('&#8242;', "'",$post_data['post_excerpt']);
-		$post_data['post_excerpt']=str_replace('&#8211;', "-",$post_data['post_excerpt']);
-		$post_data['post_excerpt']=str_replace('&#8230;', "...",$post_data['post_excerpt']);
+		#$post_data['post_excerpt']=str_replace('&#8220;', '"',$post_data['post_excerpt']);
+		#$post_data['post_excerpt']=str_replace('&#8221;', '"',$post_data['post_excerpt']);
+		#$post_data['post_excerpt']=str_replace('&#8243;', '"',$post_data['post_excerpt']);
+		#$post_data['post_excerpt']=str_replace('&#8216;', "'",$post_data['post_excerpt']);
+		#$post_data['post_excerpt']=str_replace('&#8217;', "'",$post_data['post_excerpt']);
+		#$post_data['post_excerpt']=str_replace('&#8242;', "'",$post_data['post_excerpt']);
+		#$post_data['post_excerpt']=str_replace('&#8211;', "-",$post_data['post_excerpt']);
+		#$post_data['post_excerpt']=str_replace('&#8230;', "...",$post_data['post_excerpt']);
+		$post_data['post_excerpt']=html_entity_decode($post_data['post_excerpt']);
+		$post_data['post_excerpt']=html_entity_decode($post_data['post_excerpt'],ENT_QUOTES,'UTF-8');
 
-		$post_data['post_title']=str_replace('&#8220;', '"',$post_data['post_title']);
-		$post_data['post_title']=str_replace('&#8220;', '"',$post_data['post_title']);
-		$post_data['post_title']=str_replace('&#8243;', '"',$post_data['post_title']);
-		$post_data['post_title']=str_replace('&#8216;', "'",$post_data['post_title']);
-		$post_data['post_title']=str_replace('&#8217;', "'",$post_data['post_title']);
-		$post_data['post_title']=str_replace('&#8242;', "'",$post_data['post_title']);
-		$post_data['post_title']=str_replace('&#8211;', "-",$post_data['post_title']);
-		$post_data['post_title']=str_replace('&#8230;', "...",$post_data['post_title']);
+		#$post_data['post_title']=str_replace('&#8220;', '"',$post_data['post_title']);
+		#$post_data['post_title']=str_replace('&#8221;', '"',$post_data['post_title']);
+		#$post_data['post_title']=str_replace('&#8243;', '"',$post_data['post_title']);
+		#$post_data['post_title']=str_replace('&#8216;', "'",$post_data['post_title']);
+		#$post_data['post_title']=str_replace('&#8217;', "'",$post_data['post_title']);
+		#$post_data['post_title']=str_replace('&#8242;', "'",$post_data['post_title']);
+		#$post_data['post_title']=str_replace('&#8211;', "-",$post_data['post_title']);
+		#$post_data['post_title']=str_replace('&#8230;', "...",$post_data['post_title']);
+		$post_data['post_title']=html_entity_decode($post_data['post_title']);
+		$post_data['post_title']=html_entity_decode($post_data['post_title'],ENT_QUOTES,'UTF-8');
 		
 		# The following handle some character conversions which might be needed for some people. I think this is down to what character set the DB tables are set to use 			#$post_data['post_excerpt']=mb_convert_encoding($post_data['post_excerpt'], 'UTF-8', 'HTML-ENTITIES');
 		#$post_data['post_title']=mb_convert_encoding($post_data['post_title'], 'UTF-8', 'HTML-ENTITIES');
-		
+
 		# Converts latin diacritics into two letters. This includes umlauted letters.
     		#$post_data['post_excerpt']= preg_replace(array('/&szlig;/','/&(..)lig;/','/&([aouAOU])uml;/','/&(.)[^;]*;/'),array('ss',"$1","$1".'e',"$1"), $post_data['post_excerpt']);
 
@@ -196,7 +200,7 @@ function wordbook_fbclient_publishaction_impl($fbclient, $post_data) {
 			# This is the call that should be used to publish to fan pages but there would seem to be a bug in the API
 			#$result = $fbclient->stream_publish($message, json_encode($attachment), json_encode($action_links), $_POST["wordbook_page_post"],$_POST["wordbook_page_post"]);
 			
-			$result = $fbclient->stream_publish($message, json_encode($attachment), json_encode($action_links), $_POST["wordbook_page_post"]);
+			$result = $fbclient->stream_publish($message, json_encode($attachment), json_encode($action_links),$_POST["wordbook_page_post"]);
 		}
 
 	} catch (Exception $e) {
@@ -208,8 +212,11 @@ function wordbook_fbclient_publishaction_impl($fbclient, $post_data) {
 
 function wordbook_fbclient_getinfo($fbclient, $fields) {
 	try {
+		#echo "Getting UID from FB<br>";
 		$uid = $fbclient->users_getLoggedInUser();
-		$users = $fbclient->users_getInfo(array($uid), $fields);
+		#var_dump($uid);
+		#echo "<p><br> Getting user info<br>";
+		$users = $fbclient->users_getInfo($uid, $fields);
 		$error_code = null;
 		$error_msg = null;
 	} catch (Exception $e) {
@@ -442,10 +449,8 @@ function wordbook_delete_user($user_id) {
 
 function wordbook_get_userdata($user_id) {
 	global $wpdb;
-
-	$rows = $wpdb->get_results('
-		SELECT * FROM ' . WORDBOOK_USERDATA . ' WHERE user_ID = ' . $user_id . '
-		');
+	$sql='SELECT * FROM ' . WORDBOOK_USERDATA . ' WHERE user_ID = ' . $user_id ;
+	$rows = $wpdb->get_results($sql);
 	if ($rows) {
 		$rows[0]->onetime_data = unserialize($rows[0]->onetime_data);
 		$rows[0]->facebook_error =
@@ -902,7 +907,11 @@ global  $wpdb;
 	<div class="wordbook_status">
 <?php
 	$show_paypal = false;
+	#var_dump($wbuser);
+	#echo "<p><br></p>";
 	$fbclient = wordbook_fbclient($wbuser);
+	#var_dump($fbclient);
+	#echo "<p><br></p>";
 	list($fbuid, $users, $error_code, $error_msg) =
 		wordbook_fbclient_getinfo($fbclient, array(
 			'is_app_user',
@@ -1065,7 +1074,7 @@ function wordbook_option_support() {
 		 'Unknown';
 
 	$info = array(
-		'Wordbook' => $wb_version,
+		'Wordbooker' => $wb_version,
 		'Facebook PHP API' => FACEBOOK_PHP_API,
 		'JSON library' => WORDBOOK_JSON_ENCODE,
 		'SimpleXML library' => WORDBOOK_SIMPLEXML,
@@ -1179,7 +1188,7 @@ function wordbook_fbclient_setfbml($wbuser, $fbclient, $postid, $exclude_postid)
 	return wordbook_fbclient_facebook_finish($wbuser, $result,'profile.setFBML', $error_code, $error_msg, $postid);
 }
 
-function wordbook_fbclient_publishaction($wbuser, $fbuid, $fbname, $fbclient,$postid) 
+function wordbook_fbclient_publishaction($wbuser, $fbclient,$postid) 
 {
 	$post = get_post($postid);
 	$post_link = get_permalink($postid);
@@ -1244,15 +1253,14 @@ function wordbook_fbclient_publishaction($wbuser, $fbuid, $fbname, $fbclient,$po
  * WordPress hooks: update Facebook when a blog entry gets published.
  */
 
-function wordbook_post_excerpt($content, $maxlength) {
-	$excerpt = apply_filters('the_excerpt', $content);
+function wordbook_post_excerpt($excerpt, $maxlength) {
 	if (function_exists('strip_shortcodes')) {
 		$excerpt = strip_shortcodes($excerpt);
 	}
 	#$excerpt = strip_tags($excerpt,'<p></p>');
 	$excerpt = strip_tags($excerpt);
 	if (strlen($excerpt) > $maxlength) {
-	$excerpt=current(explode("\r", wordwrap($excerpt, $maxlength, "\r")))." ...";	
+	$excerpt=current(explode("SJA26666AJS", wordwrap($excerpt, $maxlength, "SJA26666AJS")))." ...";	
 	}
 	return $excerpt;
 }
@@ -1359,12 +1367,6 @@ function wordbook_publish_action($post) {
 		return 29;
 	}
 	if (!wordbook_postlogged($post->ID)) {
-		list($fbuid, $users, $error_code, $error_msg) = wordbook_fbclient_getinfo($fbclient, array('name'));
-		if ($fbuid && is_array($users) && ($user = $users[0])) {
-			$fbname = $user['name'];
-		} else {
-			$fbname = 'A friend';
-		}
 		# Lets see if they want to update their status. We do it this way so you can update your status without publishing!
 		if( $_POST["wordbook_status_update_override"]=="on") { 
 			$status_text = $_POST['wordbook_status_update_text_override']." ".$post->post_title." - ".get_permalink($post->ID)."  ";
@@ -1373,7 +1375,7 @@ function wordbook_publish_action($post) {
 	// User has unchecked the publish to facebook option so lets just give up and go home
 	$wbpda=$_POST["wordbook_publish_default_action"];
 	if ($wbpda!="on") {return;}
-		$results=wordbook_fbclient_publishaction($wbuser, $fbuid, $fbname,$fbclient, $post->ID);
+		$results=wordbook_fbclient_publishaction($wbuser, $fbclient, $post->ID);
 		wordbook_insertinto_postlogs($post->ID);
 		$fb_post_id=$results;
 		// Has the user decided to collect comments for this post?
@@ -1425,6 +1427,7 @@ add_action('delete_post', 'wordbook_delete_post');
 
 
 function wordbook_publish($postid) {
+	#var_dump($_POST);
 	$post = get_post($postid);
         if( get_post_type($postid) == 'page' ) {return ;}
 	$wordbook_settings = get_option('wordbook_settings'); 
