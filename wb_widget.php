@@ -75,18 +75,14 @@ function widget_facebook($args) {
 	echo $before_widget . $before_title . $title . $after_title;
         global $wpdb;
         // We need to get the user_id from the userdata table for this blog.
-        $sql="Select user_id from ".WORDBOOK_USERDATA." limit 1";
+        $sql="Select user_id from ".WORDBOOKER_USERDATA." limit 1";
         $result = $wpdb->get_results($sql);
 	$wbuser = wordbook_get_userdata($result[0]->user_id);
         $fbclient = wordbook_fbclient($wbuser);
+	$pfields=array('is_app_user','first_name','name','status','pic',);
+#	if ( MINIMAL_STATUS===true )  $pfields=array('is_app_user','name',); 
         list($fbuid, $users, $error_code, $error_msg) =
-        wordbook_fbclient_getinfo($fbclient, array(
-	'is_app_user',
-	'first_name',
-	'name',
-	'status',
-	'pic',
-	));
+        wordbook_fbclient_getinfo($fbclient, $pfields);
         $profile_url = "http://www.facebook.com/profile.php?id=$fbuid";
         if ($fbuid) {
                 if (is_array($users)) {

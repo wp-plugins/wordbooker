@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Options 
 Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.0
+Version: 1.5
 Description: Advanced Options for the WordBooker Plugin
 Author: Steve Atty
 */
@@ -43,6 +43,8 @@ function wordbook_option_manager() {
 	if (! isset($wordbook_settings["wordbook_attribute"])){ $wordbook_settings["wordbook_attribute"]="Posted a new post on their blog";}
 	// If no Status line text, then set it 
 	if (! isset($wordbook_settings["wordbook_status_update_text"])){ $wordbook_settings["wordbook_status_update_text"]="New Blog Post:";}
+	// No Share link set, then set it
+	if (! isset($wordbook_settings["wordbook_actionlink"])){ $wordbook_settings["wordbook_actionlink"]=300;}
 	// If the extract length isn't set the we know the user hasn't been here before so lets set up a few things:
  	if (! isset($wordbook_settings['wordbook_extract_length'])) {
 		// Comment scraping is done once an hour by a cron job. So lets set it up.
@@ -75,6 +77,8 @@ function wordbook_option_manager() {
 					$wordbook_settings["wordbook_status_update"]=$_POST['wordbook_status_update'];
 					$wordbook_settings["wordbook_comment_poll"]=$_POST['wordbook_comment_poll'];
 					$wordbook_settings["wordbook_pages"]=$_POST['wordbook_pages'];
+					$wordbook_settings["wordbook_actionlink"]=$_POST['wordbook_actionlink'];
+					$wordbook_settings["wordbook_search_this_header"]=$_POST['wordbook_search_this_header'];
 				        update_option('wordbook_settings',$wordbook_settings);
 			        }
 		        $ol_flash = "Your settings have been saved.";
@@ -84,12 +88,12 @@ function wordbook_option_manager() {
 			} // endif wbs_is_hash_valid
 		} 
 	
-	if ($ol_flash != '') echo '<div id="message" class="updated fade"><p>' . $ol_flash . '</p></div>';;
+	if ($ol_flash != '') echo '<div id="message" class="updated fade"><p>' . $ol_flash . '</p></div>';
 	wordbook_option_notices();
-	if ($wordbook_settings["wordbook_default_author"]==0) {$wordbook_settings["wordbook_default_author"]=$user_ID;}
-	$wbuser = wordbook_get_userdata($wordbook_settings["wordbook_default_author"]);
+	$sql="select user_ID from ".WORDBOOKER_USERDATA." where user_ID=".$user_ID;
+	$result = $wpdb->get_results($sql);
+	$wbuser = wordbook_get_userdata($result[0]->user_ID);
 	if ($wbuser->session_key) {
-	#if (($wbuser = wordbook_get_userdata($wordbook_settings["wordbook_default_author"])) && $wbuser->session_key) {
 		$temp_hash = wbs_generate_hash();
 		wbs_store_hash($temp_hash);
 		$checked_flag=array('on'=>'checked','off'=>'');
@@ -100,35 +104,48 @@ function wordbook_option_manager() {
 		<input type="hidden" name="wordbook_permit" value="'.$wordbook_settings["wordbook_permit"].'" />
 		<input type="hidden" name="status_update_permit" value="'.$wordbook_settings["status_update_permit"].'" />
 		<input type="hidden" name="token" value="' . wbs_retrieve_hash() . '" />';
-		$sql="select wpu.ID,wpu.display_name from $wpdb->users wpu,".WORDBOOK_USERDATA." wud where wpu.ID=wud.user_id and wud.use_facebook=1;";
-		$wb_users = $wpdb->get_results($sql);
-		echo "<h3> Default Facebook Account for Posts</h3>"; 
+		$sql="select wpu.ID,wpu.display_name from $wpdb->users wpu,".WORDBOOKER_USERDATA." wud where wpu.ID=wud.user_id and wud.use_facebook=1;";
+		$wb_users = $wpdb->get_results($sql); 
 		echo 'Unless changed, Posts will be published on the Facebook belonging to : <select name="wordbook_default_author" ><option value=0>Select Default Facebook User</option>';
+		$option="";
   		foreach ($wb_users as $wb_user) {	
-			if ($wb_user->ID==$wordbook_settings["wordbook_default_author"] ) {$option = '<option selected="yes" value='.$wb_user->ID.'>';} else {
-        		$option = '<option value='.$wb_user->ID.'>';}
+			if ($wb_user->ID==$wordbook_settings["wordbook_default_author"] ) {$option .= '<option selected="yes" value='.$wb_user->ID.'>';} else {
+        		$option .= '<option value='.$wb_user->ID.'>';}
         		$option .= $wb_user->display_name;
         		$option .= '</option>';
-        		echo $option;
 		}
+		echo $option;
 		echo '</select><br>
                 <label for="wb_extract_length">Length of Extract :
-                 <select id="wordbook_extract_length" name="wordbook_extract_length"  >';
-                $arr = array(200=> "200",  250=> "250", 256=>"256 (Default) ", 270=>"270", 300=>"300", 350 => "350",400 => "400");
+		<select id="wordbook_extract_length" name="wordbook_extract_length"  >';
+        
+	        $arr = array(200=> "200",  250=> "250", 256=>"256 (Default) ", 270=>"270", 300=>"300", 350 => "350",400 => "400");
+         
                 foreach ($arr as $i => $value) {
-                        if ($i==$wordbook_settings['wordbook_extract_length']){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
+                        if ($i==$wordbook_settings['wordbook_actionlink']){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
                        else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}}
                 echo "</select><br>";
+
 		echo '<label for="wb_publish_default">Default Publish Post to Facebook : ';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbook_publish_default" '.$checked_flag[$wordbook_settings["wordbook_publish_default"]].' ></P><br>';
 		echo '<label for="wb_attribute">Post Attribute : ';
-		echo '<INPUT NAME="wordbook_attribute" size=50 maxlength=50 value="'.$wordbook_settings["wordbook_attribute"].'"></P><br>';
+		echo '<INPUT NAME="wordbook_attribute" size=50 maxlength=50 value="'.stripslashes($wordbook_settings["wordbook_attribute"]).'"></P><br>';
 		echo '<label for="wb_publish_timeframe">Republish Post if edited more than  : ';
 		echo '<INPUT NAME="wordbook_republish_time_frame" size=3 maxlength=3 value='.$wordbook_settings["wordbook_republish_time_frame"].'> days ago <INPUT TYPE=CHECKBOX NAME="wordbook_republish_time_obey" '.$checked_flag[$wordbook_settings["wordbook_republish_time_obey"]].' ><br>';
 		echo '<label for="wb_publish_republicaro">Override Re-Publication window : ';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbook_publish_override" '.$checked_flag[$wordbook_settings["wordbook_publish_override"]].' > ( Force Re-Publish Post to Facebook on Edit )</P><br>';
 		echo '<label for="wb_status_update">Update Facebook Status  : ';
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbook_status_update" '.$checked_flag[$wordbook_settings["wordbook_status_update"]].' > <INPUT NAME="wordbook_status_update_text" size=50 maxlength=50 value="'.$wordbook_settings["wordbook_status_update_text"].'"><br>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbook_status_update" '.$checked_flag[$wordbook_settings["wordbook_status_update"]].' > <INPUT NAME="wordbook_status_update_text" size=50 maxlength=50 value="'.stripslashes($wordbook_settings["wordbook_status_update_text"]).'">';
+echo '</select></P><br>
+               <label for="wb_action_link">Action Link Option :
+		         <select id="wordbook_actionlink" name="wordbook_actionlink"  >';	
+       $arr = array(100=> "None ",  200=> "Share Link ", 300=>"Read Full Article");
+                foreach ($arr as $i => $value) {
+                        if ($i==$wordbook_settings['wordbook_actionlink']){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
+                       else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}}
+                echo "<</select></P><br>";
+		echo '<label for="wordbook_search_this_header">Enable Extended description for Share Link : ';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbook_search_this_header" '.$checked_flag[$wordbook_settings["wordbook_search_this_header"]].'></P><br><br>';
 		echo '<label for="wb_publish_comment_approve">Import Comments from Facebook for Wordbook Posts : ';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbook_comment_get" '.$checked_flag[$wordbook_settings["wordbook_comment_get"]].'> ( Next Scheduled fetch is at : '.date("H:i:s",wp_next_scheduled('wb_cron_job')).' ) </P><br>';
 		echo '<label for="wb_publish_comment_approve">Auto Approve imported comments : ';
@@ -201,7 +218,7 @@ function wordbook_inner_custom_box() {
 	$wordbook_settings=get_option('wordbook_settings'); 
 	$checked_flag=array('on'=>'checked','off'=>'');
 	echo "The following options override the defaults set on the options page<br><br>";
-	$sql="select wpu.ID,wpu.display_name from $wpdb->users wpu,".WORDBOOK_USERDATA." wud where wpu.ID=wud.user_id and wud.use_facebook=1;";
+	$sql="select wpu.ID,wpu.display_name from $wpdb->users wpu,".WORDBOOKER_USERDATA." wud where wpu.ID=wud.user_id and wud.use_facebook=1;";
 	$wb_users = $wpdb->get_results($sql);
 	echo 'Posts will be published on the Facebook belonging to : <select name="wordbook_default_author_override" >';
 	foreach ($wb_users as $wb_user) {	
@@ -225,12 +242,19 @@ function wordbook_inner_custom_box() {
 		echo '</select><br>'; 
 	}
 
+	echo 'Action Link Option :<select id="wordbook_actionlink" name="wordbook_actionlink_overide"  >';	
+       $arr = array(100=> "None ",  200=> "Share Link ", 300=>"Read Full Article ");
+                foreach ($arr as $i => $value) {
+                        if ($i==$wordbook_settings['wordbook_actionlink']){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
+                       else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}}
+                echo "<</select></P><br><br>";
+
 	echo '<input type="hidden" name="soupy" value="twist" />';
 	echo '<INPUT TYPE=CHECKBOX NAME="wordbook_publish_default_action" '.$checked_flag[$wordbook_settings["wordbook_publish_default"]].' > Publish Post to Facebook</P><br>';
 	echo '<INPUT TYPE=CHECKBOX NAME="wordbook_publish_overridden" '.$checked_flag[$wordbook_settings["wordbook_publish_override"]].' > Force Re-Publish Post to Facebook on Edit (overrides republish window)</P><br>';
 	echo '<INPUT TYPE=CHECKBOX NAME="wordbook_comment_overridden" '.$checked_flag[$wordbook_settings["wordbook_comment_get"]].' > Fetch comments from Facebook for this post</P><br>';
-	echo 'Facebook Post Attribute line: <INPUT NAME="wordbook_attribution" size=50 maxlength=50 value="'.$wordbook_settings["wordbook_attribute"].'"></P><br>';	
-	echo 'Facebook Status Update<INPUT TYPE=CHECKBOX NAME="wordbook_status_update_override" '.$checked_flag[$wordbook_settings["wordbook_status_update"]].' > : <INPUT NAME="wordbook_status_update_text_override" size=50 maxlength=50 value="'.$wordbook_settings["wordbook_status_update_text"].'"><br>';
+	echo 'Facebook Post Attribute line: <INPUT NAME="wordbook_attribution" size=50 maxlength=50 value="'.stripslashes($wordbook_settings["wordbook_attribute"]).'"></P><br>';	
+	echo '<INPUT TYPE=CHECKBOX NAME="wordbook_status_update_override" '.$checked_flag[$wordbook_settings["wordbook_status_update"]].' > &nbsp;Facebook Status Update&nbsp;: <INPUT NAME="wordbook_status_update_text_override" size=50 maxlength=50 value="'.stripslashes($wordbook_settings["wordbook_status_update_text"]).'"><br>';
 
 }
 ?>

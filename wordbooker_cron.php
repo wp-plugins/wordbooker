@@ -3,14 +3,14 @@
 /**
 Extension Name: Wordbooker Cron
 Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.0
+Version: 1.5
 Description: Code to pull comments back from Facebook
 Author: Steve Atty
 */
 
 function wordbook_poll_facebook() {
 	global  $wpdb, $user_id,$table_prefix;
-	define('WORDBOOK_USERDATA', $table_prefix . 'wordbook_userdata');
+	define('WORDBOOKER_USERDATA', $table_prefix . 'wordbook_userdata');
 	define ('DEBUG', false);
 	$wordbook_settings =get_option('wordbook_settings'); 
 	$debug_file='/tmp/wordbook_'.$table_prefix.'debug';
@@ -20,6 +20,9 @@ function wordbook_poll_facebook() {
 		$debug_string=date("Y-m-d H:i:s",time())." : Cron Running\n";
 		fwrite($fp, $debug_string);
 	}
+
+	// Here we need to check if they have any future published posts that we need to handle
+
 	if ( !isset($wordbook_settings['wordbook_comment_get'])) {
 		if (DEBUG) {
 			$debug_string=date("Y-m-d H:i:s",time())." : Comment Scrape not active. Cron Finished\n";
@@ -28,11 +31,10 @@ function wordbook_poll_facebook() {
 		}
 		return;
 	}
-	$debug_file='/tmp/wordbook_'.$table_prefix.'debug';
 
 	// Yes they have so lets get to work. We have to get the FB user associated with this blog
 	// We can support multiple users by removing the limit 1 and putting another for loop round this block, so it can pick up everything.
-        $sql="Select user_id from ".WORDBOOK_USERDATA;
+        $sql="Select user_id from ".WORDBOOKER_USERDATA;
         $wb_users = $wpdb->get_results($sql);
 	foreach ($wb_users as $wb_user){
 		if (DEBUG) {
@@ -50,7 +52,7 @@ function wordbook_poll_facebook() {
 			fwrite($fp, $debug_string);
 		}
 		// Go the postcomments table - this contains a list of FB post_ids, the wp post_id that corresponds to it and the timestamps of the last FB comment pulled.
-		$sql='Select fb_post_id,comment_timestamp,wp_post_id from ' . WORDBOOK_POSTCOMMENTS . ' where fb_post_id like "'.$fbclient->users_getLoggedInUser().'%" order by fb_post_id desc ';	
+		$sql='Select fb_post_id,comment_timestamp,wp_post_id from ' . WORDBOOKER_POSTCOMMENTS . ' where fb_post_id like "'.$fbclient->users_getLoggedInUser().'%" order by fb_post_id desc ';	
 		$rows = $wpdb->get_results($sql);
 		// For each FB post ID we find we go out to the stream on Facebook and grab the comments.
 		if (count($rows)>0) {
@@ -90,9 +92,9 @@ function wordbook_poll_facebook() {
 								'comment_approved' => $comment_approve,
 							);
 							// change this to use wp_new_comment /includes/comment.php for docs
-							$pos = strripos($comment[text], "imported from my Wordpress blog");
+							$pos = strripos($comment[text], "Comment: [from blog ]");
 							if ($pos === false) {wp_new_comment($data); }
-							$sql='update '. WORDBOOK_POSTCOMMENTS .' set comment_timestamp='.$comment[time].' where fb_post_id="'.$comdata_row->fb_post_id.'" and wp_post_id='.$comdata_row->wp_post_id;
+							$sql='update '. WORDBOOKER_POSTCOMMENTS .' set comment_timestamp='.$comment[time].' where fb_post_id="'.$comdata_row->fb_post_id.'" and wp_post_id='.$comdata_row->wp_post_id;
 							$result = $wpdb->query($sql);
 						} // end of new comment process	
 					} // End of Foreach process
