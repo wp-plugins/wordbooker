@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU
 Requires at least: 2.7
 Tested up to: 2.9.1
-Stable tag: 1.5
+Stable tag: 1.6
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall. 
 
@@ -88,9 +88,9 @@ Yes, and its also WPMU compliant.
 1. Re-install and re-activate the plugin.
 
 
-= What is the Enable Extended description for Share This Link option do? =
+= What is the Enable Extended description for Share Link option do? =
 
-If you're using the Share This action link on your posts to Facebook it uses the META DESCRIPTION tag to extract something from your post. If you dont have an SEO system which populates this, or if you dont usally use post excerpts then selecting this option populates the tag with the first couple hundred characters of your post.
+If you're using the Share action link on your posts to Facebook it uses the META DESCRIPTION tag to extract something from your post. If you dont have an SEO system which populates this, or if you dont usally use post excerpts then selecting this option populates the tag with the first couple hundred characters of your post which gives a nice block of text in the post that will appear when people share your post on their wall.
 
 
 
@@ -111,14 +111,23 @@ Alternatively, leave a comment on [my blog](http://blogs.canalplan.org.uk/steve)
 
 == Upgrade Notice ==
 
-If you've upgrading from my forked version of Robert's  Wordbook plugin ( http://wordpress.org/extend/plugins/wordbook ) then you'll have to remove the old version first as it's a new application and uses different API keys. If you dont want to lose track of any posts you've published with my version then BEFORE you de-install, export the wordbook_postcomments table. Then remove the old app, install this one, set up your configuration and then import the wordbook_postcomments table.
+If you've upgrading from my forked version of Robert's Wordbook plugin ( http://wordpress.org/extend/plugins/wordbook ) then you'll have to remove the old version first as it's a new application and uses different API keys. If you dont want to lose track of any posts you've published with my version then BEFORE you de-install, export the wordbook_postcomments table. Then remove the old app, install this one, set up your configuration and then import the wordbook_postcomments table.
 
 If you are upgrading from an earlier version of wordbooker then DO NOT deactivate the plugin before you upgrade as this will remove the tables. Simply delete the contents of the wordbooker folder and upload the new version.
 
 
 == Changelog == 
 
-= Version 1.5  :  06/01/2010 =
+= Version 1.6 :  22/01/2010 =
+ - Added custom "tags" to Post Attribute and Status lines.
+ - Added "Current logged in user" as an option for the target FB account
+ - Added ability to choose to post to FB Wall, Fan Page Wall or both.
+ - Fixed bug relating to extract length.
+ - Added status_update permission check as this sometimes seems to fail.
+ - Tidied up the handling of the options page for users with no wordbooker configuration
+
+
+= Version 1.5  :  10/01/2010 =
  - Added check for "old" versions of the Facebook Client files which other plugins might be using. 
  - Further refinement of extract routine. 
  - User selectable "action link" for posts made to Facebook. 
