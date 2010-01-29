@@ -9,6 +9,11 @@ But what if you've got a Family WB where different people would like to post to 
 On the Edit Post page there is a WordBook Options block which includes a drop down list of the blog you wish to post to, if you want to post to your default blog then you don't need to touch this but if someone wants to post that post to their FB account all they need to do is pick their name from the drop down list before they post.
 
 
+** Post Fan Page wall **
+
+This allows you to optionally choose to publish your blog extract to a Fan Page.
+
+
 ** Length of Extract **
 
 This allows you to change the length of the extract posted to Facebook. The minimum value is 200 and the maximum is 400 (at the moment) with the default being 256 characters. The extract will be trimmed to the nearest full word BELOW this value.
@@ -39,6 +44,16 @@ This allows to to force all edits to be reposted to Facebook ignoring the republ
 If this option is checked then the title of your blog post and its permalink will be posted to your status, along with the text specified here. This can be overridden from the Edit Post page. NOTE: If this option is Selected then your status is ALWAYS updated, even if you choose NOT to publish your post to Facebook.
 
 
+** Action Link ** 
+
+Allows you to choose what the third "action link" under the FB wall extract should be
+
+
+** Extended description for Share link **
+
+Creates an extra META tag in your page header to give the Share Action Link some targetted data to work from.
+
+
 ** Import Comments from Facebook for Wordbook Posts  **
 
 This version of Wordbook supports the importing of comments made on Facebook back into your WordPress blog. This allows you to set the default behaviour. This option can be overridden from the Edit Post page
@@ -54,6 +69,9 @@ If you trust your friends on Facebook then you're probably quite happy for their
 Posts published to your WordPress account using XMLRPC clients will now also publish to Facebook - if the default option of posting to Facebook is set. Posts made via this method will also pick up the default target Facebook account, the default post attribute line, and the Update Status options.
 
 
+** Future publishing **
+
+Wordbooker settings are stored so that when a future post is posted on a schedule the options set when it was authored are used to publish.
 
 
 ** Debugging **
