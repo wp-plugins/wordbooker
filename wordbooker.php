@@ -5,7 +5,7 @@ Plugin URI: http://blogs.canalplan.org.uk/steve/wordbook/
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://blogs.canalplan.org.uk/steve/
-Version: 1.6
+Version: 1.6.1
 */
 
  /*
@@ -187,19 +187,19 @@ function wordbook_fbclient_publishaction_impl($fbclient, $post_data) {
 		// User has chosen to publish to Profile as well as a fan page
 		if ($_POST["wordbook_orandpage"]>=1) {
 			if ($_POST['wordbook_actionlink_overide']==100) {
-		// No action link
-		$result = $fbclient->stream_publish($message,json_encode($attachment), null);
-		} else
-		{
-			$result = $fbclient->stream_publish($message,json_encode($attachment), json_encode($action_links)); }
+			// No action link
+				$result = $fbclient->stream_publish($message,json_encode($attachment), null);
+			} else
+			{
+				$result = $fbclient->stream_publish($message,json_encode($attachment), json_encode($action_links));
+			 }
+			if ( $_POST["wordbook_page_post"]== -100) {} else {
+				$result = $fbclient->stream_publish($message, json_encode($attachment), json_encode($action_links),null,$_POST["wordbook_page_post"]);
+			}
 		} else {
 			# If they actually have a page to post to then we post to it
-			
 			if ( $_POST["wordbook_page_post"]== -100) {} else {
-			#var_dump($_POST['wordbook_page_post']);
-			# This is the call that should be used to publish to fan pages but there would seem to be a bug in the API
-			#$result = $fbclient->stream_publish($message, json_encode($attachment), json_encode($action_links), $_POST["wordbook_page_post"],$_POST["wordbook_page_post"]);}
-			$result = $fbclient->stream_publish($message, json_encode($attachment), json_encode($action_links),$_POST["wordbook_page_post"]);}
+			$result = $fbclient->stream_publish($message, json_encode($attachment), json_encode($action_links),null,$_POST["wordbook_page_post"]);}
 		}
 
 	} catch (Exception $e) {
@@ -1268,7 +1268,7 @@ function wordbook_fbclient_publishaction($wbuser, $fbclient,$postid)
 
 	$post_content=wordbook_post_excerpt($post_content,$wordbook_settings['wordbook_extract_length']);
 	# this is getting and setting the post attributes
-	$post_attribute=parse_wb_attributes(stripslashes($_POST["wordbook_attribution"]),$post_id,strtotime($post->post_date));
+	$post_attribute=parse_wb_attributes(stripslashes($_POST["wordbook_attribution"]),$postid,strtotime($post->post_date));
 	$post_data = array(
 		'media' => $images,
 		'post_link' => $post_link,
