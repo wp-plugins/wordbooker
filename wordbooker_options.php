@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Options 
 Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.7.1
+Version: 1.7.2
 Description: Advanced Options for the WordBooker Plugin
 Author: Steve Atty
 */
