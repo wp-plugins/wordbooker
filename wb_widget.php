@@ -4,7 +4,7 @@
 Description: Facebook Widget. Needs Wordbook installing to work.
 Author: Stephen Atty
 Author URI: http://canalplan.blogdns.com/steve
-Version: 1.3
+Version: 1.7
 */
 
 /*
@@ -25,8 +25,106 @@ Version: 1.3
  * Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+global $wp_version;
+if((float)$wp_version >= 2.8){
 
-register_sidebar_widget(array("FaceBook Status", 'widgets'), 'widget_facebook');
+class WordbookWidget extends WP_Widget {
+	
+	/**
+	 * constructor
+	 */	 
+	function WordbookWidget() {
+		parent::WP_Widget('wordbook_widget', 'Wordbooker ', array('description' => 'Multiple Facebook Status.' , 'class' => 'WordbookWidget'));	
+	}
+	
+	/**
+	 * display widget
+	 */	 
+	function widget($args, $instance) {
+		extract($args, EXTR_SKIP);
+		global  $wpdb, $user_ID,$table_prefix,$blog_id;
+		$userid=$instance['snorl'];
+		$result = wordbooker_get_cache($userid);
+		echo $before_widget;
+		$title = empty($instance['title']) ? '&nbsp;' : apply_filters('widget_title', $instance['title']);
+		if ( !empty( $title ) ) { echo $before_title . $title . $after_title; };
+                echo '<br><div class="facebook_picture" align="center">';
+                echo '<a href="'.$result->url.'" target="facebook">';
+                echo '<img src="'. $result->pic.'" /></a>';
+                echo '</div>';
+		$name=$result->name;
+         	if (strlen($instance['dname']) >0 ) $name=$instance['dname']; 
+                if ($result->status) {
+                	echo '<br><a href="'.$result->url.'">'.$name.'</a> : ';
+			echo '<i>'.$result->status.'</i><br>';
+       			if ($instance['df']=='fbt') { 
+         			echo '('.nicetime($result->updated).').'; 
+			}
+         		else {
+				echo '('.date($instance['df'], $result->updated).').';
+			}
+		}
+		echo $after_widget;
+	}
+	
+	/**
+	 *	update/save function
+	 */	 	
+	function update($new_instance, $old_instance) {
+		$instance = $old_instance;
+		$instance['title'] = strip_tags($new_instance['title']);
+		$instance['snorl'] = $new_instance['snorl'];
+		$instance['dname'] = strip_tags($new_instance['dname']);
+		$instance['df'] = strip_tags($new_instance['df']);
+		return $instance;
+	}
+	
+	/**
+	 *	admin control form
+	 */	 	
+	function form($instance) {
+		global $user_ID;
+		$default = array( 'title' => __('Facebook Status'), 'snorl'=>$user_ID, 'dname'=>'', 'df'=>'D M j, g:i a' );
+		$instance = wp_parse_args( (array) $instance, $default );
+		$title_id = $this->get_field_id('title');
+		$title_name = $this->get_field_name('title');
+		$snorl_id = $this->get_field_id('snorl');
+		$snorl_name = $this->get_field_name('snorl');
+		$dname_id = $this->get_field_id('dname');
+		$dname_name = $this->get_field_name('dname');
+		$df_id = $this->get_field_id('df');
+		$df_name = $this->get_field_name('df');
+		echo '<p><label for="'.$title_id.'">'.__('Title of Widget','WordbookWidget').': </label> <input type="text" class="widefat" id="'.$title_id.'" name="'.$title_name.'" value="'.attribute_escape( $instance['title'] ).'" /></p>';
+		echo '<label for="'.$dname_id.'">'.__('Display this name instead of your Facebook name','WordbookWidget').': <input type="text" class="widefat" id="'.$dname_id.'" name="'.$dname_name.'" value="'.attribute_escape( $instance['dname'] ).'" /></label></p>';
+		echo '<input type="hidden" class="widefat" id="'.$snorl_id.'" name="'.$snorl_name.'" value="'.attribute_escape( $instance['snorl'] ).'" /></p>';
+		echo "\r\n".'<p><label for="'.$df_id.'">'.__('Date Format','WordbookWidget').':  </label>'; 
+		echo '<select id=id="'.$df_id.'"  name="'.$df_name.'" >';
+		$ds12=date('D M j, g:i a');
+		$dl12=date('l F j, g:i a');
+		$dl24=date('l F j, h:i');
+		$ds24=date('D M j, h:i');
+		$drfc=date('r');
+		$arr = array('D M j, g:i a'=> $ds12,  'l F j, g:i a'=> $dl12, 'D M j, h:i'=>$ds24, 'l F j, h:i'=>$dl24,fbt=>"Facebook Text style", r =>$drfc);
+		foreach ($arr as $i => $value) {
+		if ($i==attribute_escape( $instance['df'])){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
+		else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
+		}
+		echo '</select></p>';
+	}
+}
+
+
+
+/* register widget when loading the WP core */
+add_action('widgets_init', wordbooker_widgets);
+
+function wordbooker_widgets(){
+	register_widget('WordbookWidget');
+}
+
+}
+
+register_sidebar_widget('FaceBook Status', 'widget_facebook');
 register_widget_control('FaceBook Status', 'fb_widget_control', '500', '500');
 
 function nicetime($date)
@@ -68,6 +166,7 @@ function nicetime($date)
 
 function widget_facebook($args) {
 	extract($args);
+	global  $wpdb, $user_ID,$table_prefix,$blog_id;
         $fb_widget_options = unserialize(get_option('fb_widget_options'));
 	$title = stripslashes($fb_widget_options['title']);
         $dispname = stripslashes($fb_widget_options['dispname']);
@@ -77,34 +176,25 @@ function widget_facebook($args) {
         // We need to get the user_id from the userdata table for this blog.
         $sql="Select user_id from ".WORDBOOKER_USERDATA." limit 1";
         $result = $wpdb->get_results($sql);
-	$wbuser = wordbook_get_userdata($result[0]->user_id);
-        $fbclient = wordbook_fbclient($wbuser);
+	$result = wordbooker_get_cache($result[0]->user_id);
 	$pfields=array('is_app_user','first_name','name','status','pic',);
-#	if ( MINIMAL_STATUS===true )  $pfields=array('is_app_user','name',); 
-        list($fbuid, $users, $error_code, $error_msg) =
-        wordbook_fbclient_getinfo($fbclient, $pfields);
-        $profile_url = "http://www.facebook.com/profile.php?id=$fbuid";
-        if ($fbuid) {
-                if (is_array($users)) {
-                        $user = $users[0];
-                        if ($user['pic']) {
-                                echo '<div class="facebook_picture" align="center">';
-                                echo '<a href="'.$profile_url.'" target="facebook">';
-                                echo '<img src="'.$user['pic'].'" /></a>';
-                                echo '</div>';
-                        }
-                        if (!($name = $user['first_name']))  $name = $user['name'];
-                        if (strlen($dispname)>0) $name=$dispname; 
-                        if ($user['status']['message']) {
-                        	echo '<p><a href="'.$profile_url.'">'.$name.'</a>';
-                                echo ' <i>'.$user['status']['message'].'</i><br> ';
-                                if ($dformat=='fbt') { 
-                                 echo '('.nicetime($user['status']['time']).').'; }
-                                 else {echo '('.date($dformat, $user['status']['time']).').';}
-                                echo '</p>';
-                        }
-                }
-        }
+	if ( !empty( $title ) ) { echo $before_title . $title . $after_title; };
+        echo '<br><div class="facebook_picture" align="center">';
+        echo '<a href="'.$result->url.'" target="facebook">';
+        echo '<img src="'. $result->pic.'" /></a>';
+        echo '</div>';
+	$name=$result->name;
+ 	if (strlen($dispname)>0) $name=$dispname; 
+        if ($result->status) {
+        	echo '<br><a href="'.$result->url.'">'.$name.'</a> : ';
+		echo '<i>'.$result->status.'</i><br>';
+		if ($dformat=='fbt') { 
+ 			echo '('.nicetime($result->updated).').'; 
+		}
+ 		else {
+			echo '('.date($dformat, $result->updated).').';
+		}
+	}
 	echo $after_widget;
 
 }

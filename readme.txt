@@ -3,7 +3,7 @@
 Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU
 Requires at least: 2.7
-Tested up to: 2.9.1
+Tested up to: 2.9.2
 Stable tag: 1.6.1
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall. 
@@ -43,14 +43,11 @@ It is certainly similar, but not the same:
 
 - Facebook Notes imports and caches your blog posts (e.g., it subscribes to your blog's RSS feed).
 
-Wordbooker uses the Facebook API to actively update your Facebook Wall just as if you had posted an update yourself on facebook.com. This means that your updates are likely to appear faster than waiting around for the Facebook Notes RSS reader to notice your update. It also means that you can make changes to your blog postings *after* initially publishing them.
+Wordbooker uses the Facebook API to actively update your Facebook Wall just as if you had posted an update yourself on facebook.com. It also means that you can make changes to your blog postings *after* initially publishing them.
 
-- With Wordbooker, your blog postings will have their own space in your Facebook profile, instead of having to compete for space with your other posted Facebook Notes.
+- With Wordbooker, your blog postings will have their own space in your Facebook Wall - just as if you'd written directly on to the wall yourself.
 
-- Your updates will show up with a nifty WordPress logo next to them instead of the normal "Notes" icon :).
-
-- Your Facebook Notes' comments will not show up on your WordPress blog. Wordbooker links everything back to your blog, so your comments will also stay on your blog 
-
+- Your updates will show up with a nifty WordPress logo next to them instead of the normal "Notes" icon, plus a link back to the full entry on your blog.
 
 
 = How is this different from the WordPress application? =
@@ -103,10 +100,16 @@ If you're using the Share action link on your posts to Facebook it uses the META
 Alternatively, leave a comment on [my blog](http://blogs.canalplan.org.uk/steve).
 
 
+== KNOWN CONFLICTS ==
+
+If you have [Facebook Connect](http://wordpress.org/extend/plugins/wp-facebookconnect/) Version 1.2.1 installed then some features of Wordbooker will not work as expected. This is due to the Facebook Platform files shipped in Facebook Connect being out of date (as of 28-Feb-2010). To resolve this issue copy ALL the files in the /wordbooker/facebook-platform/php folder into the /wp-facebookconnect/facebook-client folder.
+
+
 == Screenshots ==
 
-1. Wordbooker Options/Configuration Screen
-2. Wordbooker Options overrides when posting
+1. Wordbooker Options/Configuration : Blog Level options
+1. Wordbooker Options/Configuration : User Level options
+2. Wordbooker Options : Overrides when posting
 
 
 == Upgrade Notice ==
@@ -116,12 +119,43 @@ If you've upgrading from my forked version of Robert's Wordbook plugin ( http://
 If you are upgrading from an earlier version of wordbooker then DO NOT deactivate the plugin before you upgrade as this will remove the tables. Simply delete the contents of the wordbooker folder and upload the new version.
 
 
+
+
 == Changelog == 
+
+= Version 1.7 :  08/03/2010 =
+ - Added user data caching
+ - Multiple Facebook Status Widgets (Needs Wordpress 2.8 or above)
+ - Recoding of Blog Level settings form
+ - User level options added
+ - Fixed bug in layout of Fan Page selector
+ - Fan Page permission check/authorise added
+ - General Facebook permission checks/authorise tidied up
+ - Tidied up options page layout for various browsers.
+ - Videos and images inserted using Viper-Video Quicktags and Shashin now handled properly and tags stripped from output.
+ - Enhanced checks for conflicting (older) Facebook Platform files.
+ - Added active plugins list to Support Diagnostics list.
+ - Changed names of all wordbooker functions to avoid plugin conflicts.
+ - Options set for each post are stored and recalled when posts are edited
+ - Removed support for Facebook Profile Box posting (depreciated by Facebook)
+ - Added ability for user to hide their FB status on the Wordbooker Admin page.
+ - Widgets can display your profile or the pic/status from any of your Fan pages.
+ - Apostrophes in page names no longer break things.
+ - Added stripping of "extra" images inserted by plugins 
+ - Publishing using the Press It book marklet picks up user preferences.
+ - Revised Security hash coding for option forms.
+ - Added User Guide and linked it from the Support section of the Plugin page.
+ - Modified security check which locked contributors/subscribers out of blog
+ - Blog Administrators are only people permitted to set blog level options
+ - Where "post as specific user" is selected at blog level the user level options for that user are loaded at post creation time.
+ - Added extended debug code to help troubleshoot problems.
+
 
 = Version 1.6.1 :  29/01/2010 =
  - Fixed a bug in the Attribute "tag" handling.
  - Fixed the And/OR logic for publishing to Fan Page Walls
- - Publish to Fan Page Walls now working correclty.
+ - Publish to Fan Page Walls now working correctly.
+
 
 = Version 1.6 :  22/01/2010 =
  - Added custom "tags" to Post Attribute and Status lines.
