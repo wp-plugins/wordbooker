@@ -4,7 +4,7 @@
 Description: Facebook Widget. Needs Wordbook installing to work.
 Author: Stephen Atty
 Author URI: http://canalplan.blogdns.com/steve
-Version: 1.7
+Version: 1.7.2
 */
 
 /*
