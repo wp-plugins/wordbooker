@@ -5,7 +5,7 @@ Plugin URI: http://blogs.canalplan.org.uk/steve/wordbooker/
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://blogs.canalplan.org.uk/steve/
-Version: 1.7.2
+Version: 1.7.4
 */
 
  /*
@@ -40,7 +40,7 @@ if (! isset($wordbooker_settings['wordbook_extract_length'])) $wordbooker_settin
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
 
-# For Troubleshooting posting issues
+# For Troubleshooting posting issues. Do not leave this set to true as it will slow posting down and will fill up the error log!
 define('ADVANCED_DEBUG', false);
 
 $facebook_config['debug'] = WORDBOOKER_TESTING && !$_POST['action'];
@@ -388,7 +388,7 @@ function wordbooker_activate() {
 		return;
 	}
 	wordbooker_set_option(WORDBOOKER_OPTION_SCHEMAVERS, 2);
-		
+	$wordbooker_settings=wordbooker_options();
 	#Setup the cron. We clear it first in case someone did a dirty de-install.
 	$dummy=wp_clear_scheduled_hook('wb_cron_job');
 	$dummy=wp_schedule_event(time(), 'hourly', 'wb_cron_job');
@@ -1378,16 +1378,25 @@ function wordbooker_publish_action($post) {
 
 		}
 		// User has unchecked the publish to facebook option so lets just give up and go home
-		$wbpda=$wordbooker_post_options["wordbooker_publish_default"];
-		if ($wbpda!="on") {return;}
+		#$wbpda=$wordbooker_post_options["wordbooker_publish_default"];
+		if ($wordbooker_post_options["wordbooker_publish_default"]!="on") {
+			wordbooker_debugger("Publish Default is not Set, Giving up ",$wpuserid,1000) ;
+		 	return;
+		}
 		$results=wordbooker_fbclient_publishaction($wbuser, $fbclient, $post->ID);
 		wordbooker_insertinto_postlogs($post->ID);
 		$fb_post_id=$results;
 		// Has the user decided to collect comments for this post?
 		if( isset($wordbooker_post_options["wordbook_comment_get"])){	
-			$sql=	' INSERT INTO ' . WORDBOOKER_POSTCOMMENTS . ' (fb_post_id,comment_timestamp,wp_post_id) VALUES ("'.$fb_post_id.'",'.time().','.$post->ID.')';;
-			$result = $wpdb->query($sql);
+			$tstamp=time();
 		}
+		else
+		{	
+			$tstamp= time() + (1000 * 7 * 24 * 60 * 60);
+		}
+		$sql=	' INSERT INTO ' . WORDBOOKER_POSTCOMMENTS . ' (fb_post_id,comment_timestamp,wp_post_id) VALUES ("'.$fb_post_id.'",'.$tstamp.','.$post->ID.')';;
+		$result = $wpdb->query($sql);
+
 	}
 
 	return 30;
@@ -1562,7 +1571,11 @@ function wordbooker_post_comment($commentid) {
 	global  $wpdb, $user_id,$table_prefix;
 	define ('DEBUG', false);
 	$debug_file='/tmp/wordbook_'.$table_prefix.'comment_debug';
-	if (DEBUG) {$fp = fopen($debug_file, 'a');}
+	if (DEBUG) {
+		$fp = fopen($debug_file, 'a');
+		$debug_string=date("Y-m-d H:i:s",time())." :  Start \n";
+		fwrite($fp, $debug_string);
+	}	
 	$comment= get_comment($commentid); 
 	$cpid = $comment->comment_post_ID;
 	$cstatus=$comment->comment_approved;
@@ -1604,7 +1617,7 @@ CODEBLOX;
 					foreach ($rows as $comdata_row) {
 						$fb_post_id=$comdata_row->fb_post_id;
 						#$result2=$fbclient->stream_addComment(null,'54577506873', $fb_post_id , $ctextblock.' ');
-								$result2=$fbclient->comments_add($fb_post_id , $ctextblock.' ');
+						$result2=$fbclient->stream_addComment($fb_post_id , $ctextblock.' ');
 					} 
 				}
 			}

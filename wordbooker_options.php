@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Options 
 Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.7.2
+Version: 1.7.4
 Description: Advanced Options for the WordBooker Plugin
 Author: Steve Atty
 */
@@ -58,11 +58,12 @@ function wordbooker_option_manager() {
 	echo '<h2>WordBooker Plugin</h2>';
 	if ( isset ($_POST["reset_user_config"])) {wordbooker_delete_userdata(); }
 	//Set some defaults:
-	$wordbooker_settings =wordbooker_options();
+	$wordbooker_settings=wordbooker_options();
 	$smoot_settings =get_option('wordbook_settings');
 	# If we dont have any settings then try to recover them from old settings.
 	if (! isset($wordbooker_settings["wordbook_default_author"])) {
 		$wordbooker_settings =get_option('wordbook_settings');
+		$wordbooker_settings[WORDBOOKER_OPTION_SCHEMAVERS]=WORDBOOKER_SCHEMA_VERSION;
 		wordbooker_set_options($wordbooker_settings);
 		$wordbooker_settings =wordbooker_options();
 	}
