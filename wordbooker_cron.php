@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Cron
 Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.7
+Version: 1.7.4
 Description: Collection of processes that are often handled by wp_cron scheduled jobs
 Author: Steve Atty
 */
@@ -42,9 +42,12 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 		
 		# Now lets check over the over permissions and build up the bit mask
 		$perms_to_check= array(WORDBOOKER_FB_PUBLISH_STREAM,WORDBOOKER_FB_STATUS_UPDATE,WORDBOOKER_FB_READ_STREAM);
-			foreach(array_keys($perms_to_check) as $key){
-		 	if (! $fbclient->users_hasAppPermission($perms_to_check[$key],$uid)) { $add_auths=$add_auths+pow(2,$key);}
-			}
+		foreach(array_keys($perms_to_check) as $key){
+	 		if (! $fbclient->users_hasAppPermission($perms_to_check[$key],$uid)) { $add_auths = $add_auths | pow(2,$key);}
+		}
+		# And update the table. We do this here just in case the FQL_Multi fails.
+		$sql="update ".WORDBOOKER_USERDATA." set auths_needed=".$add_auths." where user_ID=".$user_id;
+		$result = $wpdb->get_results($sql);
 
 		# Lets get the person/page this user wants to get the status for. We get this from the user_meta
 		$wordbook_user_settings_id="wordbookuser".$blog_id;
@@ -55,8 +58,27 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 		$resultx=$fbclient->fql_multiquery('{  "status_info":"SELECT uid,time,message FROM status WHERE uid='.$suid.' limit 1", "profile_info":"SELECT name, url, pic FROM profile WHERE id='.$suid.'",  "page_names":"SELECT name,page_id FROM page WHERE page_id IN (SELECT page_id FROM page_admin WHERE uid='.$uid.')","woot":"Select is_app_user FROM user where uid='.$uid.'"}');
 		if (is_array($resultx)) {
 			if (is_array($resultx[0]["fql_result_set"])) { $encoded_names=str_replace('\\','\\\\',serialize($resultx[0]["fql_result_set"]));}
-			$sql="update ".WORDBOOKER_USERDATA." set name='".mysql_real_escape_string($resultx[1]["fql_result_set"][0]["name"])."',status='".mysql_real_escape_string($resultx[2]["fql_result_set"][0]["message"])."',updated=".mysql_real_escape_string($resultx[2]["fql_result_set"][0]["time"])." , url='".mysql_real_escape_string($resultx[1]["fql_result_set"][0]["url"])."', pic='".mysql_real_escape_string($resultx[1]["fql_result_set"][0]["pic"])."',facebook_id='".$uid."' , pages= '".mysql_real_escape_string($encoded_names)."', auths_needed=".$add_auths.", use_facebook=".$resultx[3]["fql_result_set"][0]["is_app_user"]." where user_ID=".$user_id;	
+	#		$sql="update ".WORDBOOKER_USERDATA." set name='".mysql_real_escape_string($resultx[1]["fql_result_set"][0]["name"])."',status='".mysql_real_escape_string($resultx[2]["fql_result_set"][0]["message"])."',updated=".mysql_real_escape_string($resultx[2]["fql_result_set"][0]["time"])." , url='".mysql_real_escape_string($resultx[1]["fql_result_set"][0]["url"])."', pic='".mysql_real_escape_string($resultx[1]["fql_result_set"][0]["pic"])."',facebook_id='".$uid."' , pages= '".mysql_real_escape_string($encoded_names)."', auths_needed=".$add_auths.", use_facebook=".$resultx[3]["fql_result_set"][0]["is_app_user"]." where user_ID=".$user_id;	
+		#	$result = $wpdb->get_results($sql);
+	
+			$sql="update ".WORDBOOKER_USERDATA." set name='".mysql_real_escape_string($resultx[1]["fql_result_set"][0]["name"])."'";
+			if (is_array($resultx[2]["fql_result_set"])) {
+				$sql.=", status='".mysql_real_escape_string($resultx[2]["fql_result_set"][0]["message"])."'";
+				$sql.=", updated=".mysql_real_escape_string($resultx[2]["fql_result_set"][0]["time"]);
+			}
+			if (is_array($resultx[1]["fql_result_set"])) {
+				$sql.=", url='".mysql_real_escape_string($resultx[1]["fql_result_set"][0]["url"])."'";
+				$sql.=", pic='".mysql_real_escape_string($resultx[1]["fql_result_set"][0]["pic"])."'";
+			}
+			$sql.=", facebook_id='".$uid."'";
+			$sql.=", pages= '".mysql_real_escape_string($encoded_names)."'";
+			if (is_array($resultx[3]["fql_result_set"])) {
+				$sql.=", use_facebook=".$resultx[3]["fql_result_set"][0]["is_app_user"];
+			}
+			$sql.="  where user_ID=".$user_id;
+			#echo $sql;
 			$result = $wpdb->get_results($sql);
+
 		}
 	}
 #fclose($fp);
