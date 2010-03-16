@@ -5,7 +5,7 @@ Plugin URI: http://blogs.canalplan.org.uk/steve/wordbooker/
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://blogs.canalplan.org.uk/steve/
-Version: 1.7.4
+Version: 1.7.5
 */
 
  /*
@@ -154,21 +154,21 @@ function wordbooker_fbclient_publishaction_impl($fbclient, $post_data) {
 		
 		if ($wordbooker_post_options['wordbook_actionlink']==100) {
 		// No action link
-		wordbooker_debugger("No action link being used","",1000) ;
+		wordbooker_debugger("No action link being used","",$post->ID) ;
 		}
 		if ($wordbooker_post_options['wordbook_actionlink']==200) {
 		// Share This
-			wordbooker_debugger("Share Link being used","",1000) ;
+			wordbooker_debugger("Share Link being used"," ",$post->ID) ;
 			$action_links = array(array('text' => 'Share','href' => 'http://www.facebook.com/share.php?u='.urlencode($post_data['post_link'])));
 		}
 		if ($wordbooker_post_options['wordbook_actionlink']==300) {
 		// Read Full
-			wordbooker_debugger("Read Full link being used","",1000) ;
+			wordbooker_debugger("Read Full link being used"," ",$post->ID) ;
 		$action_links = array(array('text' => 'Read entire article','href' => $post_data['post_link']));
 		}
 		// User has chosen to publish to Profile as well as a fan page
 		if ($wordbooker_post_options["wordbook_orandpage"]>1) {
-		wordbooker_debugger("posting to fan wall and personal wall (if available)","",1000) ;;
+		wordbooker_debugger("posting to fan wall and personal wall (if available)","",$post->ID) ;;
 			if ($wordbooker_post_options['wordbook_actionlink']==100) {
 			// No action link
 				$result = $fbclient->stream_publish($message,json_encode($attachment), null);
@@ -176,8 +176,8 @@ function wordbooker_fbclient_publishaction_impl($fbclient, $post_data) {
 			{
 				$result = $fbclient->stream_publish($message,json_encode($attachment), json_encode($action_links));
 			 }
-			if ( $wordbooker_post_options["wordbook_page_post"]== -100) { wordbooker_debugger("No Fan Wall post","",1000) ; } else {
-				wordbooker_debugger("Also posting to Fan wall",$wordbooker_post_options["wordbook_page_post"],1000) ;
+			if ( $wordbooker_post_options["wordbook_page_post"]== -100) { wordbooker_debugger("No Fan Wall post"," ",$post->ID) ; } else {
+				wordbooker_debugger("Also posting to Fan wall",$wordbooker_post_options["wordbook_page_post"],$post->ID) ;
 				if ($wordbooker_post_options['wordbook_actionlink']==100) {
 				// No action link
 				$result = $fbclient->stream_publish($message,json_encode($attachment), null,null,$wordbooker_post_options["wordbook_page_post"]);
@@ -190,8 +190,8 @@ function wordbooker_fbclient_publishaction_impl($fbclient, $post_data) {
 		} else {
 			# If they actually have a page to post to then we post to it
 			
-			if ( $wordbooker_post_options["wordbook_page_post"]== -100) { wordbooker_debugger("No Fan Wall post","",1000) ; } else {
-				wordbooker_debugger("Only posting to Fan wall",$wordbooker_post_options["wordbook_page_post"],1000) ;
+			if ( $wordbooker_post_options["wordbook_page_post"]== -100) { wordbooker_debugger("No Fan Wall post"," ",$post->ID) ; } else {
+				wordbooker_debugger("Only posting to Fan wall",$wordbooker_post_options["wordbook_page_post"],$post->ID) ;
 				if ($wordbooker_post_options['wordbook_actionlink']==100) {
 				// No action link
 				$result = $fbclient->stream_publish($message,json_encode($attachment), null,null,$wordbooker_post_options["wordbook_page_post"]);
@@ -389,6 +389,7 @@ function wordbooker_activate() {
 	}
 	wordbooker_set_option(WORDBOOKER_OPTION_SCHEMAVERS, 2);
 	$wordbooker_settings=wordbooker_options();
+	var_dump($wordbooker_options);
 	#Setup the cron. We clear it first in case someone did a dirty de-install.
 	$dummy=wp_clear_scheduled_hook('wb_cron_job');
 	$dummy=wp_schedule_event(time(), 'hourly', 'wb_cron_job');
@@ -1189,7 +1190,7 @@ function wordbooker_fbclient_publishaction($wbuser, $fbclient,$postid)
 #	$images=$images2;
 	$images=array_filter($images, "strip_images");
 	$wordbooker_settings =wordbooker_options(); 
-
+	wordbooker_debugger("Getting the Excerpt"," ",$post->ID) ;
 	# We take the raw post data for the extract.
 	$post_content=wordbooker_post_excerpt($post_content,$wordbooker_post_options['wordbook_extract_length']);
 
@@ -1202,7 +1203,7 @@ function wordbooker_fbclient_publishaction($wbuser, $fbclient,$postid)
 		'post_excerpt' => $post_content,
 		'post_attribute' => $post_attribute
 		);
-
+	wordbooker_debugger("Calling wordbooker_fbclient_publishaction_impl"," ",$post->ID) ;
 	list($result, $error_code, $error_msg, $method) = wordbooker_fbclient_publishaction_impl($fbclient, $post_data);
 
 	return wordbooker_fbclient_facebook_finish($wbuser, $result,$method, $error_code, $error_msg, $postid);
@@ -1256,15 +1257,26 @@ function parse_wordbooker_attributes($attribute_text,$post_id,$timestamp) {
 function wordbooker_header($blah){
 	# This puts the Meta Description tag into the header and populates it with some text.
 	$wordbooker_settings = wordbooker_options(); 
-	if ( !isset($wordbooker_settings['wordbook_search_this_header']) ||($wordbooker_settings['wordbook_search_this_header']==100) ) {	
+	# If they're not using the Share link then go home
+	if ( !isset($wordbooker_settings['wordbook_actionlink']) ||($wordbooker_settings['wordbook_actionlink']!=200) ) {	
 		return;
 	}
+	# Only do this if we are showing a single page or post
 	if (is_single() || is_page()) {
-	$post = get_post($post->ID);
-	 	$description = str_replace('"','&quot;',$post->post_content);
-		$excerpt = wordbooker_post_excerpt($description,350);	
-		$meta_string = sprintf("<meta name=\"description\" content=\"%s\"/>", $excerpt);	
-	echo $meta_string;	
+		$post = get_post($post->ID);
+		if (isset($wordbooker_settings['wordbook_search_this_header'])){
+	 		$description = str_replace('"','&quot;',$post->post_content);
+			$excerpt = wordbooker_post_excerpt($description,350); 
+		}	
+		# If we've got an excerpt use that instead
+		if (isset($post->post_excerpt)) { 
+			$excerpt=$post->post_excerpt; 
+		} 	
+		# Now if we've got something put the meta tag out.
+		if (isset($excerpt)){ 
+			$meta_string = sprintf("<meta name=\"description\" content=\"%s\"/>", $excerpt);
+			echo $meta_string;
+		}	
 	} 
 	return $blah;
 }
@@ -1352,20 +1364,22 @@ function wordbooker_publish_action($post) {
 	
 
 	foreach (array_keys($wordbooker_post_options) as $key){
-		wordbooker_debugger("Post option : ".$key,$wordbooker_post_options[$key],1000) ;
+		wordbooker_debugger("Post option : ".$key,$wordbooker_post_options[$key],$post->ID) ;
 	}
 
-	$wpuserid=$wordbooker_post_options["wordbook_default_author"];
+if  ($wordbooker_settings["wordbook_default_author"] == 0 ) {$wpuserid=$post->post_author;} else {$wpuserid=$wordbooker_settings["wordbook_default_author"];}
+	#$wpuserid=$wordbooker_post_options["wordbook_default_author"];
+	
 	if (!($wbuser = wordbooker_get_userdata($wpuserid)) || !$wbuser->session_key) {
 		return 28;
 	}
-	wordbooker_debugger("Posting as user : ",$wpuserid,1000) ;
+	wordbooker_debugger("Posting as user : ",$wpuserid,$post->ID) ;
 	/* If publishing a new blog post, update text in "Wordbook" box. */
 	$fbclient = wordbooker_fbclient($wbuser);
 	if (!wordbooker_postlogged($post->ID)) {
 		# Lets see if they want to update their status. We do it this way so you can update your status without publishing!
 		if( $wordbooker_post_options["wordbooker_status_update"]=="on") {
-			wordbooker_debugger("Setting status_text",$wordbooker_post_options['wordbooker_status_update_text'],1000) ; 
+			wordbooker_debugger("Setting status_text",$wordbooker_post_options['wordbooker_status_update_text'],$post->ID) ; 
 			$status_text = parse_wordbooker_attributes(stripslashes($wordbooker_post_options['wordbooker_status_update_text']),$post->ID,strtotime($post->post_date)); 
 			try {
 				$fbclient->users_setStatus($status_text);
@@ -1380,9 +1394,10 @@ function wordbooker_publish_action($post) {
 		// User has unchecked the publish to facebook option so lets just give up and go home
 		#$wbpda=$wordbooker_post_options["wordbooker_publish_default"];
 		if ($wordbooker_post_options["wordbooker_publish_default"]!="on") {
-			wordbooker_debugger("Publish Default is not Set, Giving up ",$wpuserid,1000) ;
+			wordbooker_debugger("Publish Default is not Set, Giving up ",$wpuserid,$post->ID) ;
 		 	return;
 		}
+		wordbooker_debugger("Calling wordbooker_fbclient_publishaction"," ",$post->ID) ;
 		$results=wordbooker_fbclient_publishaction($wbuser, $fbclient, $post->ID);
 		wordbooker_insertinto_postlogs($post->ID);
 		$fb_post_id=$results;
@@ -1421,11 +1436,13 @@ function wordbooker_delete_post($postid) {
 function wordbooker_publish($postid) {
 	global $user_ID, $user_identity, $user_login, $wpdb;
 	$post = get_post($postid);
+
         if ( get_post_type($postid) == 'page' ) {return ;}
-	if (!current_user_can(WORDBOOKER_MINIMUM_ADMIN_LEVEL)) { return; }
+
+	if ((isset($user_ID)) &&  (!current_user_can(WORDBOOKER_MINIMUM_ADMIN_LEVEL))) { return; }
 	wordbooker_deletefrom_errorlogs($postid);
-	wordbooker_debugger("commence "," ",1000) ; 
-	if  ($wordbooker_settings["wordbook_default_author"] == 0 ) {$wb_user_id=$user_ID;} else {$wb_user_id=$wordbooker_settings["wordbook_default_author"];}
+	wordbooker_debugger("commence "," ",$post->ID) ; 
+	if  ($wordbooker_settings["wordbook_default_author"] == 0 ) {$wb_user_id=$post->post_author;} else {$wb_user_id=$wordbooker_settings["wordbook_default_author"];}
 	# If the referer is press-this then the user hasn't used the full edit post form so we need to get the blog/user level settings.
 	if ( stripos($_POST["_wp_http_referer"],'press-this')) {
 		# Get the blog level settings
@@ -1512,7 +1529,7 @@ function wordbooker_publish_remote($postid) {
 	$wordbooker_settings = wordbooker_options();
 
 	// then get the user level settings and override the blog level settings.
-	if  ($wordbooker_settings["wordbook_default_author"] == 0 ) {$wb_user_id=$user_ID;} else {$wb_user_id=$wordbooker_settings["wordbook_default_author"];}
+	if  ($wordbooker_settings["wordbook_default_author"] == 0 ) {$wb_user_id=$post->post_author;} else {$wb_user_id=$wordbooker_settings["wordbook_default_author"];}
 	$wordbook_user_settings_id="wordbookuser".$blog_id;
 	$wordbookuser=get_usermeta($wb_user_id,$wordbook_user_settings_id);
 	# If we have user settings then lets go through and override the blog level defaults.
@@ -1635,6 +1652,9 @@ CODEBLOX;
 function wordbooker_debugger($method,$error_msg,$post_id) {
 	if (ADVANCED_DEBUG) { 
 	global $user_ID,$post_ID,$wpdb;
+	$usid=1;
+	if (!isset($post_id)) {$post_id=$post_ID;}
+	if (isset($user_ID)) {$usid=$user_ID;}
 	$sql=	"INSERT INTO " . WORDBOOKER_ERRORLOGS . " (
 				user_id
 				, method
@@ -1642,14 +1662,13 @@ function wordbooker_debugger($method,$error_msg,$post_id) {
 				, error_msg
 				, postid
 			) VALUES (  
-				" . $user_ID . "
+				" . $usid . "
 				, '" . $method . "'
 				, -1
 				, '" . $error_msg . "'
-				, " . $post_ID . "
+				, " . $post_id . "
 			)";
 	$result = $wpdb->query($sql);
-	#echo $sql." - ".$result."<br>";
 	usleep(1000000);
 	}
 }
