@@ -4,7 +4,7 @@
 Description: Facebook Widget. Needs Wordbook installing to work.
 Author: Stephen Atty
 Author URI: http://canalplan.blogdns.com/steve
-Version: 1.7
+Version: 1.7.7
 */
 
 /*
@@ -34,7 +34,7 @@ class WordbookWidget extends WP_Widget {
 	 * constructor
 	 */	 
 	function WordbookWidget() {
-		parent::WP_Widget('wordbook_widget', 'Wordbooker ', array('description' => 'Multiple Facebook Status.' , 'class' => 'WordbookWidget'));	
+		parent::WP_Widget('wordbook_widget', 'Wordbooker ', array('description' => __('Multiple Facebook Status','wordbooker') , 'class' => 'WordbookWidget'));	
 	}
 	
 	/**
@@ -84,7 +84,7 @@ class WordbookWidget extends WP_Widget {
 	 */	 	
 	function form($instance) {
 		global $user_ID;
-		$default = array( 'title' => __('Facebook Status'), 'snorl'=>$user_ID, 'dname'=>'', 'df'=>'D M j, g:i a' );
+		$default = array( 'title' => __('Facebook Status','wordbooker'), 'snorl'=>$user_ID, 'dname'=>'', 'df'=>'D M j, g:i a' );
 		$instance = wp_parse_args( (array) $instance, $default );
 		$title_id = $this->get_field_id('title');
 		$title_name = $this->get_field_name('title');
@@ -94,17 +94,17 @@ class WordbookWidget extends WP_Widget {
 		$dname_name = $this->get_field_name('dname');
 		$df_id = $this->get_field_id('df');
 		$df_name = $this->get_field_name('df');
-		echo '<p><label for="'.$title_id.'">'.__('Title of Widget','WordbookWidget').': </label> <input type="text" class="widefat" id="'.$title_id.'" name="'.$title_name.'" value="'.attribute_escape( $instance['title'] ).'" /></p>';
-		echo '<label for="'.$dname_id.'">'.__('Display this name instead of your Facebook name','WordbookWidget').': <input type="text" class="widefat" id="'.$dname_id.'" name="'.$dname_name.'" value="'.attribute_escape( $instance['dname'] ).'" /></label></p>';
+		echo '<p><label for="'.$title_id.'">'.__('Title of Widget','wordbooker').': </label> <input type="text" class="widefat" id="'.$title_id.'" name="'.$title_name.'" value="'.attribute_escape( $instance['title'] ).'" /></p>';
+		echo '<label for="'.$dname_id.'">'.__('Display this name instead of your Facebook name','wordbooker').': <input type="text" class="widefat" id="'.$dname_id.'" name="'.$dname_name.'" value="'.attribute_escape( $instance['dname'] ).'" /></label></p>';
 		echo '<input type="hidden" class="widefat" id="'.$snorl_id.'" name="'.$snorl_name.'" value="'.attribute_escape( $instance['snorl'] ).'" /></p>';
-		echo "\r\n".'<p><label for="'.$df_id.'">'.__('Date Format','WordbookWidget').':  </label>'; 
+		echo "\r\n".'<p><label for="'.$df_id.'">'.__('Date Format','wordbooker').':  </label>'; 
 		echo '<select id=id="'.$df_id.'"  name="'.$df_name.'" >';
 		$ds12=date('D M j, g:i a');
 		$dl12=date('l F j, g:i a');
 		$dl24=date('l F j, h:i');
 		$ds24=date('D M j, h:i');
 		$drfc=date('r');
-		$arr = array('D M j, g:i a'=> $ds12,  'l F j, g:i a'=> $dl12, 'D M j, h:i'=>$ds24, 'l F j, h:i'=>$dl24,fbt=>"Facebook Text style", r =>$drfc);
+		$arr = array('D M j, g:i a'=> $ds12,  'l F j, g:i a'=> $dl12, 'D M j, h:i'=>$ds24, 'l F j, h:i'=>$dl24,fbt=>__("Facebook Text style",'wordbooker'), r =>$drfc);
 		foreach ($arr as $i => $value) {
 		if ($i==attribute_escape( $instance['df'])){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
 		else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
@@ -117,6 +117,8 @@ class WordbookWidget extends WP_Widget {
 
 /* register widget when loading the WP core */
 add_action('widgets_init', wordbooker_widgets);
+$plugin_dir = basename(dirname(__FILE__));
+#load_plugin_textdomain( 'wordbook', 'wp-content/plugins/' . $plugin_dir, $plugin_dir );
 
 function wordbooker_widgets(){
 	register_widget('WordbookWidget');

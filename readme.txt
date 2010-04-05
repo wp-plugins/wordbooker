@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU
 Requires at least: 2.7
 Tested up to: 2.9.2
-Stable tag: 1.6.1
+Stable tag: 1.7.7
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall. 
 
@@ -13,6 +13,8 @@ This plugin allows you to cross-post your blog posts to your Facebook Wall.
 This plugin allows you to cross-post your blog posts to your Facebook Wall. You can also "cross polinate" comments between Facebook and your Wordpres blog.
 
 Various options including "attribute" lines and polling for comments and automatic re-posting on edit can be configured.
+
+NOTE : You have to have PHP V5 installed for this plugin to work as the code contains several PHP V5 specific features.
 
 
 == Installation ==
@@ -123,7 +125,45 @@ If you are upgrading from an earlier version of wordbooker then DO NOT deactivat
 
 == Changelog == 
 
-= Version 1.7 :  08/03/2010 =
+= Version 1.7.7 :05/04/2010
+
+- Added support for WP thumbnails (needs WP/WPMU 2.9 or above).
+- Added support for 'Quick Press' (i.e. post from Dashboard)
+- Added support for use by non wordbooker users - posts from non wordbooker user inherit the blog level settings (and if the default user is set to a specific user they inherit those settings too)
+- Added support for posts made by wp-o-matic.
+- Added NextGen tags to the misbalanced tags list so they get stripped from the text of the excerpt.
+- Added a lot more diagnostic messages.
+- Fixed 'Press This' functionalilty
+- Fixed loss of user settings on remote posts.
+- Added more diagnostics
+- Separated Errors and Diagnostics into two display blocks
+- Advanced Diagnostics now a blog level option on the Options page rather than editing the PHP file
+
+
+
+= Version 1.7.6 :  Limited release on Wordbooker Facebook page.
+
+- Changes for this release have been rolled up into 1.7.7.
+
+
+= Version 1.7.5 : 13/03/2010 =
+
+- Fixed a bug which stopped Scheduled Posts being pushed up to Facebook
+- Added support for the "Excerpt" Box in the Add Post. If this is populated and the "Share" link option is enabled then the Excerpt text will be used to populate the Share Link.
+- Added some addtional advanced debug coding.
+
+= Version 1.7.4 : 12/03/2010 =
+
+- Fix bug with option checking on new install which sometimes caused odd errors.
+
+= Version 1.7.3	: 10/03/2010 =
+
+-  Fix bitwise logic bug in permissions check code
+-  Recode Status Cache update code to handle completely empty Facebook Statuses
+-  Recode Missing Auths check to isolate it from Facebook Multi-query handling
+-  Added more diagnostic messages to the advanced debugging process.
+
+= Version 1.7.2 :  08/03/2010 =
  - Added user data caching
  - Multiple Facebook Status Widgets (Needs Wordpress 2.8 or above)
  - Recoding of Blog Level settings form
