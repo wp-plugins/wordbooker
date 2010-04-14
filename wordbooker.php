@@ -1337,7 +1337,7 @@ function wordbooker_post_excerpt($excerpt, $maxlength) {
 	$close_tag=explode(",",$close_tags);
 	foreach (array_keys($open_tag) as $key) {
 		if (preg_match_all('/' . preg_quote($open_tag[$key]) . '(.*?)' . preg_quote($close_tag[$key]) .'/i',$excerpt,$matches)) {
-			$excerpt=str_replace($matches[0],"fred" , $excerpt);
+			$excerpt=str_replace($matches[0],"" , $excerpt);
 		 }
 	}
 	if (strlen($excerpt) > $maxlength) {
