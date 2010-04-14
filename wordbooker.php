@@ -5,7 +5,7 @@ Plugin URI: http://blogs.canalplan.org.uk/steve/wordbooker/
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://blogs.canalplan.org.uk/steve/
-Version: 1.7.7
+Version: 1.7.8
 */
 
  /*
@@ -133,7 +133,9 @@ function wordbooker_fbclient_publishaction_impl($fbclient, $post_data) {
 
 	
 		$method = 'stream.publish';
+		#$message=$post_data['post_attribute']."@[2870211117049:1:One ] @[2870211117049:1:two ] @[2870211117049:1:three] @[2870211117049:1:four ]";
 		$message=$post_data['post_attribute'];
+
 		#$post_data['post_excerpt']=html_entity_decode($post_data['post_excerpt']);
 		#$post_data['post_excerpt']=html_entity_decode($post_data['post_excerpt'],ENT_QUOTES,'UTF-8');
 		#$post_data['post_title']=html_entity_decode($post_data['post_title']);
@@ -726,7 +728,7 @@ function wordbooker_clear_diagnosticlogs() {
 	global $user_ID, $wpdb;
 	$result = $wpdb->query('
 		DELETE FROM ' . WORDBOOKER_ERRORLOGS . '
-		WHERE user_ID = ' . $user_ID . ' and error_code = -1');
+		WHERE  error_code <= -1');
 	if ($result === false) {
 		echo '<div id="message" class="updated fade">';
 		_e('Failed to clear Diagnostic logs.');
@@ -834,9 +836,7 @@ function wordbooker_render_diagnosticlogs() {
 	$rows = $wpdb->get_results('
 		SELECT *
 		FROM ' . WORDBOOKER_ERRORLOGS . '
-		WHERE user_ID = ' . $user_ID . ' and error_code = -1
-		ORDER BY timestamp
-		');
+		WHERE error_code <= -1 order by error_code desc');
 	if ($rows) {
 ?>
 	<hr>
@@ -1395,7 +1395,11 @@ function wordbooker_fbclient_publishaction($wbuser, $fbclient,$postid)
 	#var_dump($images);
 	$wordbooker_settings =wordbooker_options(); 
 	wordbooker_debugger("Getting the Excerpt"," ",$post->ID) ;
+
 	# We take the raw post data for the extract.
+
+	# Parse the content for wordbooker FB tags and put them into an array
+
 	$post_content=wordbooker_post_excerpt($post_content,$wordbooker_post_options['wordbook_extract_length']);
 	# this is getting and setting the post attributes
 	$post_attribute=parse_wordbooker_attributes(stripslashes($wordbooker_post_options["wordbook_attribute"]),$postid,strtotime($post->post_date));
@@ -1416,8 +1420,9 @@ function strip_images($var)
 {
 	$strip_array= array ('addthis.com','gravatar.com','zemanta.com','wp-includes');
 	foreach ($strip_array as $strip_domain) {
+	wordbooker_debugger("looking for ".$strip_domain." in ".$var['src']," ",$post->ID) ;
 	#echo "looking for ".$strip_domain." in ".$var['src']." <br>";
- 	  if (stripos($var['src'],$strip_domain)) {return;}
+ 	  if (stripos($var['src'],$strip_domain)) {wordbooker_debugger("Found a match so dump the string"," ",$post->ID) ; return;}
 	}
 	return $var;
 }
@@ -1555,12 +1560,13 @@ function wordbooker_post_excerpt($excerpt, $maxlength) {
 	$close_tag=explode(",",$close_tags);
 	foreach (array_keys($open_tag) as $key) {
 		if (preg_match_all('/' . preg_quote($open_tag[$key]) . '(.*?)' . preg_quote($close_tag[$key]) .'/i',$excerpt,$matches)) {
-			$excerpt=str_replace($matches[0],"fred" , $excerpt);
+			$excerpt=str_replace($matches[0],"" , $excerpt);
 		 }
 	}
 	if (strlen($excerpt) > $maxlength) {
 		$excerpt=current(explode("SJA26666AJS", wordwrap($excerpt, $maxlength, "SJA26666AJS")))." ...";	
 	}
+
 	return $excerpt;
 }
 
@@ -1599,11 +1605,14 @@ function wordbooker_publish_action($post) {
 	wordbooker_debugger("Posting as user : ",$wpuserid,$post->ID) ;
 	/* If publishing a new blog post, update text in "Wordbook" box. */
 	$fbclient = wordbooker_fbclient($wbuser);
+
 	if (!wordbooker_postlogged($post->ID)) {
 		# Lets see if they want to update their status. We do it this way so you can update your status without publishing!
 		if( $wordbooker_post_options["wordbooker_status_update"]=="on") {
-			wordbooker_debugger("Setting status_text",$wordbooker_post_options['wordbooker_status_update_text'],$post->ID) ; 
+	
+			wordbooker_debugger("Setting status_text".$wordbooker_post_options['wordbooker_status_update_text']," ",$post->ID) ; 
 			$status_text = parse_wordbooker_attributes(stripslashes($wordbooker_post_options['wordbooker_status_update_text']),$post->ID,strtotime($post->post_date)); 
+		$status_text = wordbooker_post_excerpt($status_text,420); 			
 			try {
 				$fbclient->users_setStatus($status_text);
 			    }
@@ -1633,11 +1642,13 @@ function wordbooker_publish_action($post) {
 		{	
 			$tstamp= time() + (1000 * 7 * 24 * 60 * 60);
 		}
-		$sql=	' INSERT INTO ' . WORDBOOKER_POSTCOMMENTS . ' (fb_post_id,comment_timestamp,wp_post_id) VALUES ("'.$result1.'",'.$tstamp.','.$post->ID.')';;
-		$result = $wpdb->query($sql);
-		$sql=	' INSERT INTO ' . WORDBOOKER_POSTCOMMENTS . ' (fb_post_id,comment_timestamp,wp_post_id) VALUES ("'.$result2.'",'.$tstamp.','.$post->ID.')';;
-		$result = $wpdb->query($sql);
+		$sql=	' INSERT INTO ' . WORDBOOKER_POSTCOMMENTS . ' (fb_post_id,comment_timestamp,wp_post_id) VALUES ("'.$result1.'",'.$tstamp.','.$post->ID.')';
+		if ( isset($result1) ) {$result = $wpdb->query($sql);}
+		$sql=	' INSERT INTO ' . WORDBOOKER_POSTCOMMENTS . ' (fb_post_id,comment_timestamp,wp_post_id) VALUES ("'.$result2.'",'.$tstamp.','.$post->ID.')';
+		if ( isset($result2) ) {$result = $wpdb->query($sql);}
 
+		$sql=	' DELETE FROM  ' . WORDBOOKER_POSTCOMMENTS . ' where fb_post_id="" ';
+		$result = $wpdb->query($sql);	
 	}
 
 	return 30;
@@ -1669,18 +1680,15 @@ function wordbooker_publish($postid) {
 	wordbooker_deletefrom_errorlogs($postid);
 	wordbooker_debugger("commence "," ",$post->ID) ; 
 	$wordbooker_settings = wordbooker_options();
-	# If we've no FB user associated with this ID and the blog owner hasn't overridden then we give up.
-	if ((! wordbooker_get_userdata($user_ID))  && ( !isset($wordbooker_settings['wordbook_publish_no_user'])))  { wordbooker_debugger("No user ID - give up "," ",$post->ID) ; return;}
-	if ((! wordbooker_get_userdata($post->post_author))  && ( !isset($wordbooker_settings['wordbook_publish_no_user'])))  {wordbooker_debugger("No post author - give up "," ",$post->ID) ;  return;}
+	# If there is no user row for this user then set the user id to the default author. If the default author is set to 0 (i.e current logged in user) then only blog level settings apply.
+	if (! wordbooker_get_userdata($post->post_author)) { $wb_user_id=$wordbooker_settings["wordbook_default_author"];}
 	if  ($wordbooker_settings["wordbook_default_author"] == 0 ) {$wb_user_id=$post->post_author;} else {$wb_user_id=$wordbooker_settings["wordbook_default_author"];}
-
-		# If there is no user row for this user then set the user id to the default author. If the default author is set to 0 (i.e current logged in user) then only blog level settings apply.
-	if (! wordbooker_get_userdata($user_ID)) { $wb_user_id=$wordbooker_settings["wordbook_default_author"];}
+	# If we've no FB user associated with this ID and the blog owner hasn't overridden then we give up.
+	
 	# If the referer is press-this then the user hasn't used the full edit post form so we need to get the blog/user level settings.
 	# Also check for a missing user_id (i,e, user is not a wordbooker user), or if the extract_length is empty (wp-o-matic does that)
-	if ( (stripos($_POST["_wp_http_referer"],'press-this')) || ( stripos($_POST["_wp_http_referer"],'index.php'))  || (! wordbooker_get_userdata($user_ID)) ||  ($_POST["wordbook_extract_length"]=="" )) {
-		wordbooker_debugger("Inside the press this block "," ",$post->ID) ;
-		#if (! wordbooker_get_userdata($user_ID)) { $wb_user_id=$wordbooker_settings["wordbook_default_author"];}
+	if ( (stripos($_POST["_wp_http_referer"],'press-this')) || ( stripos($_POST["_wp_http_referer"],'index.php'))   ) {
+		wordbooker_debugger("Inside the press this / quick press block "," ",$post->ID) ;
 		# New get the user level settings from the DB
 		$wordbook_user_settings_id="wordbookuser".$blog_id;
 		$wordbookuser=get_usermeta($wb_user_id,$wordbook_user_settings_id);
@@ -1704,6 +1712,12 @@ function wordbooker_publish($postid) {
 	$_POST['soupy']="twist";
 	}
 	
+	else 
+
+	{	if ((! wordbooker_get_userdata($post->post_author))  && ( !isset($wordbooker_settings['wordbook_publish_no_user'])))  { wordbooker_debugger("Not a WB user (".$post->post_author.") and no overide - give up "," ",$post->ID) ; return;}
+		if ((! wordbooker_get_userdata($wb_user_id))  && ( !isset($wordbooker_settings['wordbook_publish_no_user'])))  {wordbooker_debugger("Author (".$post->post_author.") not a WB user and no overide- give up "," ",$post->ID) ;  return;}
+	}
+
 	if ($_POST["wordbook_default_author"]== 0 ) { $_POST["wordbook_default_author"]=$post->post_author; }
 	
 	// If soupy isn't set then its a future post so we need to get the meta data
@@ -1711,11 +1725,14 @@ function wordbooker_publish($postid) {
 		wordbooker_debugger("Looks like a future post "," ",$post->ID) ;
 		# Get the blog level and then the user level settings - just in case this post predates the install.
 		$wordbooker_settings = wordbooker_options();
-		if (! wordbooker_get_userdata($user_ID)) { $wb_user_id=$wordbooker_settings["wordbook_default_author"];}
+		wordbooker_debugger("Getting settings for user : ",$wb_user_id,$post->ID) ; 
+		if (! wordbooker_get_userdata($wb_user_id)) { $wb_user_id=$wordbooker_settings["wordbook_default_author"];}
 		// then get the user level settings and override the blog level settings.
+
 		$wordbook_user_settings_id="wordbookuser".$blog_id;
 		$wordbookuser=get_usermeta($wb_user_id,$wordbook_user_settings_id);
 		# If we have user settings then lets go through and override the blog level defaults.
+;
 		if(is_array($wordbookuser)) {
 			foreach (array_keys($wordbookuser) as $key) {
 				if ((strlen($wordbookuser[$key])>0) && ($wordbookuser[$key]!="0") ) {
@@ -1724,15 +1741,18 @@ function wordbooker_publish($postid) {
 			}
 
 		}
+
 		#Now push these into the $_POST array.
 		foreach (array_keys($wordbooker_settings) as $key ) {
 			if (substr($key,0,8)=='wordbook') {
-				$_POST[$key]=str_replace( array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),array('&','"','\'','<','>',"\t"),$x[$key]);
+				$_POST[$key]=str_replace( array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),array('&','"','\'','<','>',"\t"),$wordbooker_settings[$key]);
 			}
 		}	
 
 		# now lets get the post meta
 		$x = get_post_meta($postid, 'wordbooker_options', true); 
+	
+
 		if(is_array($x)) {
 			foreach (array_keys($x) as $key ) {
 				if (substr($key,0,8)=='wordbook') {
@@ -1743,6 +1763,7 @@ function wordbooker_publish($postid) {
 
 	}		
 	# Now put the $_POST data into an array
+#var_dump($_POST);
 	foreach (array_keys($_POST) as $key ) {
 		if (substr($key,0,8)=='wordbook') {
 			$wb_params[$key]=str_replace(array('&','"','\'','<','>',"\t",), array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),$_POST[$key]);
@@ -1873,7 +1894,7 @@ function wordbooker_post_comment($commentid) {
 	if (($cuid==0) && ($caemail==get_bloginfo( 'admin_email' ))) {$real_comment=false;}
 	if ($real_comment) {
 		if (DEBUG) {
-			$debug_string="FBID : ".$cpid."  stat:".$cstatus."text:".$ctext." type:".$ctype."!!\n";
+			$debug_string="FBID : ".$cpid."  stat:".$cstatus."  text:".$ctext." type:".$ctype."!!\n";
 			fwrite($fp, $debug_string);
 		}	
 		if ($cstatus==1) {
@@ -1933,8 +1954,18 @@ function wordbooker_debugger($method,$error_msg,$post_id) {
 	if (wordbooker_get_option('wordbook_advanced_diagnostics')) { 
 	global $user_ID,$post_ID,$wpdb;
 	$usid=1;
+	# Get the error_code last used - allows us to order in a subsecond timestamp
+	$result = $wpdb->get_results("select min(error_code) as ec from ". WORDBOOKER_ERRORLOGS);
+	$rowid=$result[0]->ec;
+	if (!isset($rowid)) {$rowid=-1;}
+	if ($rowid>=0) {$rowid=-1;}
+	$rowid=$rowid-1;
+	if (post_id<=1) {$post_id=$post_ID;}
 	if (!isset($post_id)) {$post_id=$post_ID;}
+	if (!isset($post_id)) {$post_id=1;}
 	if (isset($user_ID)) {$usid=$user_ID;}
+	if (!isset($usid)) {$usid=wordbooker_get_option('wordbook_default_author');}
+	if (!isset($usid)) {$usid=1;}
 	$sql=	"INSERT INTO " . WORDBOOKER_ERRORLOGS . " (
 				user_id
 				, method
@@ -1944,12 +1975,12 @@ function wordbooker_debugger($method,$error_msg,$post_id) {
 			) VALUES (  
 				" . $usid . "
 				, '" . $method . "'
-				, -1
+				, $rowid
 				, '" . $error_msg . "'
 				, " . $post_id . "
 			)";
 	$result = $wpdb->query($sql);
-	usleep(1000000);
+	#usleep(1000000);
 	}
 }
 
@@ -1990,4 +2021,5 @@ add_action('transition_post_status', 'wordbooker_future_post',WORDBOOK_HOOK_PRIO
 include("wb_widget.php");
 include("wordbooker_options.php");
 include("wordbooker_cron.php");
+#include("wordbooker_friends.php");
 ?>
