@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Options 
 Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.7.7
+Version: 1.7.9
 Description: Advanced Options for the WordBooker Plugin
 Author: Steve Atty
 */
@@ -64,10 +64,11 @@ function wbs_retrieve_hash() {
 
 
 function wordbooker_option_manager() {
-	global $ol_flash, $wordbooker_settings, $_POST, $wp_rewrite,$user_ID,$wpdb, $table_prefix,$current_blog,$blog_id;
+	global $ol_flash, $wordbooker_settings, $_POST, $wp_rewrite,$user_ID,$wpdb, $table_prefix,$current_blog,$blog_id,$db_prefix;
 	// Check for missing functions and abort
 	echo '<div class="wrap">';
 	echo '<h2>WordBooker Plugin</h2>';
+
 	if ( isset ($_POST["reset_user_config"])) {wordbooker_delete_userdata(); }
 	//Set some defaults:
 	$wordbooker_settings=wordbooker_options();
@@ -127,6 +128,7 @@ function wordbooker_option_manager() {
 			$wordbookuser_settings['wordbook_disable_status']=$_POST['wordbook_disable_status'];
 			$wordbookuser_settings['wordbook_status_id']=$_POST['wordbook_status_id'];
 			$wordbookuser_settings['wordbook_thumb_only']=$_POST['wordbook_thumb_only'];
+			$wordbookuser_settings['wordbook_use_excerpt']=$_POST['wordbook_use_excerpt'];
 			$encoded_setings=$wordbookuser_settings;
 			$wordbook_user_settings_id="wordbookuser".$blog_id;
 			update_usermeta( $user_ID, $wordbook_user_settings_id, $encoded_setings );
@@ -479,6 +481,9 @@ if ($oldv==1) {
 			echo '<INPUT TYPE=CHECKBOX NAME="wordbook_thumb_only" '.$checked_flag[$wordbookuser_settings["wordbook_thumb_only"]].'><br>';
 		}
 		
+		echo '<label for="wb_use_extract">'.__('Use Post Excerpt').' : </label>';
+			echo '<INPUT TYPE=CHECKBOX NAME="wordbook_use_excerpt" '.$checked_flag[$wordbookuser_settings["wordbook_use_excerpt"]].'><br>';
+
 		echo '<label for="wb_status_id">'.__('Show Status for').' : </label> <select name="wordbook_status_id" ><option selected="yes" value=-100>'.__('My Own Profile').'&nbsp;&nbsp;</option>';
 		$option="";
 		if ($have_fan_pages==1) {
@@ -663,6 +668,8 @@ function wordbooker_inner_custom_box() {
 	if ( function_exists( 'get_the_post_thumbnail' ) ) {
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbook_thumb_only" '.$checked_flag[$wordbooker_settings["wordbook_thumb_only"]].'>'.__(' Use Thumbnail as only image').' <br>';
 	}
+
+	echo '<INPUT TYPE=CHECKBOX NAME="wordbook_use_excerpt" '.$checked_flag[$wordbooker_settings["wordbook_use_excerpt"]].' > Use Wordpress Excerpt for Wall Post <br>';
 	echo 'Facebook Post Attribute line: <INPUT NAME="wordbook_attribute" size=60 maxlength=60 value="'.stripslashes($wordbooker_settings["wordbook_attribute"]).'"><br>';	
 	echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_status_update" '.$checked_flag[$wordbooker_settings["wordbooker_status_update"]].' > '.__('Facebook Status Update text').' : <INPUT NAME="wordbooker_status_update_text" size=60 maxlength=60 value="'.stripslashes($wordbooker_settings["wordbooker_status_update_text"]).'"><br>';
 	echo '<INPUT TYPE=CHECKBOX NAME="wordbook_comment_get" '.$checked_flag[$wordbooker_settings["wordbook_comment_get"]].' > '.__('Fetch comments from Facebook for this post').'<br>';

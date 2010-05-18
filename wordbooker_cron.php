@@ -48,7 +48,7 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 				try {
 					$permy = $fbclient->users_hasAppPermission("publish_stream",$page['page_id']);
 					$error_code = null;
-					if($permy==0) {$add_auths=1;wordbooker_debugger("Page needs permissions for ".$page['page_id'],$page['page_id'],0) ;}
+					if($permy==0) {$add_auths=1;wordbooker_debugger("Page needs permissions for ".$page['page_id']," ",0) ;}
 					$error_msg = null;
 				} catch (Exception $e) {
 					wordbooker_debugger("Page needs permissions for ".$page['page_id'],$page['page_id'],0);
@@ -59,7 +59,7 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 		}
 		
 		# Now lets check over the over permissions and build up the bit mask
-		$perms_to_check= array(WORDBOOKER_FB_PUBLISH_STREAM,WORDBOOKER_FB_STATUS_UPDATE,WORDBOOKER_FB_READ_STREAM);
+		$perms_to_check= array(WORDBOOKER_FB_PUBLISH_STREAM,WORDBOOKER_FB_STATUS_UPDATE,WORDBOOKER_FB_READ_STREAM,WORDBOOKER_FB_CREATE_NOTE);
 		foreach(array_keys($perms_to_check) as $key){
 	 		if (! $fbclient->users_hasAppPermission($perms_to_check[$key],$uid)) { $add_auths = $add_auths | pow(2,$key);}
 		}
@@ -75,10 +75,26 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 	
 		if (isset($wordbookuser['wordbook_status_id'])  && $wordbookuser['wordbook_status_id']!=-100) {$suid=$wordbookuser['wordbook_status_id'];}
 		wordbooker_debugger("Getting Status for : ",$suid,0) ;
-		$resultx=$fbclient->fql_multiquery('{  "status_info":"SELECT uid,time,message FROM status WHERE uid='.$suid.' limit 1", "profile_info":"SELECT name, url, pic FROM profile WHERE id='.$suid.'",  "page_names":"SELECT name,page_id FROM page WHERE page_id IN (SELECT page_id FROM page_admin WHERE uid='.$uid.' and page_id in (select page_id from page_fan where uid='.$uid.' )) or page_id IN (SELECT page_id FROM page_admin WHERE uid='.$uid.')","woot":"Select is_app_user FROM user where uid='.$uid.'"}');
+		$resultx=$fbclient->fql_multiquery('{  "status_info":"SELECT uid,time,message FROM status WHERE uid='.$suid.' limit 1", "profile_info":"SELECT name, url, pic FROM profile WHERE id='.$suid.'",  "page_names":"SELECT name,page_id FROM page WHERE page_id IN (SELECT page_id FROM page_admin WHERE uid='.$uid.')","woot":"Select is_app_user FROM user where uid='.$uid.'"}');
+
 		if (is_array($resultx)) {
-			#var_dump($resultx[0]["fql_result_set"]);
-			if (is_array($resultx[0]["fql_result_set"])) { $encoded_names=str_replace('\\','\\\\',serialize($resultx[0]["fql_result_set"]));} else {wordbooker_debugger("Failed to get page information from FB"," ",0); }
+		$all_pages=array();
+			if (is_array($resultx[0]["fql_result_set"])) { 
+			#	var_dump($resultx[0]["fql_result_set"]);
+			if (is_array($resultx[0]["fql_result_set"])) { $encoded_names=str_replace('\\','\\\\',serialize($resultx[0]["fql_result_set"]));}
+				 foreach ( $resultx[0]["fql_result_set"] as $pageinfo ) {
+
+				$pages["page_id"]=$pageinfo["page_id"];
+				$pages["name"]=mb_convert_encoding($pageinfo["name"],'UTF-8');
+				$all_pages[]=$pages;
+
+					wordbooker_debugger("Page info for page ID ".$pageinfo["page_id"],mysql_real_escape_string($pageinfo["name"]),0) ;
+	
+				}
+			#var_dump($all_pages);
+			#$encoded_names=str_replace('\\','\\\\',serialize($all_pages));
+			#echo $encodes_names;
+			} else {wordbooker_debugger("Failed to get page information from FB"," ",0); }
 			wordbooker_debugger("Setting name as  : ",mysql_real_escape_string($resultx[1]["fql_result_set"][0]["name"]),0) ;
 			$sql="update ".WORDBOOKER_USERDATA." set name='".mysql_real_escape_string($resultx[1]["fql_result_set"][0]["name"])."'";
 			if (is_array($resultx[2]["fql_result_set"])) {
@@ -111,7 +127,7 @@ function wordbooker_poll_facebook($single_user=null) {
 	# If a user ID has been passed in then restrict to that single user.
 	$limit_user="";
 	if (isset($single_user)) {$limit_user=" where user_id=".$single_user." limit 1";}
-	define ('DEBUG', true);
+	define ('DEBUG', false);
 	$wordbooker_settings =get_option('wordbooker_settings'); 
 	$debug_file='/tmp/wordbook_'.$table_prefix.'debug';
 	if (DEBUG) {
