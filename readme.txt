@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU
 Requires at least: 2.7
 Tested up to: 2.9.2
-Stable tag: 1.7.9
+Stable tag: 1.8
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall. 
 
@@ -19,11 +19,15 @@ NOTE : You have to have PHP V5 installed for this plugin to work as the code con
 
 == Installation ==
 
-1. [Download](http://wordpress.org/extend/plugins/wordbooker/) the ZIP file.
+1. [Download] (http://wordpress.org/extend/plugins/wordbooker/) the ZIP file.
 1. Unzip the ZIP file.
 1. Upload the `wordbooker` directory to the `/wp-content/plugins/` directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 1. Navigate to `Options` &rarr; `Wordbooker` for configuration and follow the on-screen prompts.
+
+== IMPORTANT ==  
+
+Wordbooker 1.8 uses the new Faceobok OAUTH authorisation method. This means that when you upgrade you may find that you loose your "Session" with Facebook and you only get a partial option screen displayed. If this happens then simply reload the Wordbooker Options page and follow the instructions.
 
 
 == Features ==
@@ -66,7 +70,7 @@ This Wordbook plugin works in the reverse direction. When you publish a new post
 
 - Any errors Wordbooker encounters while communicating with Facebook will be recorded in error logs; the error logs (if any) are viewable in the "Wordbooker" panel of the "Options" WordPress admin page.
 
-- To discourage spammy behavior, Facebook restricts each user of any application to 10 posts within any rolling 48-hour window of time. If you've been playing around with Wordbooker and posting lots of test posts, you have likely hit this limit; it will appear in the error logs as `error_code 4: "Application request limit reached"`. There is nothing to do but wait it out.
+- To discourage spammy behavior, Facebook restricts each user of any application to 25 posts within any rolling 48-hour window of time. If you've been playing around with Wordbooker and posting lots of test posts, you have likely hit this limit; it will appear in the error logs as `error_code 4: "Application request limit reached"`. There is nothing to do but wait it out.
 
 - Facebook sometimes incorrectly returns this result to application requests (other developers have also reported this problem with their Facebook apps; it's not just Wordbook); there is also nothing the Wordbook plugin can do about this.
 
@@ -125,12 +129,21 @@ If you are upgrading from an earlier version of wordbooker then DO NOT deactivat
 
 == Changelog == 
 
-= Version 1.7.9 : 18/05/2010
+
+= Version 1.8 : 30/05/2010 =
+- Facebook authorisation migrated to OAUTH2
+- Minor bug fixes
+- Userguide updated to include new features and authorisation process.
+- Recoded cron code to try to work round Facebook Database issues.
+
+
+
+= Version 1.7.9 : 18/05/2010 =
 - Several minor bug fixes and tweaks.
 - Ability to use the User generated Post Excerpt to post to the wall.
  
 
-= Version 1.7.8 :14/04/2010
+= Version 1.7.8 :14/04/2010 =
 - Fixed Scheduled post handling which was broken again.
 - Recoded Advanced Diagnostics so they no longer slow down the posting process.
 - Fixed bug concerning incorrect facebook IDs when posting comments.
@@ -139,8 +152,7 @@ If you are upgrading from an earlier version of wordbooker then DO NOT deactivat
 
 
 
-= Version 1.7.7 :05/04/2010
-
+= Version 1.7.7 :05/04/2010 =
 - Added support for WP thumbnails (needs WP/WPMU 2.9 or above).
 - Added support for 'Quick Press' (i.e. post from Dashboard)
 - Added support for use by non wordbooker users - posts from non wordbooker user inherit the blog level settings (and if the default user is set to a specific user they inherit those settings too)
@@ -155,23 +167,21 @@ If you are upgrading from an earlier version of wordbooker then DO NOT deactivat
 
 
 
-= Version 1.7.6 :  Limited release on Wordbooker Facebook page.
-
+= Version 1.7.6 :  Limited release on Wordbooker Facebook page. =
 - Changes for this release have been rolled up into 1.7.7.
 
 
 = Version 1.7.5 : 13/03/2010 =
-
 - Fixed a bug which stopped Scheduled Posts being pushed up to Facebook
 - Added support for the "Excerpt" Box in the Add Post. If this is populated and the "Share" link option is enabled then the Excerpt text will be used to populate the Share Link.
 - Added some addtional advanced debug coding.
 
-= Version 1.7.4 : 12/03/2010 =
 
+= Version 1.7.4 : 12/03/2010 =
 - Fix bug with option checking on new install which sometimes caused odd errors.
 
-= Version 1.7.3	: 10/03/2010 =
 
+= Version 1.7.3	: 10/03/2010 =
 -  Fix bitwise logic bug in permissions check code
 -  Recode Status Cache update code to handle completely empty Facebook Statuses
 -  Recode Missing Auths check to isolate it from Facebook Multi-query handling

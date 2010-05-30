@@ -5,7 +5,7 @@ Plugin URI: http://blogs.canalplan.org.uk/steve/wordbooker/
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://blogs.canalplan.org.uk/steve/
-Version: 1.7.9
+Version: 1.8
 */
 
  /*
@@ -45,8 +45,16 @@ define('ADVANCED_DEBUG',false);
 
 $facebook_config['debug'] = WORDBOOKER_TESTING && !$_POST['action'];
 
+#Wordbooker2 - Dev
+#define('WORDBOOKER_FB_APIKEY', '0138375357c1eb1257ed9970ec1a274c');
+#define('WORDBOOKER_FB_SECRET', '4310b484ec5236694cfa4b94166aca61');
+#define('WORDBOOKER_FB_ID', '111687885534181');
+
+#Wordbooker - live
 define('WORDBOOKER_FB_APIKEY', '0cbf13c858237f5d74ef0c32a4db11fd');
 define('WORDBOOKER_FB_SECRET', 'df04f22f3239fb75bf787f440e726f31');
+define('WORDBOOKER_FB_ID', '254577506873');
+
 define('WORDBOOKER_FB_APIVERSION', '1.0');
 define('WORDBOOKER_FB_DOCPREFIX','http://wiki.developers.facebook.com/index.php/');
 define('WORDBOOKER_FB_MAXACTIONLEN', 60);
@@ -1037,41 +1045,82 @@ function wordbooker_option_notices() {
 	}
 }
 
+
+
+
+function get_check_session(){
+	global $facebook2,$user_ID;
+
+	# This function basically checks for a stored session and if we have one it returns it, If we have no stored session then it gets one and stores it
+	# OK lets go to the database and see if we have a session stored
+	$session=wordbooker_get_userdata($user_ID);
+	if (is_array($session)) {
+
+		# We have a session ID so lets not get a new one
+		# Put some session checking in here to make sure its valid
+		try {
+		$attachment =  array('access_token' => $session_id[0],);
+		$ret_code=$facebook->api('/me', 'GET', $attachment);
+		}
+		catch (Exception $e) {
+		# We don't have a good session so
+		#echo "woops";
+		wordbooker_delete_user($user_ID);
+		return;
+
+	}
+		return $session[0];
+	} 
+	else 
+	{
+		# Are we coming back from a login with a session set? 
+		$_GET['session']=stripslashes($_GET['session']);
+		$session = $facebook2->getSession();
+		if (is_array($session)) {
+			# Yes! so lets store it!y)
+		wordbooker_set_userdata($onetime_data, $facebook_error, $secret,$session['session_key']);
+			return $session['access_token'];
+		}
+		
+	} 
+}
+ 
 function wordbooker_option_setup($wbuser) {
 ?>
 
 	<h3><?php _e('Setup'); ?></h3>
 	<div class="wordbook_setup">
 <?php
-	_e('<p>Wordbooker needs to be linked to your Facebook account. This link will be used to publish your WordPress blog updates to your wall and to pull comments from your wall, and will not be used for any other purpose.</p>');
 
-	_e('<p>To do this we need to get a code from Facebook to link the two accounts. If you click on the Facebook Login button below it will open a new window where you will be prompted to login to Facebook (assuming that you are not already logged in).</p>');
+require 'src/facebook.php';
 
-	_e('<p>Once you\'ve logged in you will be asked to generate a "one time code". Generate the code and copy it, and the come back to this page.</p>');
-?>
-	<div style="text-align: center;"><a href="http://www.facebook.com/code_gen.php?v=<?php echo WORDBOOKER_FB_APIVERSION; ?>&api_key=<?php echo WORDBOOKER_FB_APIKEY; ?>" target="facebook"><img src="http://static.ak.facebook.com/images/devsite/facebook_login.gif" /></a></div>
+// Create our Application instance.
+global $facebook2;
+$facebook2 = new Facebook(array(
+  'appId'  => WORDBOOKER_FB_ID,
+  'secret' => WORDBOOKER_FB_SECRET,
+  'cookie' => false,
+));
 
-	<form action="<?php echo WORDBOOKER_SETTINGS_URL; ?>" method="post">
-		<p><?php _e('Next, enter the one-time code obtained in the previous step:');?></p>
-		<div style="text-align: center;">
-		<input type="text" name="one_time_code" id="one_time_code"
-			value="<?php echo $wbuser->onetime_data['onetimecode']; ?>" size="9" />
-		</div>
-		<input type="hidden" name="action" value="one_time_code" />
-
-<?php
-		if ($wbuser) {
-			wordbooker_render_onetimeerror($wbuser);
-			$wbuser->onetime_data = null;
-			wordbooker_update_userdata($wbuser);
-			
-		}
-?>
-		<p style="text-align: center;"><input type="submit" value="<?php _e('Submit &raquo;'); ?>" /></p>
-	</form>
-	</div>
-
-<?php
+# Lets set up the permissions we need and set the login url in case we need it.
+$par['req_perms'] = "publish_stream,offline_access,user_status,read_stream,email,user_groups";
+$par['next'] = "http://ccgi.pemmaquid.plus.com/cgi-bin/index.php?blogreturn=".urlencode('http://'.$_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"]);
+$par['cancel_url']= "http://ccgi.pemmaquid.plus.com/cgi-bin/index.php";
+  #* - next: the url to go to after a successful login
+  # * - cancel_url: the url to go to after the user cancels
+  # * - req_perms: comma separated list of requested extended perms
+$loginUrl = $facebook2->getLoginUrl($par);
+$access_token=get_check_session();
+# If we've not got an access_token we need to login.
+if ( is_null($access_token) ) {
+		echo "We need to authorise Wordbooker with your Facebook Account. Please click on the following link and follow the instructions <br><br>";
+		echo '<a href="'. $loginUrl.'" <img src="http://static.ak.fbcdn.net/rsrc.php/zB6N8/hash/4li2k73z.gif"> </a>';
+}
+ else  {
+	echo'Wordbooker should now be authorised. Please click on the Reload Page Button <br> <form action="" method="post">';
+	echo '<p style="text-align: center;"><input type="submit" name="perm_save" class="button-primary" value="'. __('Reload Page').'" /></p>';
+	echo '</form> '; 
+}
 }
 
 function wordbooker_status($user_id)
@@ -1436,11 +1485,10 @@ function wordbooker_fbclient_publishaction($wbuser, $fbclient,$postid)
 
 	$wordbooker_settings =wordbooker_options(); 
 	wordbooker_debugger("Getting the Excerpt"," ",$post->ID) ;
-
 	# We take the raw post data for the extract
 
 	if (isset($wordbooker_post_options["wordbook_use_excerpt"])  && isset($post->post_excerpt)) { 
-			$post_content=$post->post_excerpt; }
+		$post_content=$post->post_excerpt; }
 	else {	$post_content=wordbooker_post_excerpt($post_content,$wordbooker_post_options['wordbook_extract_length']);}
 
 	# this is getting and setting the post attributes
@@ -1510,8 +1558,10 @@ function wordbooker_header($blah){
 	$wordbooker_settings = wordbooker_options(); 
 	# If they're not using the Share link then go home
 	if ( !isset($wordbooker_settings['wordbook_actionlink']) ||($wordbooker_settings['wordbook_actionlink']!=200) ) {	
+
 		return;
 	}
+
 	# Only do this if we are showing a single page or post
 	if (is_single() || is_page()) {
 		$post = get_post($post->ID);
@@ -1525,7 +1575,7 @@ function wordbooker_header($blah){
 		} 	
 		# Now if we've got something put the meta tag out.
 		if (isset($excerpt)){ 
-			$meta_string = sprintf("<meta name=\"description\" content=\"%s\"/>", $excerpt);
+			$meta_string = sprintf("<meta name=\"Description\" content=\"%s\"/>", $excerpt);
 			echo $meta_string;
 		}	
 	} 
@@ -1548,7 +1598,7 @@ function wordbooker_check_permissions($wbuser,$user) {
 	if ($perm_miss->auths_needed==0) { return;}
 	$fbclient = wordbooker_fbclient($wbuser);
 	$opurl="http://www.facebook.com/connect/prompt_permissions.php?v=";
-	$opurlt="&fbconnect=true"."&display=popup"."&extern=1&enable_profile_selector=1";
+	$opurlt="&fbconnect=true"."&display=popup"."&extern=1&enable_profile_selector=1&next=http%3A%2F%2Fccgi.pemmaquid.plus.com%2Fcgi-bin%2Findex.php%3Fblogreturn=".urlencode("http://".$_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"]);
 	$perms_to_check= array(WORDBOOKER_FB_PUBLISH_STREAM,WORDBOOKER_FB_STATUS_UPDATE,WORDBOOKER_FB_READ_STREAM,WORDBOOKER_FB_CREATE_NOTE);
 	$perm_messages= array( __('publish content to your Wall/Fan pages'), __('update your status'), __('read your News Feed and Wall'),__('create notes'));
 	$preamble= __("Wordbooker requires authorization to ");
@@ -1558,7 +1608,7 @@ function wordbooker_check_permissions($wbuser,$user) {
 		# Bit map check to put out the right text for the missing permissions.
 		if (pow(2,$key) & $perm_miss->auths_needed ) {
 		       $url = $opurl. WORDBOOKER_FB_APIVERSION . "&api_key=". WORDBOOKER_FB_APIKEY ."&ext_perm=" . $perms_to_check[$key] .$opurlt;
-		       echo '<p>'.$preamble.$perm_messages[$key].$postamble.'</p><div style="text-align: center;"><a href="'.$url.'" target="facebook"> <img src="http://static.ak.facebook.com/images/devsite/facebook_login.gif" /></a><br></div>';}
+		       echo '<p>'.$preamble.$perm_messages[$key].$postamble.'</p><div style="text-align: center;"><a href="'.$url.'" > <img src="http://static.ak.facebook.com/images/devsite/facebook_login.gif" /></a><br></div>';}
 		}
 		echo "and then save your settings<br>";
 		echo '<form action="'.WORDBOOKER_SETTINGS_URL.'" method="post"> <input type="hidden" name="action" value="" />';
@@ -2060,6 +2110,7 @@ add_action('delete_post', 'wordbooker_delete_post');
 add_action('xmlrpc_publish_post', 'wordbooker_publish_remote');
 add_action('publish_phone', 'wordbooker_publish_remote');
 add_action('publish_post', 'wordbooker_publish');
+add_action('publish_page', 'wordbooker_publish');
 add_action('wb_cron_job', 'wordbooker_poll_facebook');
 add_action('delete_post', 'wordbooker_delete_post');
 add_action('comment_post', 'wordbooker_post_comment');

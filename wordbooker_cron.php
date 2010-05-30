@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Cron
 Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.7.8
+Version: 1.8
 Description: Collection of processes that are often handled by wp_cron scheduled jobs
 Author: Steve Atty
 */
@@ -27,12 +27,25 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 		wordbooker_debugger("Getting Permisions for : ",$uid,0) ;
 		# Check that the user has permission to publish to all their fan pages. All we need to know is if one or more is missing permissions - FB will do the rest for us
 	#	$query = "SELECT page_id FROM page_admin WHERE uid=$uid and page_id in (select page_id from page_fan where uid=$uid)";
+
 	#	echo $query."<br>";
 	#	$result1 = $fbclient->fql_query($query);
 	#	var_dump($result1);
+
+		#$query="SELECT page_id FROM page_admin WHERE uid=$uid and ) page_id in (select page_id from page_fan where uid=$uid ) or page_id IN (SELECT page_id FROM page_admin WHERE uid=$uid))";
+		#echo $query;
 		$query = "SELECT page_id FROM page_admin WHERE uid = $uid";
 	#	echo "<br>".$query."<br>";
+		try {
 		$result2 = $fbclient->fql_query($query);
+}
+		catch (Exception $e) {
+		# We don't have a good session so
+		#echo "woops";
+		wordbooker_delete_user($user_id);
+		return;
+
+	}
 	#	echo "<br>";
 	#var_dump($result2);
 	#if ((is_array($result1)) && (is_array($result2)) ) {$result=array_unique(array_merge($result1,$result2));} 
@@ -48,7 +61,9 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 				try {
 					$permy = $fbclient->users_hasAppPermission("publish_stream",$page['page_id']);
 					$error_code = null;
-					if($permy==0) {$add_auths=1;wordbooker_debugger("Page needs permissions for ".$page['page_id']," ",0) ;}
+					if($permy==0) {$add_auths=1;wordbooker_debugger("Page needs permissions for ".$page['page_id']," ",0) ;} 
+					else { wordbooker_debugger("No permissions needed for page : ".$page['page_id']," ",0);}
+					
 					$error_msg = null;
 				} catch (Exception $e) {
 					wordbooker_debugger("Page needs permissions for ".$page['page_id'],$page['page_id'],0);
@@ -75,15 +90,55 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 	
 		if (isset($wordbookuser['wordbook_status_id'])  && $wordbookuser['wordbook_status_id']!=-100) {$suid=$wordbookuser['wordbook_status_id'];}
 		wordbooker_debugger("Getting Status for : ",$suid,0) ;
-		$resultx=$fbclient->fql_multiquery('{  "status_info":"SELECT uid,time,message FROM status WHERE uid='.$suid.' limit 1", "profile_info":"SELECT name, url, pic FROM profile WHERE id='.$suid.'",  "page_names":"SELECT name,page_id FROM page WHERE page_id IN (SELECT page_id FROM page_admin WHERE uid='.$uid.')","woot":"Select is_app_user FROM user where uid='.$uid.'"}');
 
-		if (is_array($resultx)) {
+try {
+$query="SELECT uid,time,message FROM status WHERE uid= $suid limit 1";
+$fb_status_info = $fbclient->fql_query($query);
+} catch (Exception $e) {
+wordbooker_debugger("Failed to get Status information from FB"," ",0);
+		}
+#echo "<br><br>";
+$fb_status_info=$fb_status_info[0];
+#var_dump($fb_status_info );
+#echo "<br><br>";
+try {
+$query="SELECT name, url, pic FROM profile WHERE id=$suid ";
+$fb_profile_info = $fbclient->fql_query($query);
+} catch (Exception $e) {
+wordbooker_debugger("Failed to get user information from FB"," ",0);
+		}
+$fb_profile_info=$fb_profile_info[0];
+#var_dump($fb_profile_info);
+#echo "<br><br>";
+try {
+$query="SELECT name,page_id FROM page WHERE page_id IN (SELECT page_id FROM page_admin WHERE uid= $uid )";
+#$query="SELECT name,page_id FROM page WHERE page_id IN (SELECT page_id FROM page_admin WHERE uid=$uid and page_id in (select page_id from page_fan where uid=$uid )) or page_id IN (SELECT page_id FROM page_admin WHERE uid=$uid)";
+$fb_page_info = $fbclient->fql_query($query);
+} catch (Exception $e) {
+wordbooker_debugger("Failed to get page information from FB"," ",0);
+		}
+#$fb_page_info=$fb_page_info[0];
+#var_dump($fb_page_info);
+#echo "<br><br>";
+try {
+$query="Select is_app_user FROM user where uid=$uid";
+$fb_app_info = $fbclient->fql_query($query);
+} catch (Exception $e) {
+wordbooker_debugger("Failed to get app_user information from FB"," ",0);
+		}
+$fb_app_info=$fb_app_info[0];
+#var_dump($fb_app_info);
+#echo "<br><br>";
+
+	#	$resultx=$fbclient->fql_multiquery('{  "status_info":"SELECT uid,time,message FROM status WHERE uid='.$suid.' limit 1", "profile_info":"SELECT name, url, pic FROM profile WHERE id='.$suid.'",  "page_names":"SELECT name,page_id FROM page WHERE page_id IN (SELECT page_id FROM page_admin WHERE uid='.$uid.')","woot":"Select is_app_user FROM user where uid='.$uid.'"}');
+		#var_dump($resultx);
+	#	if (is_array($resultx)) {
 		$all_pages=array();
-			if (is_array($resultx[0]["fql_result_set"])) { 
-			#	var_dump($resultx[0]["fql_result_set"]);
-			if (is_array($resultx[0]["fql_result_set"])) { $encoded_names=str_replace('\\','\\\\',serialize($resultx[0]["fql_result_set"]));}
-				 foreach ( $resultx[0]["fql_result_set"] as $pageinfo ) {
-
+			if (is_array($fb_page_info)) { 
+	#		var_dump($fb_page_info);
+			if (is_array($fb_page_info)) { $encoded_names=str_replace('\\','\\\\',serialize($fb_page_info));}
+				 foreach ( $fb_page_info as $pageinfo ) {	
+		#		var_dump($pageinfo);
 				$pages["page_id"]=$pageinfo["page_id"];
 				$pages["name"]=mb_convert_encoding($pageinfo["name"],'UTF-8');
 				$all_pages[]=$pages;
@@ -95,28 +150,28 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 			#$encoded_names=str_replace('\\','\\\\',serialize($all_pages));
 			#echo $encodes_names;
 			} else {wordbooker_debugger("Failed to get page information from FB"," ",0); }
-			wordbooker_debugger("Setting name as  : ",mysql_real_escape_string($resultx[1]["fql_result_set"][0]["name"]),0) ;
-			$sql="update ".WORDBOOKER_USERDATA." set name='".mysql_real_escape_string($resultx[1]["fql_result_set"][0]["name"])."'";
-			if (is_array($resultx[2]["fql_result_set"])) {
-				wordbooker_debugger("Setting status as  : ",mysql_real_escape_string($resultx[2]["fql_result_set"][0]["message"]),0) ;
-				$sql.=", status='".mysql_real_escape_string($resultx[2]["fql_result_set"][0]["message"])."'";
-				$sql.=", updated=".mysql_real_escape_string($resultx[2]["fql_result_set"][0]["time"]);
+			wordbooker_debugger("Setting name as  : ",mysql_real_escape_string($fb_profile_info["name"]),0) ;
+			$sql="update ".WORDBOOKER_USERDATA." set name='".mysql_real_escape_string($fb_profile_info["name"])."'";
+			if (is_array($fb_status_info)) {
+				wordbooker_debugger("Setting status as  : ",mysql_real_escape_string($fb_status_info["message"]),0) ;
+				$sql.=", status='".mysql_real_escape_string($fb_status_info["message"])."'";
+				$sql.=", updated=".mysql_real_escape_string($fb_status_info["time"]);
 			} else {wordbooker_debugger("Failed to get Status information from FB"," ",0); }
-			if (is_array($resultx[1]["fql_result_set"])) {
-				wordbooker_debugger("Setting URL as  : ",mysql_real_escape_string($resultx[1]["fql_result_set"][0]["url"]),0) ;
-				$sql.=", url='".mysql_real_escape_string($resultx[1]["fql_result_set"][0]["url"])."'";
-				$sql.=", pic='".mysql_real_escape_string($resultx[1]["fql_result_set"][0]["pic"])."'";
+			if (is_array($fb_profile_info)) {
+				wordbooker_debugger("Setting URL as  : ",mysql_real_escape_string($fb_profile_info["url"]),0) ;
+				$sql.=", url='".mysql_real_escape_string($fb_profile_info["url"])."'";
+				$sql.=", pic='".mysql_real_escape_string($fb_profile_info["pic"])."'";
 			}	else {wordbooker_debugger("Failed to get Image information from FB"," ",0); }
 			$sql.=", facebook_id='".$uid."'";
 			$sql.=", pages= '".mysql_real_escape_string($encoded_names)."'";
-			if (is_array($resultx[3]["fql_result_set"])) {
-				$sql.=", use_facebook=".$resultx[3]["fql_result_set"][0]["is_app_user"];
+			if (is_array($fb_app_info)) {
+				$sql.=", use_facebook=".$fb_app_info["is_app_user"];
 			}
 			$sql.="  where user_ID=".$user_id;
 			#echo $sql;
 			$result = $wpdb->get_results($sql);
 
-		}
+		#}
 	}
 #fclose($fp);
 	wordbooker_debugger("Cache Refresh Complete "," ",0) ; 
