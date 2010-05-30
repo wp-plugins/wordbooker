@@ -1092,7 +1092,7 @@ function wordbooker_option_setup($wbuser) {
 	<div class="wordbook_setup">
 <?php
 
-require 'src/facebook.php';
+require 'fb2/facebook.php';
 
 // Create our Application instance.
 global $facebook2;
