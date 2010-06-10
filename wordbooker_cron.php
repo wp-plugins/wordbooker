@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Cron
 Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.8
+Version: 1.7.9.1
 Description: Collection of processes that are often handled by wp_cron scheduled jobs
 Author: Steve Atty
 */
@@ -35,7 +35,7 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 		#$query="SELECT page_id FROM page_admin WHERE uid=$uid and ) page_id in (select page_id from page_fan where uid=$uid ) or page_id IN (SELECT page_id FROM page_admin WHERE uid=$uid))";
 		#echo $query;
 		$query = "SELECT page_id FROM page_admin WHERE uid = $uid";
-	#	echo "<br>".$query."<br>";
+		#echo "<br>".$query."<br>";
 		try {
 		$result2 = $fbclient->fql_query($query);
 }
