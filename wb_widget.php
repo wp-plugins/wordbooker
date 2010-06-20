@@ -4,7 +4,7 @@
 Description: Facebook Widget. Needs Wordbook installing to work.
 Author: Stephen Atty
 Author URI: http://canalplan.blogdns.com/steve
-Version: 1.8
+Version: 1.8.5
 */
 
 /*
@@ -46,17 +46,18 @@ class WordbookWidget extends WP_Widget {
 		$userid=$instance['snorl'];
 		$result = wordbooker_get_cache($userid);
 		echo $before_widget;
+		$name=$result->name;
+         	if (strlen($instance['dname']) >0 ) $name=$instance['dname'];
 		$title = empty($instance['title']) ? '&nbsp;' : apply_filters('widget_title', $instance['title']);
 		if ( !empty( $title ) ) { echo $before_title . $title . $after_title; };
-                echo '<br><div class="facebook_picture" align="center">';
+                echo '<br /><div class="facebook_picture" align="center">';
                 echo '<a href="'.$result->url.'" target="facebook">';
-                echo '<img src="'. $result->pic.'" /></a>';
+                echo '<img src="'. $result->pic.'" alt=" FB photo for '.$name.'" /></a>';
                 echo '</div>';
-		$name=$result->name;
-         	if (strlen($instance['dname']) >0 ) $name=$instance['dname']; 
+	
                 if ($result->status) {
-                	echo '<br><a href="'.$result->url.'">'.$name.'</a> : ';
-			echo '<i>'.$result->status.'</i><br>';
+                	echo '<br /><a href="'.$result->url.'">'.$name.'</a> : ';
+			echo '<i>'.$result->status.'</i><br />';
        			if ($instance['df']=='fbt') { 
          			echo '('.nicetime($result->updated).').'; 
 			}
@@ -181,15 +182,15 @@ function widget_facebook($args) {
 	$result = wordbooker_get_cache($result[0]->user_id);
 	$pfields=array('is_app_user','first_name','name','status','pic',);
 	if ( !empty( $title ) ) { echo $before_title . $title . $after_title; };
-        echo '<br><div class="facebook_picture" align="center">';
+        echo '<br /><div class="facebook_picture" align="center">';
         echo '<a href="'.$result->url.'" target="facebook">';
         echo '<img src="'. $result->pic.'" /></a>';
         echo '</div>';
 	$name=$result->name;
  	if (strlen($dispname)>0) $name=$dispname; 
         if ($result->status) {
-        	echo '<br><a href="'.$result->url.'">'.$name.'</a> : ';
-		echo '<i>'.$result->status.'</i><br>';
+        	echo '<br /><a href="'.$result->url.'">'.$name.'</a> : ';
+		echo '<i>'.$result->status.'</i><br />';
 		if ($dformat=='fbt') { 
  			echo '('.nicetime($result->updated).').'; 
 		}

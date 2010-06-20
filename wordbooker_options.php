@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Options 
 Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.8.4
+Version: 1.8.5
 Description: Advanced Options for the WordBooker Plugin
 Author: Steve Atty
 */
@@ -66,13 +66,8 @@ function wbs_retrieve_hash() {
 
 function wordbooker_option_manager() {
 	global $ol_flash, $wordbooker_settings, $_POST, $wp_rewrite,$user_ID,$wpdb, $table_prefix,$current_blog,$blog_id,$db_prefix;
-	// Check for missing functions and abort
 	echo '<div class="wrap">';
 	echo '<h2>WordBooker Plugin</h2>';
-#$pop["session"] ='{"session_key":"4xxxxxxxxxxxxxxxxxxxxxx6-1xxxxxxxxxxxxx7","uid":"1xxxxxxxxxxxxx7","expires":0,"secret":"cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx1","access_token":"2xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx6-1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxk.","sig":"9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}';
-
-#var_dump($pop);
-#var_dump(json_decode($pop["session"]));
 
 	if ( isset ($_POST["reset_user_config"])) {wordbooker_delete_userdata(); }
 	//Set some defaults:
@@ -145,7 +140,7 @@ function wordbooker_option_manager() {
 		} // endif wbs_is_hash_valid
 	}  // end if user_meta check.
 
-if ($oldv==1) {
+	if ($oldv==1) {
 	// Easiest test to see if we have been submitted to
 		if(isset($_POST['token'])) {
 			// Now we check the hash, to make sure we are not getting CSRF
@@ -241,7 +236,8 @@ if ($oldv==1) {
 		$fblike_button=array('button_count'=>'Button Count ','standard'=>'Standard ');
 		$fblike_faces=array('false'=>'No','true'=>'Yes');
 		$fblike_location=array('top'=>'Above Post ','bottom'=>'Below Post');
-if ($oldv==0) {
+
+	if ($oldv==0) {
 
 		echo'<p><hr><h3>';
 		_e('Blog Level Customisation');
@@ -282,20 +278,28 @@ if ($oldv==0) {
 
 		echo '<label for="wb_facebook_like">'.__("Include a Facebook Like button in blog"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_show]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_show"]].' ><br />';
-	
-		echo '<label for="wb_facebook_like">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show a Facebook Like button in each post"). ' : </label>';
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_post]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_post"]].' ><br />';
 
-		echo '<label for="wb_facebook_like_page">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show a Facebook Like button on Pages"). ' : </label>';
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_page]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_page"]].' ><br />';
-
-		echo '<label for="wb_facebook_like_front">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show a Facebook Like button on front page"). ' : </label>';
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_frontpage]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_frontpage"]].' ><br />';
-
-		echo '<label for="wb_facebook_like_share">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show a Facebook Share button as well"). ' : </label>';
+		echo '<label for="wb_facebook_like_share">'.__("Include a Facebook Share button in blog"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_share_too]" '.$checked_flag[$wordbooker_settings["wordbooker_like_share_too"]].' ><br />';
 
+	
+		echo '<label for="wb_facebook_like">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Like / Share buttons in each post"). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_post]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_post"]].' ><br />';
 
+		echo '<label for="wb_facebook_like_page">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Like / Share buttons on Pages"). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_page]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_page"]].' ><br />';
+
+		echo '<label for="wb_facebook_like_front">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Like button on front page"). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_frontpage]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_frontpage"]].' ><br />';
+
+		echo '<label for="wb_facebook_share_front">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Share button on front page"). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_share_button_frontpage]" '.$checked_flag[$wordbooker_settings["wordbooker_share_button_frontpage"]].' ><br />';
+
+		echo '<label for="wb_fbshare_location">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__('Facebook Share - Display Button ').' :</label> <select id="wordbook_fbshare_location" name="wordbooker_settings[wordbook_fbshare_location]"  >';
+		foreach ($fblike_location as $i => $value) {
+			if ($i==$wordbooker_settings['wordbook_fbshare_location']){ print '<option selected="yes" value="'.$i.'" >'.$fblike_location[$i].'</option>';}
+		       else {print '<option value="'.$i.'" >'.$fblike_location[$i].'</option>';}}
+		echo "</select><br />";
 
 		echo '<label for="wb_fblike_location">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__('Facebook Like - Display Button ').' :</label> <select id="wordbook_fblike_location" name="wordbooker_settings[wordbook_fblike_location]"  >';
 		foreach ($fblike_location as $i => $value) {
@@ -359,7 +363,7 @@ if ($oldv==0) {
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbook_search_this_header]" '.$checked_flag[$wordbooker_settings["wordbook_search_this_header"]].' /><br />';
 
 		echo '<label for="wb_import_comment">'.__("Import Comments from Facebook for Wordbook Posts"). ': </label>';
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbook_comment_get]" '.$checked_flag[$wordbooker_settings["wordbook_comment_get"]]. '/> ( '.__("Next Scheduled fetch is at").' : '.date_i18n(get_option('time_format'),wp_next_scheduled('wb_cron_job')).' ) <br />';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbook_comment_get]" '.$checked_flag[$wordbooker_settings["wordbook_comment_get"]]. '/> ( '.__("Next Scheduled fetch is in").' : '.date('i',(wp_next_scheduled('wb_cron_job') - time ())).' minute(s) )<br />';
 
 		echo '<label for="wb_publish_comment_approve">'.__("Auto Approve imported comments"). ' :</label> ';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbook_comment_approve]" '.$checked_flag[$wordbooker_settings["wordbook_comment_approve"]].' /><br />';
@@ -377,9 +381,9 @@ if ($oldv==0) {
 		if (current_user_can('activate_plugins')) {echo '<input type="submit" name="SBLO" value="'.__("Save Blog Level Options").'" class="button-primary"  />&nbsp;&nbsp;&nbsp;<input type="submit" name="RSD" value="'.__("Reset to system Defaults").'" class="button-primary" action="poo" />';}
 		echo '</p></form><br /></div><hr>';
 
-}
+	}
 
-if ($oldv==1) {
+	if ($oldv==1) {
 		echo'<p><hr><h3>'.__("Blog Level Customisation").' : </h3>';
 		echo'<form action="" method="post">';
 		echo '<input type="hidden" name="wordbooker_settings[schemavers]" value='.$wordbooker_settings[schemavers].' />';
@@ -417,24 +421,28 @@ if ($oldv==1) {
 		
 
 
-
 		echo '<label for="wb_facebook_like">'.__("Include a Facebook Like button in blog"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_show]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_show"]].' ><br />';
+
+		echo '<label for="wb_facebook_like_share">'.__("Include a Facebook Share button in blog"). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_share_too]" '.$checked_flag[$wordbooker_settings["wordbooker_like_share_too"]].' ><br />';
+
 	
-		echo '<label for="wb_facebook_like">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show a Facebook Like button in each post"). ' : </label>';
+		echo '<label for="wb_facebook_like">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Like / Share buttons in each post"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_post]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_post"]].' ><br />';
 
-		echo '<label for="wb_facebook_like_page">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show a Facebook Like button on Pages"). ' : </label>';
+		echo '<label for="wb_facebook_like_page">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Like / Share buttons on Pages"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_page]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_page"]].' ><br />';
 
-		echo '<label for="wb_facebook_like_front">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show a Facebook Like button on front page"). ' : </label>';
+		echo '<label for="wb_facebook_like_front">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Like button on front page"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_frontpage]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_frontpage"]].' ><br />';
 
 
-		echo '<label for="wb_facebook_like_share">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show a Facebook Share button as well"). ' : </label>';
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_share_too]" '.$checked_flag[$wordbooker_settings["wordbooker_like_share_too"]].' ><br />';
-
-
+		echo '<label for="wb_fbshare_location">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__('Facebook Share - Display Button ').' :</label> <select id="wordbook_fbshare_location" name="wordbooker_settings[wordbook_fbshare_location]"  >';
+		foreach ($fblike_location as $i => $value) {
+			if ($i==$wordbooker_settings['wordbook_fbshare_location']){ print '<option selected="yes" value="'.$i.'" >'.$fblike_location[$i].'</option>';}
+		       else {print '<option value="'.$i.'" >'.$fblike_location[$i].'</option>';}}
+		echo "</select><br />";
 
 		echo '<label for="wb_fblike_location">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__('Facebook Like - Display Button ').' :</label> <select id="wordbook_fblike_location" name="wordbooker_settings[wordbook_fblike_location]"  >';
 		foreach ($fblike_location as $i => $value) {
@@ -630,13 +638,12 @@ if ($oldv==1) {
 
 		echo '<input type="submit" value="'.__("Save User Options").'" name="swbus" class="button-primary"  />&nbsp;&nbsp;&nbsp;<input type="submit" name="rwbus" value="'.__("Reset to Blog Defaults").'" class="button-primary"  /></form><br /></div><hr>';
 
-		wordbooker_status($user_ID);
-		wordbooker_option_status($wbuser);
 		wordbooker_render_errorlogs();
 		wordbooker_render_diagnosticlogs();
-		?>
-		<br /><hr><h3>
- <?php  	_e("Donate");
+		wordbooker_status($user_ID);
+		wordbooker_option_status($wbuser);
+		echo "<br /><hr><h3>";
+ 	_e("Donate");
 		echo "</h3>";
 
 		if (wordbooker_contributed (0) ){
