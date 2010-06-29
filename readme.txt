@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
 Requires at least: 2.8
 Tested up to: 3.0
-Stable tag: 1.8.7
+Stable tag: 1.8.8
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall. 
 
