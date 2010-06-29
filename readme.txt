@@ -135,7 +135,10 @@ If you are upgrading from an earlier version of wordbooker then DO NOT deactivat
 
 
 
-== Changelog == 
+== Changelog ==
+
+= Version 1.8.8 : 29/06/2010 =
+- Fix ANOTHER mistake caused by SVN problems - 
 
 = Version 1.8.7 : 29/06/2010 =
 - Fix a mistake caused by SVN problems -

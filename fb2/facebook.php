@@ -1,18 +1,18 @@
 <?php
 
-if (!function_exists('curl_init')) {
-  throw new Exception('Facebook needs the CURL PHP extension.');
-}
-if (!function_exists('json_decode')) {
-  throw new Exception('Facebook needs the JSON PHP extension.');
-}
+#if (!function_exists('curl_init')) {
+  #throw new Exception('Facebook needs the CURL PHP extension.');
+#}
+#if (!function_exists('json_decode')) {
+#  throw new Exception('Facebook needs the JSON PHP extension.');
+#}
 
 /**
  * Thrown when an API call returns an exception.
  *
  * @author Naitik Shah <naitik@facebook.com>
  */
-class FacebookApiException extends Exception
+class FacebookApiException2 extends Exception
 {
   /**
    * The result from the API server that represents the exception information.
@@ -74,7 +74,7 @@ class FacebookApiException extends Exception
  *
  * @author Naitik Shah <naitik@facebook.com>
  */
-class Facebook
+class Facebook2
 {
   /**
    * Version.
@@ -267,11 +267,10 @@ class Facebook
 
       // try loading session from $_GET
       if (isset($_GET['session'])) {
-        $session = json_decode(
+        $session = (array) json_decode(
           get_magic_quotes_gpc()
             ? stripslashes($_GET['session'])
-            : $_GET['session'],
-          true
+            : $_GET['session']
         );
         $session = $this->validateSessionObject($session);
       }
@@ -408,21 +407,21 @@ class Facebook
    *
    * @param Array $params method call object
    * @return the decoded response object
-   * @throws FacebookApiException
+   * @throws FacebookApiException2
    */
   protected function _restserver($params) {
     // generic application level parameters
     $params['api_key'] = $this->getAppId();
     $params['format'] = 'json';
 
-    $result = json_decode($this->_oauthRequest(
+    $result = (array) json_decode($this->_oauthRequest(
       $this->getApiUrl($params['method']),
       $params
-    ), true);
+    ));
 
     // results are returned, errors are thrown
     if (is_array($result) && isset($result['error_code'])) {
-      throw new FacebookApiException($result);
+      throw new FacebookApiException2($result);
     }
     return $result;
   }
@@ -434,7 +433,7 @@ class Facebook
    * @param String $method the http method (default 'GET')
    * @param Array $params the query/post data
    * @return the decoded response object
-   * @throws FacebookApiException
+   * @throws FacebookApiException2
    */
   protected function _graph($path, $method='GET', $params=array()) {
     if (is_array($method) && empty($params)) {
@@ -443,14 +442,14 @@ class Facebook
     }
     $params['method'] = $method; // method override as we always do a POST
 
-    $result = json_decode($this->_oauthRequest(
+    $result = (array) json_decode($this->_oauthRequest(
       $this->getUrl('graph', $path),
       $params
-    ), true);
+    ));
 
     // results are returned, errors are thrown
     if (is_array($result) && isset($result['error'])) {
-      $e = new FacebookApiException($result);
+      $e = new FacebookApiException2($result);
       if ($e->getType() === 'OAuthException') {
         $this->setSession(null);
       }
@@ -465,7 +464,7 @@ class Facebook
    * @param String $path the path (required)
    * @param Array $params the query/post data
    * @return the decoded response object
-   * @throws FacebookApiException
+   * @throws FacebookApiException2
    */
   protected function _oauthRequest($url, $params) {
     if (!isset($params['access_token'])) {
@@ -498,19 +497,42 @@ class Facebook
    * @param CurlHandler $ch optional initialized curl handle
    * @return String the response text
    */
-  protected function makeRequest($url, $params, $ch=null) {
-    if (!$ch) {
-      $ch = curl_init();
+protected function makeRequest($url, $params, $ch=null) {
+    
+    $content = "";
+    foreach ($params as $key => $param) {
+        $content .= "{$key}=" . urlencode($param) . "&";
+    }
+    substr($post, 0, strlen($post) - 1);
+    
+    $user_agent = 'Facebook API PHP5 Client 2.0.4 (non-curl) ' . phpversion();
+    $content_type = 'application/x-www-form-urlencoded';
+    
+    $content_length = strlen($content);
+    $context =
+      array('http' =>
+              array('method' => 'POST',
+                    'user_agent' => $user_agent,
+                    'header' => 'Content-Type: ' . $content_type . "\r\n" .
+                                'Content-Length: ' . $content_length,
+                    'content' => $content));
+    $context_id = stream_context_create($context);
+    $sock = fopen($url, 'r', false, $context_id);
+
+    $result = '';
+    if ($sock) {
+      while (!feof($sock)) {
+        $result .= fgets($sock, 4096);
+      }
+      fclose($sock);
     }
 
-    $opts = self::$CURL_OPTS;
-    $opts[CURLOPT_POSTFIELDS] = http_build_query($params, null, '&');
-    $opts[CURLOPT_URL] = $url;
-    curl_setopt_array($ch, $opts);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    return $result;
+    //error_log("MAKE REQUEST RESULT : " . $result);
+
+    return $result;    
+    
   }
+
 
   /**
    * The name of the Cookie that contains the session.
