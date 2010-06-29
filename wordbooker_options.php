@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Options 
 Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.8.5
+Version: 1.8.6
 Description: Advanced Options for the WordBooker Plugin
 Author: Steve Atty
 */
@@ -282,7 +282,10 @@ function wordbooker_option_manager() {
 		echo '<label for="wb_facebook_like_share">'.__("Include a Facebook Share button in blog"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_share_too]" '.$checked_flag[$wordbooker_settings["wordbooker_like_share_too"]].' ><br />';
 
+		echo '<label for="wb_facebook_iframe">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Use Iframes instead of FBXML"). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_iframe]" '.$checked_flag[$wordbooker_settings["wordbooker_iframe"]].' ><br />';
 	
+
 		echo '<label for="wb_facebook_like">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Like / Share buttons in each post"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_post]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_post"]].' ><br />';
 
@@ -427,6 +430,9 @@ function wordbooker_option_manager() {
 		echo '<label for="wb_facebook_like_share">'.__("Include a Facebook Share button in blog"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_share_too]" '.$checked_flag[$wordbooker_settings["wordbooker_like_share_too"]].' ><br />';
 
+
+		echo '<label for="wb_facebook_iframe">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Use Iframes instead of FBXML"). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_iframe]" '.$checked_flag[$wordbooker_settings["wordbooker_iframe"]].' ><br />';
 	
 		echo '<label for="wb_facebook_like">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Like / Share buttons in each post"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_post]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_post"]].' ><br />';
