@@ -5,7 +5,7 @@ Plugin URI: http://blogs.canalplan.org.uk/steve/wordbooker/
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://blogs.canalplan.org.uk/steve/
-Version: 1.8.9
+Version: 1.8.10
 */
 
  /*
@@ -39,7 +39,7 @@ if (! isset($wordbooker_settings['wordbook_extract_length'])) $wordbooker_settin
 
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
-define('WORDBOOKER_CODE_RELEASE','1.8.6r0');
+define('WORDBOOKER_CODE_RELEASE','1.8.10.r0');
 
 # For Troubleshooting 
 define('ADVANCED_DEBUG',false);
@@ -784,10 +784,15 @@ function wordbooker_postlogged($postid) {
 	global $wpdb,$wordbooker_post_options;
 	// See if the user has overridden the repost on edit - i.e. they want to publish and be damned!
 #var_dump($_POST);
-	if (isset ($wordbooker_post_options["wordbooker_publish_override"])) { return false;}
+	if (isset ($wordbooker_post_options["wordbooker_publish_override"])) { 
+		wordbooker_debugger("Publish override in force: "," ",$postid) ;
+		return false;
+	}
 	$wordbooker_settings =wordbooker_options(); 
 	// Does the user want us to ever publish on Edit? If not then return true
-	if ( (! isset($wordbooker_settings["wordbook_republish_time_obey"])) && ($_POST['original_post_status']=='publish')) { return true;}
+	if ( (! isset($wordbooker_settings["wordbook_republish_time_obey"])) && ($_POST['original_post_status']=='publish')) { 
+		return true;
+	}
 	if (! isset($wordbooker_settings['wordbook_republish_time_frame'])) $wordbooker_settings['wordbook_republish_time_frame']='10';
 	$rows = $wpdb->get_results('
 		SELECT *
@@ -1230,6 +1235,7 @@ function get_check_session(){
 
 
 
+
 function wordbooker_option_setup($wbuser) {
 ?>
 
@@ -1248,13 +1254,9 @@ function wordbooker_option_setup($wbuser) {
 	));
 
 	# Lets set up the permissions we need and set the login url in case we need it.
-	$par['req_perms'] = "publish_stream,offline_access,user_status,read_stream,email,user_group,smanage_pages";
-	#$par['next'] = "http://ccgi.pemmaquid.plus.com/cgi-bin/index.php?br=".urlencode(get_bloginfo('url')."");
+	$par['req_perms'] = "publish_stream,offline_access,user_status,read_stream,email,user_groups,manage_pages";
 	$par['next'] = "http://ccgi.pemmaquid.plus.com/cgi-bin/index.php?br=".urlencode(get_bloginfo('wpurl')."");
 	$par['cancel_url']= "http://ccgi.pemmaquid.plus.com/cgi-bin/index.php";
-	  #* - next: the url to go to after a successful login
-	  # * - cancel_url: the url to go to after the user cancels
-	  # * - req_perms: comma separated list of requested extended perms;
 	$loginUrl = $facebook2->getLoginUrl($par);
 	wordbooker_debugger("Checking Session "," ",0) ;
 	$access_token=get_check_session();
@@ -1262,8 +1264,8 @@ function wordbooker_option_setup($wbuser) {
 
 	if ( is_null($access_token) ) {
 	wordbooker_debugger("No session found - lets login and authorise "," ",0) ;
-			echo "We need to authorise Wordbooker with your Facebook Account. Please click on the following link and follow the instructions <br><br>";
-			echo '<a href="'. $loginUrl.'"> <img src="http://static.ak.fbcdn.net/rsrc.php/zB6N8/hash/4li2k73z.gif" alt="Facebook Login Button" /> </a>';
+			echo "We need to authorise Wordbooker with your Facebook Account. Please click on the following link and follow the instructions <br / ><br />";
+			echo '<a href="'. $loginUrl.'"> <img src="http://static.ak.fbcdn.net/rsrc.php/zB6N8/hash/4li2k73z.gif" alt="Facebook Login Button" /> </a><br />';
 	}
 	 else  {
 		wordbooker_debugger("Everything looks good so lets ask them to refresh "," ",0) ;
@@ -1271,7 +1273,7 @@ function wordbooker_option_setup($wbuser) {
 		echo '<p style="text-align: center;"><input type="submit" name="perm_save" class="button-primary" value="'. __('Reload Page').'" /></p>';
 		echo '</form> '; 
 	}
-	echo "</div>";
+	echo "</div></div>";
 }
 
 function wordbooker_status($user_id)
@@ -1569,7 +1571,11 @@ function wordbooker_fbclient_publishaction($wbuser, $fbclient,$postid)
 	}
 	
 	preg_match_all('/<img \s+ ([^>]*\s+)? src \s* = \s* [\'"](.*?)[\'"]/ix',get_post_meta($post->ID, 'image', TRUE), $matches_ct); 
-	$matches=array_merge($matches_tn,$matches_ct);
+	$matches=$matches_ct;
+	if ( function_exists( 'get_the_post_thumbnail' ) ) { 
+		$matches=array_merge($matches_tn,$matches_ct);
+	}
+   
 
 	$yturls = array();
 	# If the user only wants the thumbnail then we can simply not do the skim over the processed images
@@ -2081,6 +2087,9 @@ function wordbooker_publish_action($post) {
 	/* If publishing a new blog post, update text in "Wordbook" box. */
 	$fbclient = wordbooker_fbclient($wbuser);
 
+	if (wordbooker_postlogged($post->ID)) {
+			wordbooker_debugger("This post falls within the don't republish window : "," ",$post->ID) ;
+	}
 	if (!wordbooker_postlogged($post->ID)) {
 		# Lets see if they want to update their status. We do it this way so you can update your status without publishing!
 		if( $wordbooker_post_options["wordbooker_status_update"]=="on") {
