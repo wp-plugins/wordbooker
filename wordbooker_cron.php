@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Cron
 Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.8.10
+Version: 1.8.11
 Description: Collection of processes that are often handled by wp_cron scheduled jobs
 Author: Steve Atty
 */
@@ -17,10 +17,12 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 	$debug_file='/tmp/wordbook_cache_'.$table_prefix.'debug';
 	#$fp = fopen($debug_file, 'a');
 	$debug_string=date("Y-m-d H:i:s",time())." : Processing for ".$uid."\n";
-	wordbooker_debugger("Cache Refresh for ",$uid,0) ; 
+	wordbooker_debugger("Cache Refresh for ",$uid,0) ;
+	wordbooker_debugger("UID length : ",strlen($uid),0) ;  
 	#fwrite($fp, $debug_string);
 	# If we've not got the ID from the table lets try to get it from the logged in user
 	if (strlen($uid)==0) {
+		wordbooker_debugger("No Cache record for user - getting Logged in user ",$uid,0) ; 
 		try {
 			$uid=$fbclient->users_getLoggedInUser();
 		}
@@ -36,6 +38,26 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 	if (strlen($uid)>0){
 		wordbooker_debugger("Cache processing for user : ",$uid,0) ;
 		wordbooker_debugger("Getting Permisions for : ",$uid,0) ;
+		$permlist= array(WORDBOOKER_FB_PUBLISH_STREAM,WORDBOOKER_FB_STATUS_UPDATE,WORDBOOKER_FB_READ_STREAM,WORDBOOKER_FB_CREATE_NOTE);
+		foreach($permlist as $perm){
+		try {
+			$permy = $fbclient->users_hasAppPermission($perm);
+			$error_code = null;
+			if($permy==0) {
+				$add_auths=1;
+				wordbooker_debugger("User is missing permssion : ".$perm," ",0) ;
+			} 
+			else {
+				wordbooker_debugger("User has permssion : ".$perm," ",0) ;
+			}
+			$error_msg = null;
+		} catch (Exception $e) {
+			$error_msg = $e->getMessage();
+			wordbooker_debugger("Permissions may be corrupted  ".$error_msg ," ",0);
+			$users = null;
+			$add_auths=1;
+		}
+		}
 		# Check that the user has permission to publish to all their fan pages. All we need to know is if one or more is missing permissions - FB will do the rest for us
 	#	$query = "SELECT page_id FROM page_admin WHERE uid=$uid and page_id in (select page_id from page_fan where uid=$uid)";
 
@@ -46,22 +68,14 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 		#$query="SELECT page_id FROM page_admin WHERE uid=$uid and ) page_id in (select page_id from page_fan where uid=$uid ) or page_id IN (SELECT page_id FROM page_admin WHERE uid=$uid))";
 		#echo $query;
 		$query = "SELECT page_id FROM page_admin WHERE uid = $uid";
-		#echo "<br>".$query."<br>";
 		try {
 			$result2 = $fbclient->fql_query($query);
 		}
 		catch (Exception $e) {
-			# We don't have a good session so
-			#echo "woops";
 			wordbooker_delete_user($user_id);
 		return;
 
 	}
-	#	echo "<br>";
-	#var_dump($result2);
-	#if ((is_array($result1)) && (is_array($result2)) ) {$result=array_unique(array_merge($result1,$result2));} 
-	#if ((is_array($result1)) && (!is_array($result2)) ) {$result=$result1;} 
-	#if ((!is_array($result1)) && (is_array($result2)) ) {$result=$result2;} 
 
 	$result=$result2;
 
@@ -107,55 +121,42 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 			$fb_status_info = $fbclient->fql_query($query);
 		}
 		catch (Exception $e) {
-			wordbooker_debugger("Failed to get Status information from FB"," ",0);
+			$error_msg = $e->getMessage();
+			wordbooker_debugger("Failed to get Status  : ".$error_msg," ",0);
 		}
-		#echo "<br><br>";
 		$fb_status_info=$fb_status_info[0];
-		#var_dump($fb_status_info );
-		#echo "<br><br>";
 		try {
 			$query="SELECT name, url, pic FROM profile WHERE id=$suid ";
 			$fb_profile_info = $fbclient->fql_query($query);
 		} 
 		catch (Exception $e) {
-			wordbooker_debugger("Failed to get user information from FB"," ",0);
+			$error_msg = $e->getMessage();
+			wordbooker_debugger("Failed to get user inf : ".$error_msg," ",0);
 		}
 		$fb_profile_info=$fb_profile_info[0];
-		#var_dump($fb_profile_info);
-		#echo "<br><br>";
 		try {
 			$query="SELECT name,page_id FROM page WHERE page_id IN (SELECT page_id FROM page_admin WHERE uid= $uid )";
-		#$query="SELECT name,page_id FROM page WHERE page_id IN (SELECT page_id FROM page_admin WHERE uid=$uid and page_id in (select page_id from page_fan where uid=$uid )) or page_id IN (SELECT page_id FROM page_admin WHERE uid=$uid)";
 			$fb_page_info = $fbclient->fql_query($query);
 		} 
 		catch (Exception $e) 
 		{
-		wordbooker_debugger("Failed to get page information from FB"," ",0);
+		$error_msg = $e->getMessage();
+		wordbooker_debugger("Failed to get page info : ".$error_msg," ",0);
 		}
-		#$fb_page_info=$fb_page_info[0];
-		#var_dump($fb_page_info);
-		#echo "<br><br>";
 		try {
 			$query="Select is_app_user FROM user where uid=$uid";
 			$fb_app_info = $fbclient->fql_query($query);
 		} 
 		catch (Exception $e) 
 		{
-			wordbooker_debugger("Failed to get app_user information from FB"," ",0);
+			$error_msg = $e->getMessage();
+			wordbooker_debugger("Failed to get app_user inf : ".$error_msg," ",0);
 		}
 		$fb_app_info=$fb_app_info[0];
-		#var_dump($fb_app_info);
-		#echo "<br><br>";
-
-	#	$resultx=$fbclient->fql_multiquery('{  "status_info":"SELECT uid,time,message FROM status WHERE uid='.$suid.' limit 1", "profile_info":"SELECT name, url, pic FROM profile WHERE id='.$suid.'",  "page_names":"SELECT name,page_id FROM page WHERE page_id IN (SELECT page_id FROM page_admin WHERE uid='.$uid.')","woot":"Select is_app_user FROM user where uid='.$uid.'"}');
-		#var_dump($resultx);
-	#	if (is_array($resultx)) {
 		$all_pages=array();
 			if (is_array($fb_page_info)) { 
-	#		var_dump($fb_page_info);
 			if (is_array($fb_page_info)) { $encoded_names=str_replace('\\','\\\\',serialize($fb_page_info));}
 				 foreach ( $fb_page_info as $pageinfo ) {	
-		#		var_dump($pageinfo);
 				$pages["page_id"]=$pageinfo["page_id"];
 				if (function_exists('mb_convert_encoding')) {
 					$pages["name"]=mb_convert_encoding($pageinfo["name"],'UTF-8');
@@ -169,9 +170,6 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 					wordbooker_debugger("Page info for page ID ".$pageinfo["page_id"],mysql_real_escape_string($pageinfo["name"]),0) ;
 	
 				}
-			#var_dump($all_pages);
-			#$encoded_names=str_replace('\\','\\\\',serialize($all_pages));
-			#echo $encodes_names;
 			} else {wordbooker_debugger("Failed to get page information from FB"," ",0); }
 			wordbooker_debugger("Setting name as  : ",mysql_real_escape_string($fb_profile_info["name"]),0) ;
 			$sql="update ".WORDBOOKER_USERDATA." set name='".mysql_real_escape_string($fb_profile_info["name"])."'";
@@ -191,10 +189,7 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 				$sql.=", use_facebook=".$fb_app_info["is_app_user"];
 			}
 			$sql.="  where user_ID=".$user_id;
-			#echo $sql;
 			$result = $wpdb->get_results($sql);
-
-		#}
 	}
 #fclose($fp);
 	wordbooker_debugger("Cache Refresh Complete for user",$uid,0) ; 
@@ -254,7 +249,6 @@ function wordbooker_poll_facebook($single_user=null) {
 		}	
 		$wbuser = wordbooker_get_userdata($wb_user->user_id);
 		$fbclient = wordbooker_fbclient($wbuser);
-		#sleep(5);
 		// Now we need to check if they've set Auto Approve on comments.
 		$comment_approve=0;
 		if (isset($wordbooker_settings['wordbook_comment_approve'])) {$comment_approve=1;}

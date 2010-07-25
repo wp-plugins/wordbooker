@@ -4,7 +4,7 @@
 Description: Facebook Status Widget. Needs Wordbook installing to work.
 Author: Stephen Atty
 Author URI: http://canalplan.blogdns.com/steve
-Version: 1.8.10
+Version: 1.8.11
 */
 
 /*
@@ -56,13 +56,15 @@ class WordbookWidget extends WP_Widget {
                 echo '</div>';
 	
                 if ($result->status) {
+			#$current_offset = get_option('gmt_offset');
+			$current_offsett=0;
                 	echo '<p><br /><a href="'.$result->url.'">'.$name.'</a> : ';
 			echo '<i>'.$result->status.'</i><br />';
        			if ($instance['df']=='fbt') { 
          			echo '('.nicetime($result->updated).').'; 
 			}
          		else {
-				echo '('.date($instance['df'], $result->updated).').';
+				echo '('.date($instance['df'], $result->updated+(3600*$current_offset)).').';
 			}
 		}
 		echo "</p>".$after_widget;
@@ -105,7 +107,6 @@ class WordbookWidget extends WP_Widget {
 		$dl24=date('l F j, h:i');
 		$ds24=date('D M j, h:i');
 		$drfc=date('r');
-		#$arr = array('D M j, g:i a'=> "Short 12 (".$ds12.") - Default",  'l F j, g:i a'=> "Long 12 (".$dl12.") ", 'D M j, h:i'=>"Short 24 (".$ds24.") ", 'l F j, h:i'=>"Long 24 (".$dl24.")",fbt=>"Facebook Text style", r => "RFC 822 (".$drfc." ) ");
 		$arr = array('D M j, g:i a'=> $ds12,  'l F j, g:i a'=> $dl12, 'D M j, h:i'=>$ds24, 'l F j, h:i'=>$dl24,fbt=>__("Facebook Text style",'wordbooker'), r =>$drfc);
 		foreach ($arr as $i => $value) {
 		if ($i==attribute_escape( $instance['df'])){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}

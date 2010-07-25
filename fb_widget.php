@@ -4,7 +4,7 @@
 Description: Facebook Fan Box Widget. Needs Wordbook installing to work.
 Author: Stephen Atty
 Author URI: http://canalplan.blogdns.com/steve
-Version: 1.8.10
+Version: 1.8.11
 */
 
 /*
@@ -45,17 +45,13 @@ class FacebookWidget extends WP_Widget {
 		global  $wpdb, $user_ID,$table_prefix,$blog_id;
 		$userid=$instance['snorl'];
 		$wordbooker_settings = wordbooker_options(); 
-		#$result = wordbooker_get_cache($userid);
-echo $before_widget;
+		echo $before_widget;
          	if (strlen($instance['dname']) >0 ) $name=$instance['dname'];
 		$title = empty($instance['title']) ? '&nbsp;' : apply_filters('widget_title', $instance['title']);
 		if ( !empty( $title ) ) { echo $before_title . $title . $after_title; };
 		$wplang="en_US";
 		if (strlen(WPLANG) > 2) {$wplang=WPLANG;}
-		#var_dump($instance);
 		echo "<p>";
-		#$xx=$instance['connections']-6;
-		#$xx2=($xx/3)*90;
 		$height = $instance['height'];
 		$width = $instance['width'];
 		$connections=$instance['connections'];
@@ -72,14 +68,13 @@ echo $before_widget;
 
 ;
 		if ( (!isset($wordbooker_settings['wordbooker_like_button_show']) && !isset($wordbooker_settings['wordbooker_like_share_too'])) || isset($wordbooker_settings['wordbooker_iframe'])) {
-		echo'<iframe style="border: medium none; overflow: hidden; height: '.$height.'px; width: '.$width.'px;" src="http://www.facebook.com/plugins/fan.php?api_key=254577506873&amp;connections='.$connections.'&amp;height='.$height.'&amp;id='.$instance['pid'].'&amp;locale='.$wplang.'&amp;logobar='.$header.'&amp;header='.$header.'&amp;stream='.$stream.'&amp;width='.$width.'"></iframe>';
+			echo'<iframe style="border: medium none; overflow: hidden; height: '.$height.'px; width: '.$width.'px;" src="http://www.facebook.com/plugins/fan.php?api_key=254577506873&amp;connections='.$connections.'&amp;height='.$height.'&amp;id='.$instance['pid'].'&amp;locale='.$wplang.'&amp;logobar='.$header.'&amp;header='.$header.'&amp;stream='.$stream.'&amp;width='.$width.'"></iframe>';
 		}
 		else {
-		echo '<fb:fan profile_id="'.$instance['pid'].'" width="'.$instance['width'].'" height="'.$instance['height'].'" connections="'.$instance['connections'].'" stream="'.$stream.'" logobar="'.$header.'" header="'.$header.'" locale="'.$wplang.'"></fb:fan>';
-	#	echo '<fb:like-box profile_id="'.$instance['pid'].'" width="180" connections="6" stream="'.$checked_flag[$instance['stream']].'" logobar="'.$checked_flag[$instance['header']].'" ></fb:like-box>';
-}	
+			echo '<fb:fan profile_id="'.$instance['pid'].'" width="'.$instance['width'].'" height="'.$instance['height'].'" connections="'.$instance['connections'].'" stream="'.$stream.'" logobar="'.$header.'" header="'.$header.'" locale="'.$wplang.'" ></fb:fan>';
+		}	
 		
-		#echo $xx2;
+	
 		echo "</p>".$after_widget;
 	}
 	
@@ -106,13 +101,9 @@ echo $before_widget;
 	function form($instance) {
 		global $user_ID,$wpdb,$table_prefix,$blog_id;
 		$result = wordbooker_get_cache($user_ID,'pages');
-		#var_dump($result);
 		$fanpages=unserialize($result->pages);
-		#var_dump($fp);
 		$xx=array('page_id'=>'254577506873','name'=>'Wordbooker');
-	#	$fanpages=array_merge($fp,$xx);
 		$fanpages[]=$xx;
-		#var_dump($fanpages);
 		$default = array( 'title' => __('Fan Page','wordbooker'), 'snorl'=>$user_ID, 'dname'=>'', 'pid'=>'254577506873', 'stream'=>'false', 'connections'=>6, 'width'=>188, 'height'=>260, 'header'=>'false' );
 		$instance = wp_parse_args( (array) $instance, $default );
 		$title_id = $this->get_field_id('title');
