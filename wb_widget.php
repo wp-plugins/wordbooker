@@ -1,10 +1,10 @@
 <?php
 
 /*
-Description: Facebook Widget. Needs Wordbook installing to work.
+Description: Facebook Status Widget. Needs Wordbook installing to work.
 Author: Stephen Atty
 Author URI: http://canalplan.blogdns.com/steve
-Version: 1.8
+Version: 1.8.11
 */
 
 /*
@@ -34,7 +34,7 @@ class WordbookWidget extends WP_Widget {
 	 * constructor
 	 */	 
 	function WordbookWidget() {
-		parent::WP_Widget('wordbook_widget', 'Wordbooker ', array('description' => __('Multiple Facebook Status','wordbooker') , 'class' => 'WordbookWidget'));	
+		parent::WP_Widget('wordbook_widget', 'Wordbooker FB Status ', array('description' => __('Allows you to have one or more Facebook Status widgets in your sidebar. The widget picks up the user id of the person who drags it onto the side bar','wordbooker') , 'class' => 'WordbookWidget'));	
 	}
 	
 	/**
@@ -46,25 +46,28 @@ class WordbookWidget extends WP_Widget {
 		$userid=$instance['snorl'];
 		$result = wordbooker_get_cache($userid);
 		echo $before_widget;
+		$name=$result->name;
+         	if (strlen($instance['dname']) >0 ) $name=$instance['dname'];
 		$title = empty($instance['title']) ? '&nbsp;' : apply_filters('widget_title', $instance['title']);
 		if ( !empty( $title ) ) { echo $before_title . $title . $after_title; };
-                echo '<br><div class="facebook_picture" align="center">';
+                echo '<br /><div class="facebook_picture" align="center">';
                 echo '<a href="'.$result->url.'" target="facebook">';
-                echo '<img src="'. $result->pic.'" /></a>';
+                echo '<img src="'. $result->pic.'" alt=" FB photo for '.$name.'" /></a>';
                 echo '</div>';
-		$name=$result->name;
-         	if (strlen($instance['dname']) >0 ) $name=$instance['dname']; 
+	
                 if ($result->status) {
-                	echo '<br><a href="'.$result->url.'">'.$name.'</a> : ';
-			echo '<i>'.$result->status.'</i><br>';
+			#$current_offset = get_option('gmt_offset');
+			$current_offsett=0;
+                	echo '<p><br /><a href="'.$result->url.'">'.$name.'</a> : ';
+			echo '<i>'.$result->status.'</i><br />';
        			if ($instance['df']=='fbt') { 
          			echo '('.nicetime($result->updated).').'; 
 			}
          		else {
-				echo '('.date($instance['df'], $result->updated).').';
+				echo '('.date($instance['df'], $result->updated+(3600*$current_offset)).').';
 			}
 		}
-		echo $after_widget;
+		echo "</p>".$after_widget;
 	}
 	
 	/**
@@ -95,9 +98,9 @@ class WordbookWidget extends WP_Widget {
 		$df_id = $this->get_field_id('df');
 		$df_name = $this->get_field_name('df');
 		echo '<p><label for="'.$title_id.'">'.__('Title of Widget','wordbooker').': </label> <input type="text" class="widefat" id="'.$title_id.'" name="'.$title_name.'" value="'.attribute_escape( $instance['title'] ).'" /></p>';
-		echo '<label for="'.$dname_id.'">'.__('Display this name instead of your Facebook name','wordbooker').': <input type="text" class="widefat" id="'.$dname_id.'" name="'.$dname_name.'" value="'.attribute_escape( $instance['dname'] ).'" /></label></p>';
+		echo '<p><label for="'.$dname_id.'">'.__('Display this name','wordbooker').': <input type="text" class="widefat" id="'.$dname_id.'" name="'.$dname_name.'" value="'.attribute_escape( $instance['dname'] ).'" /></label></p>';
 		echo '<input type="hidden" class="widefat" id="'.$snorl_id.'" name="'.$snorl_name.'" value="'.attribute_escape( $instance['snorl'] ).'" /></p>';
-		echo "\r\n".'<p><label for="'.$df_id.'">'.__('Date Format','wordbooker').':  </label>'; 
+		echo '<p><label for="'.$df_id.'">'.__('Date Format','wordbooker').':  </label>'; 
 		echo '<select id=id="'.$df_id.'"  name="'.$df_name.'" >';
 		$ds12=date('D M j, g:i a');
 		$dl12=date('l F j, g:i a');
@@ -181,15 +184,15 @@ function widget_facebook($args) {
 	$result = wordbooker_get_cache($result[0]->user_id);
 	$pfields=array('is_app_user','first_name','name','status','pic',);
 	if ( !empty( $title ) ) { echo $before_title . $title . $after_title; };
-        echo '<br><div class="facebook_picture" align="center">';
+        echo '<br /><div class="facebook_picture" align="center">';
         echo '<a href="'.$result->url.'" target="facebook">';
         echo '<img src="'. $result->pic.'" /></a>';
         echo '</div>';
 	$name=$result->name;
  	if (strlen($dispname)>0) $name=$dispname; 
         if ($result->status) {
-        	echo '<br><a href="'.$result->url.'">'.$name.'</a> : ';
-		echo '<i>'.$result->status.'</i><br>';
+        	echo '<br /><a href="'.$result->url.'">'.$name.'</a> : ';
+		echo '<i>'.$result->status.'</i><br />';
 		if ($dformat=='fbt') { 
  			echo '('.nicetime($result->updated).').'; 
 		}
