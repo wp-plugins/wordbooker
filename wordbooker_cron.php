@@ -33,7 +33,7 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 			unset($uid);
 		}
 	}
-	
+
 	# If we now have a uid lets go and do a few things.
 	if (strlen($uid)>0){
 		wordbooker_debugger("Cache processing for user : ",$uid,0) ;
@@ -72,7 +72,8 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 			$result2 = $fbclient->fql_query($query);
 		}
 		catch (Exception $e) {
-			wordbooker_delete_user($user_id);
+			$error_msg = $e->getMessage();
+			wordbooker_debugger("Failed to get page ids  : ".$error_msg," ",0);
 		return;
 
 	}
@@ -155,28 +156,31 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 		$fb_app_info=$fb_app_info[0];
 		$all_pages=array();
 			if (is_array($fb_page_info)) { 
-			if (is_array($fb_page_info)) { $encoded_names=str_replace('\\','\\\\',serialize($fb_page_info));}
-				 foreach ( $fb_page_info as $pageinfo ) {	
-				$pages["page_id"]=$pageinfo["page_id"];
-				if (function_exists('mb_convert_encoding')) {
-					$pages["name"]=mb_convert_encoding($pageinfo["name"],'UTF-8');
-				}
-				else
-				{
-					$pages["name"]=$pageinfo["name"];
-				}
-				$all_pages[]=$pages;
-
-					wordbooker_debugger("Page info for page ID ".$pageinfo["page_id"],mysql_real_escape_string($pageinfo["name"]),0) ;
-	
-				}
+				if (is_array($fb_page_info)) { $encoded_names=str_replace('\\','\\\\',serialize($fb_page_info));}
+					 foreach ( $fb_page_info as $pageinfo ) {	
+					$pages["page_id"]=$pageinfo["page_id"];
+					if (function_exists('mb_convert_encoding')) {
+						$pages["name"]=mb_convert_encoding($pageinfo["name"],'UTF-8');
+					}
+					else
+					{
+						$pages["name"]=$pageinfo["name"];
+					}
+					$all_pages[]=$pages;
+				 	wordbooker_debugger("Page info for page ID ".$pages["page_id"],mysql_real_escape_string($pages["name"]),0) ;
+					}
 			} else {wordbooker_debugger("Failed to get page information from FB"," ",0); }
 			wordbooker_debugger("Setting name as  : ",mysql_real_escape_string($fb_profile_info["name"]),0) ;
 			$sql="update ".WORDBOOKER_USERDATA." set name='".mysql_real_escape_string($fb_profile_info["name"])."'";
 			if (is_array($fb_status_info)) {
-				wordbooker_debugger("Setting status as  : ",mysql_real_escape_string($fb_status_info["message"]),0) ;
-				$sql.=", status='".mysql_real_escape_string($fb_status_info["message"])."'";
-				$sql.=", updated=".mysql_real_escape_string($fb_status_info["time"]);
+				if (stristr($fb_status_info["message"],"[[PV]]")) {
+					wordbooker_debugger("Found [[PV]] - not updating status"," ",0);
+				} 
+				else {
+					wordbooker_debugger("Setting status as  : ",mysql_real_escape_string($fb_status_info["message"]),0) ;
+					$sql.=", status='".mysql_real_escape_string($fb_status_info["message"])."'";
+					$sql.=", updated=".mysql_real_escape_string($fb_status_info["time"]);
+				}
 			} else {wordbooker_debugger("Failed to get Status information from FB"," ",0); }
 			if (is_array($fb_profile_info)) {
 				wordbooker_debugger("Setting URL as  : ",mysql_real_escape_string($fb_profile_info["url"]),0) ;

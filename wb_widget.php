@@ -55,9 +55,9 @@ class WordbookWidget extends WP_Widget {
                 echo '<img src="'. $result->pic.'" alt=" FB photo for '.$name.'" /></a>';
                 echo '</div>';
 	
-                if ($result->status) {
+                if ($result->status) {			
+			$current_offset=0;
 			#$current_offset = get_option('gmt_offset');
-			$current_offsett=0;
                 	echo '<p><br /><a href="'.$result->url.'">'.$name.'</a> : ';
 			echo '<i>'.$result->status.'</i><br />';
        			if ($instance['df']=='fbt') { 

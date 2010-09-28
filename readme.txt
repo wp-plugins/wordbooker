@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
 Requires at least: 2.8
 Tested up to: 3.0
-Stable tag: 1.8.11
+Stable tag: 1.8.12
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall. 
 
@@ -111,12 +111,12 @@ If you're using the Share action link on your posts to Facebook it uses the META
 
 - Do *not* use the Review Wall for support or feature requests. People are unable to respond to Review Wall posts; you are less likely to get a response.
 
-Alternatively, leave a comment on [my blog](http://blogs.canalplan.org.uk/steve).
+Alternatively, Go to the Wordbooker Page on [GoogleCode](http://code.google.com/p/wordbooker/).
 
 
 == KNOWN CONFLICTS ==
 
-If you have [Facebook Connect](http://wordpress.org/extend/plugins/wp-facebookconnect/) Version 1.2.1 installed then some features of Wordbooker will not work as expected. This is due to the Facebook Platform files shipped in Facebook Connect being out of date (as of 28-Feb-2010). To resolve this issue copy ALL the files in the /wordbooker/facebook-platform/php folder into the /wp-facebookconnect/facebook-client folder.
+If you have [Facebook Connect](http://wordpress.org/extend/plugins/wp-facebookconnect/) Version 1.2.1 installed then some features of Wordbooker will not work as expected. This is due to the Facebook Platform files shipped in Facebook Connect being out of date (as of 12-September-2010). To resolve this issue copy ALL the files in the /wordbooker/facebook-platform/php folder into the /wp-facebookconnect/facebook-client folder.
 
 
 == Screenshots ==
@@ -128,7 +128,7 @@ If you have [Facebook Connect](http://wordpress.org/extend/plugins/wp-facebookco
 
 == Upgrade Notice ==
 
-If you've upgrading from my forked version of Robert's Wordbook plugin ( http://wordpress.org/extend/plugins/wordbook ) then you'll have to remove the old version first as it's a new application and uses different API keys. If you dont want to lose track of any posts you've published with my version then BEFORE you de-install, export the wordbook_postcomments table. Then remove the old app, install this one, set up your configuration and then import the wordbook_postcomments table.
+If you've upgrading from  Robert Tsai'ss Wordbook plugin ( http://wordpress.org/extend/plugins/wordbook ) then you'll have to deactivate it first and make sure that the tables have been deleted from the database
 
 If you are upgrading from an earlier version of wordbooker then DO NOT deactivate the plugin before you upgrade as this will remove the tables. Simply delete the contents of the wordbooker folder and upload the new version.
 
@@ -136,6 +136,15 @@ If you are upgrading from an earlier version of wordbooker then DO NOT deactivat
 
 
 == Changelog ==
+
+= Version 1.8.12 : 28/09/2010 =
+- Fixed cron code which sometimes invalidated sessions 
+- Added facebook.com to the list of image sources to be stripped as FB dont support posting images from their own CDN in wall posts 
+- fb root div tag handling code fixed  
+- html stripping code for title text tightended up 
+- Minor tweaks to diagnostic code to add more details
+- Changes to cron code to make it more robust when fetching information
+
 
 = Version 1.8.11 : 25/07/2010 =
 - Added option to allow users to change width of Facebook Like Box.
