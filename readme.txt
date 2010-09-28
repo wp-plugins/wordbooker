@@ -1,16 +1,16 @@
 === Wordbooker ===
 
 Contributors: SteveAtty
-Tags: facebook, minifeed, newsfeed, crosspost, WPMU
-Requires at least: 2.7
-Tested up to: 2.9.2
-Stable tag: 1.8
+Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
+Requires at least: 2.8
+Tested up to: 3.0
+Stable tag: 1.8.12
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall. 
 
 == Description ==
 
-This plugin allows you to cross-post your blog posts to your Facebook Wall. You can also "cross polinate" comments between Facebook and your Wordpres blog.
+This plugin allows you to cross-post your blog posts to your Facebook Wall. You can also "cross polinate" comments between Facebook and your Wordpress blog.
 
 Various options including "attribute" lines and polling for comments and automatic re-posting on edit can be configured.
 
@@ -36,6 +36,9 @@ For more details on the various features please read the additional Features.txt
 
 - Works with a complementary [Facebook application](http://www.facebook.com/apps/application.php?id=254577506873) to update your Facebook Wall and friends' News Feeds about your blog and page postings.
 - Supports multi-author blogs: each blog author notifies only their own friends of their blog/page posts.
+- Features a sidebar widget to display your current Facebook Status and picture. Multiple widgets can be supported in one single blog.
+- Features a sidebar widget to display a "Fan"/Like box for any of your pages. Multiple widgets can be supported in one single blog.
+- Features a Facebook Like Button which can be customised as to where it appears in your blog.
 - Supports posting of Comments from your blog to the corresponsding Facebook wall article.
 - Supports the pulling of comments FROM blogs posted to your Facebook wall, back into your blog. 
 - Supports the posting of blog posts to Fan Pages (if you are an administrator of that page). This is currently experimental and there is bug in the API
@@ -63,6 +66,11 @@ The [WordPress application](http://www.facebook.com/apps/application.php?id=2373
 This Wordbook plugin works in the reverse direction. When you publish a new post or page, the plugin, in conjunction with the [Wordbooker](http://www.facebook.com/apps/application.php?id=254577506873) Facebook application, cross-posts your new blog entry to your Facebook account. You cannot use Wordbooker with a blog hosted at wordpress.com.
 
 
+= Why doesn't the Facebook Like / Facebook Share show up properly even though I've enabled it?
+
+You may need to add the following to the HMTL tag in your theme : xmlns:fb="http://www.facebook.com/2008/fbml".
+So it looks something like :  <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:fb="http://www.facebook.com/2008/fbml">
+
 
 = Why aren't my blog posts showing up in Facebook? =
 
@@ -70,7 +78,7 @@ This Wordbook plugin works in the reverse direction. When you publish a new post
 
 - Any errors Wordbooker encounters while communicating with Facebook will be recorded in error logs; the error logs (if any) are viewable in the "Wordbooker" panel of the "Options" WordPress admin page.
 
-- To discourage spammy behavior, Facebook restricts each user of any application to 25 posts within any rolling 48-hour window of time. If you've been playing around with Wordbooker and posting lots of test posts, you have likely hit this limit; it will appear in the error logs as `error_code 4: "Application request limit reached"`. There is nothing to do but wait it out.
+- To discourage spammy behavior, Facebook restricts each user of any application to approximately 25 posts within any rolling 24-hour window of time. If you've been playing around with Wordbooker and posting lots of test posts, you have likely hit this limit; it will appear in the error logs as `error_code 4: "Application request limit reached"`. There is nothing to do but wait it out.
 
 - Facebook sometimes incorrectly returns this result to application requests (other developers have also reported this problem with their Facebook apps; it's not just Wordbook); there is also nothing the Wordbook plugin can do about this.
 
@@ -103,12 +111,12 @@ If you're using the Share action link on your posts to Facebook it uses the META
 
 - Do *not* use the Review Wall for support or feature requests. People are unable to respond to Review Wall posts; you are less likely to get a response.
 
-Alternatively, leave a comment on [my blog](http://blogs.canalplan.org.uk/steve).
+Alternatively, Go to the Wordbooker Page on [GoogleCode](http://code.google.com/p/wordbooker/).
 
 
 == KNOWN CONFLICTS ==
 
-If you have [Facebook Connect](http://wordpress.org/extend/plugins/wp-facebookconnect/) Version 1.2.1 installed then some features of Wordbooker will not work as expected. This is due to the Facebook Platform files shipped in Facebook Connect being out of date (as of 28-Feb-2010). To resolve this issue copy ALL the files in the /wordbooker/facebook-platform/php folder into the /wp-facebookconnect/facebook-client folder.
+If you have [Facebook Connect](http://wordpress.org/extend/plugins/wp-facebookconnect/) Version 1.2.1 installed then some features of Wordbooker will not work as expected. This is due to the Facebook Platform files shipped in Facebook Connect being out of date (as of 12-September-2010). To resolve this issue copy ALL the files in the /wordbooker/facebook-platform/php folder into the /wp-facebookconnect/facebook-client folder.
 
 
 == Screenshots ==
@@ -120,15 +128,102 @@ If you have [Facebook Connect](http://wordpress.org/extend/plugins/wp-facebookco
 
 == Upgrade Notice ==
 
-If you've upgrading from my forked version of Robert's Wordbook plugin ( http://wordpress.org/extend/plugins/wordbook ) then you'll have to remove the old version first as it's a new application and uses different API keys. If you dont want to lose track of any posts you've published with my version then BEFORE you de-install, export the wordbook_postcomments table. Then remove the old app, install this one, set up your configuration and then import the wordbook_postcomments table.
+If you've upgrading from  Robert Tsai'ss Wordbook plugin ( http://wordpress.org/extend/plugins/wordbook ) then you'll have to deactivate it first and make sure that the tables have been deleted from the database
 
 If you are upgrading from an earlier version of wordbooker then DO NOT deactivate the plugin before you upgrade as this will remove the tables. Simply delete the contents of the wordbooker folder and upload the new version.
 
 
 
 
-== Changelog == 
+== Changelog ==
 
+= Version 1.8.12 : 28/09/2010 =
+- Fixed cron code which sometimes invalidated sessions 
+- Added facebook.com to the list of image sources to be stripped as FB dont support posting images from their own CDN in wall posts 
+- fb root div tag handling code fixed  
+- html stripping code for title text tightended up 
+- Minor tweaks to diagnostic code to add more details
+- Changes to cron code to make it more robust when fetching information
+
+
+= Version 1.8.11 : 25/07/2010 =
+- Added option to allow users to change width of Facebook Like Box.
+- User level setting of Yes for Default publish didn't work
+- Fixed a bug where posts by email didn't get processed as they were missing a user id
+- Changed Share button on multi post pages so it doesn't show the count.
+- Added option to supress Meta description tag to keep SEO plugins happy.
+- Support information moved so it shows during the authorisation process to help with completely failing installs.
+- Removed a lot of old code as part of the pre V2.0 code rebuild.
+
+
+= Version 1.8.10 : 30/06/2010 =
+- Fixed a bug in the Oauth request URLs
+- Fixed a warning about arrays to do with thumbnail handling
+- Fixed a HTML bug which broke Fluency Admin
+- Added an extra diagnostic message for posts within the "Dont republish window"
+
+
+= Version 1.8.9 : 29/06/2010 =
+- Trying to fix a serious SVN screwup which has broken lots of things.
+
+
+= Version 1.8.8 : 29/06/2010 =
+- Fix ANOTHER mistake caused by SVN problems - 
+
+= Version 1.8.7 : 29/06/2010 =
+- Fix a mistake caused by SVN problems -
+
+= Version 1.8.6 : 29/06/2010 =
+- Added support for Iframe Like/Share buttons.
+- Added Faceboox "Fan"/ Like Multi-widget.
+- Fixed problem with Graph API classes clashing with other Facebook related plugins.
+- Fixed a bug in the image handling functions.
+- Fixed a bug where selecting "show FB like / Share" buttons but not selecting where to show them hid the post.
+- Changed a couple of class definitions to fix clashes with other Facebook related plugins.
+
+
+
+= Version 1.8.5 : 20/06/2010 =
+- Changed the json_decode handling in the Facebook GRAPH API to remove dependencies on Json 1.2.1
+- Added Language support for FB Like button (uses the WPLANG constant).
+- Added support for sharing main blog url on multiple post pages.
+- Changed Support information list.
+- Added "fallback" code for PHP versions missing json_decode.
+- Put in checks for multibyte support.
+- Changed format of "Next Scheduled Poll" text to work round timezone casting issues.
+- Supress og:/fb: tags and FB javascript when share/like options are turned off.
+- Wrapped og: and fb: header tags in htmlspecialchars to fix text "escaping" into page.
+- Changed tag stripping code for extracts.
+- Fixed 404 page throwing a Database error.
+- Changed callback URLs from blog_info('url') to blog_info('wpurl') to fix issues with non "home directory" WP installs.
+- Added more error trapping round user cache handling.
+- Wrapped all array_keys calls in is_array checks.
+- Added options to allow Share and Like buttons to be located either above or below post.
+
+
+= Version 1.8.4 : 10/06/2010 =
+- Fixed problems with the auth process.
+- Added more diagnostic checks.
+- Changed Facebook core call from CURL to old method.
+- Added support for Facebook Like Button.
+- Added support for Facebook Share Button
+- Added a "Recent Facebook Activity" section to the Wordbooker Options page.
+- Added checks for CURL and json_decode and tidied up error reporting.
+- Fixed bug with json_decode for PHP < 5.2
+- Fixed bug in error logging.
+- Fixed missing tag (sometimes broke login URL in IE)
+- Added code to fix "signature" issues during authentication.
+
+
+= Version 1.8.3 : 01/06/2010 (Limited release via Wordbooker Page) =
+- Changes rolled up into 1.8.4
+
+= Version 1.8.2  : 30/05/2010 (Limited release via Wordbooker Page) =
+- Changes rolled up into 1.8.3
+
+
+= Version 1.8.1 : 30/05/2010 = 
+- Fix issue with new API file directory.
 
 = Version 1.8 : 30/05/2010 =
 - Facebook authorisation migrated to OAUTH2
