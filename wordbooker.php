@@ -5,7 +5,7 @@ Plugin URI: http://blogs.canalplan.org.uk/steve/wordbooker/
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://blogs.canalplan.org.uk/steve/
-Version: 1.8.12
+Version: 1.8.13
 */
 
  /*
@@ -39,7 +39,7 @@ if (! isset($wordbooker_settings['wordbook_extract_length'])) $wordbooker_settin
 
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
-define('WORDBOOKER_CODE_RELEASE','1.8.12.r00');
+define('WORDBOOKER_CODE_RELEASE','1.8.13.r00');
 
 # For Troubleshooting 
 define('ADVANCED_DEBUG',false);
@@ -1587,7 +1587,6 @@ function wordbooker_fbclient_publishaction($wbuser, $fbclient,$postid)
 		wordbooker_debugger("setting image array to be only post images. "," ",$post->ID) ;
 		if (is_array($matched[2]) && is_array($yturls)) {$pulled_images=array_merge($matched[2],$yturls);}
 		if (is_array($matched[2])) {$pulled_images=$matched[2];}
-		if (is_array($yturls)) {$pulled_images=$yturls;}
 	}
 
 	
