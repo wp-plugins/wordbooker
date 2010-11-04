@@ -3,10 +3,10 @@
 Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
 Requires at least: 2.8
-Tested up to: 3.0
-Stable tag: 1.8.13
+Tested up to: 3.0.1
+Stable tag: 1.8.14
 
-This plugin allows you to cross-post your blog posts to your Facebook Wall. 
+This plugin allows you to cross-post your blog posts to your Facebook Wall and to any  Facebook Fan Page that you are an administrator for
 
 == Description ==
 
@@ -128,7 +128,7 @@ If you have [Facebook Connect](http://wordpress.org/extend/plugins/wp-facebookco
 
 == Upgrade Notice ==
 
-If you've upgrading from  Robert Tsai'ss Wordbook plugin ( http://wordpress.org/extend/plugins/wordbook ) then you'll have to deactivate it first and make sure that the tables have been deleted from the database
+If you've upgrading from  Robert Tsai'ss Wordbook plugin ( http://wordpress.org/extend/plugins/wordbook ) then you'll have to deactivate it first and make sure that the tables have been deleted from the database. If they haven't then Wordbooker will do some odd things and the fix is then to deactivate Wordbooker and then re-activate it again
 
 If you are upgrading from an earlier version of wordbooker then DO NOT deactivate the plugin before you upgrade as this will remove the tables. Simply delete the contents of the wordbooker folder and upload the new version.
 
@@ -136,6 +136,19 @@ If you are upgrading from an earlier version of wordbooker then DO NOT deactivat
 
 
 == Changelog ==
+
+= Version 1.8.14   04/11/2010 =
+- Added support for quicktranslate tags
+- Fixed a bug where wpg2 tags were left in the excerpt.
+- Fixed a bug where post level options were being ignored
+- Fixed a bug where post level options were being lost on Draft save.
+- Moved Graph API calls back to Curl - but have left fopen based library in archive
+- Made Fopen calls silent to stop it barfing messages on screen on incorrectly configured webservers.
+- Added wp-includes to the list of excluded image directories
+- Changed name of a couple of internal functions to stop clashes with other plugins.
+- Changed names of a couple of classes to avoid clashes with badly coded Facebook plugins
+- Added support for URL shortener plugins : currently works with "YOURLS: WordPress to Twitter" and "url_shortener" plugins
+
 
 = Version 1.8.13   30/09/2010 =
 - Fixed a bug where images were not being published - was resetting an array by accident.
