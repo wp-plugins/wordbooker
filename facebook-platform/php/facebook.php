@@ -66,7 +66,7 @@ class Facebook1 {
     $this->api_key                 = $api_key;
     $this->secret                  = $secret;
     $this->generate_session_secret = $generate_session_secret;
-    $this->api_client = new FacebookRestClient($api_key, $secret, null);
+    $this->api_client = new FacebookRestClient1($api_key, $secret, null);
     $this->validate_fb_params();
 
     // Set the default user id for methods that allow the caller to
@@ -176,7 +176,7 @@ class Facebook1 {
         $this->set_cookies($this->user, $this->api_client->session_key, $this->session_expires, $session_secret);
       }
       return $session_secret;
-    } catch (FacebookRestClientException $e) {
+    } catch (FacebookRestClientException1 $e) {
       // API_EC_PARAM means we don't have a logged in user, otherwise who
       // knows what it means, so just throw it.
       if ($e->getCode() != FacebookAPIErrorCodes::API_EC_PARAM) {
@@ -188,7 +188,7 @@ class Facebook1 {
   public function do_get_session($auth_token) {
     try {
       return $this->api_client->auth_getSession($auth_token, $this->generate_session_secret);
-    } catch (FacebookRestClientException $e) {
+    } catch (FacebookRestClientException1 $e) {
       // API_EC_PARAM means we don't have a logged in user, otherwise who
       // knows what it means, so just throw it.
       if ($e->getCode() != FacebookAPIErrorCodes::API_EC_PARAM) {
