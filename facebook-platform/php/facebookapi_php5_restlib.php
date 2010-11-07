@@ -34,7 +34,7 @@
 
 include_once 'jsonwrapper/jsonwrapper.php';
 
-class FacebookRestClient {
+class FacebookRestClient1 {
   public $secret;
   public $session_key;
   public $api_key;
@@ -74,14 +74,14 @@ class FacebookRestClient {
     $this->secret       = $secret;
     $this->session_key  = $session_key;
     $this->api_key      = $api_key;
-    $this->batch_mode = FacebookRestClient::BATCH_MODE_DEFAULT;
+    $this->batch_mode = FacebookRestClient1::BATCH_MODE_DEFAULT;
     $this->last_call_id = 0;
     $this->call_as_apikey = '';
     $this->use_curl_if_available = true;
     $this->server_addr =
-      Facebook::get_facebook_url('api') . '/restserver.php';
+      Facebook1::get_facebook_url('api') . '/restserver.php';
     $this->photo_server_addr =
-      Facebook::get_facebook_url('api-photo') . '/restserver.php';
+      Facebook1::get_facebook_url('api-photo') . '/restserver.php';
 
     if (!empty($GLOBALS['facebook_config']['debug'])) {
       $this->cur_id = 0;
@@ -161,7 +161,7 @@ function toggleDisplay(id, type) {
     if ($this->pending_batch()) {
       $code = FacebookAPIErrorCodes::API_EC_BATCH_ALREADY_STARTED;
       $description = FacebookAPIErrorCodes::$api_error_descriptions[$code];
-      throw new FacebookRestClientException($description, $code);
+      throw new FacebookRestClientException1($description, $code);
     }
 
     $this->batch_queue = array();
@@ -175,7 +175,7 @@ function toggleDisplay(id, type) {
     if (!$this->pending_batch()) {
       $code = FacebookAPIErrorCodes::API_EC_BATCH_NOT_STARTED;
       $description = FacebookAPIErrorCodes::$api_error_descriptions[$code];
-      throw new FacebookRestClientException($description, $code);
+      throw new FacebookRestClientException1($description, $code);
     }
 
     $this->pending_batch = false;
@@ -210,7 +210,7 @@ function toggleDisplay(id, type) {
     $result = $this->call_method('facebook.batch.run', $params);
 
     if (is_array($result) && isset($result['error_code'])) {
-      throw new FacebookRestClientException($result['error_msg'],
+      throw new FacebookRestClientException1($result['error_msg'],
                                             $result['error_code']);
     }
 
@@ -223,7 +223,7 @@ function toggleDisplay(id, type) {
 
       if (is_array($batch_item_result) &&
           isset($batch_item_result['error_code'])) {
-        throw new FacebookRestClientException($batch_item_result['error_msg'],
+        throw new FacebookRestClientException1($batch_item_result['error_msg'],
                                               $batch_item_result['error_code']);
       }
       $batch_item['r'] = $batch_item_result;
@@ -1689,7 +1689,7 @@ function toggleDisplay(id, type) {
                                      array('title' => $title,
                                            'description' => $description),
                                      $file,
-                                     Facebook::get_facebook_url('api-video') . '/restserver.php');
+                                     Facebook1::get_facebook_url('api-video') . '/restserver.php');
   }
 
   /**
@@ -3062,7 +3062,7 @@ function toggleDisplay(id, type) {
       $this->rawData = $data;
       $result = $this->convert_result($data, $method, $params);
       if (is_array($result) && isset($result['error_code'])) {
-        throw new FacebookRestClientException($result['error_msg'],
+        throw new FacebookRestClientException1($result['error_msg'],
                                               $result['error_code']);
       }
     }
@@ -3126,7 +3126,7 @@ function toggleDisplay(id, type) {
         $code =
           FacebookAPIErrorCodes::API_EC_PARAM;
         $description = FacebookAPIErrorCodes::$api_error_descriptions[$code];
-        throw new FacebookRestClientException($description, $code);
+        throw new FacebookRestClientException1($description, $code);
       }
 
       if ($this->format) {
@@ -3139,7 +3139,7 @@ function toggleDisplay(id, type) {
       $result = $this->convert_result($data, $method, $params);
 
       if (is_array($result) && isset($result['error_code'])) {
-        throw new FacebookRestClientException($result['error_msg'],
+        throw new FacebookRestClientException1($result['error_msg'],
                                               $result['error_code']);
       }
     }
@@ -3147,7 +3147,7 @@ function toggleDisplay(id, type) {
       $code =
         FacebookAPIErrorCodes::API_EC_BATCH_METHOD_NOT_ALLOWED_IN_BATCH_MODE;
       $description = FacebookAPIErrorCodes::$api_error_descriptions[$code];
-      throw new FacebookRestClientException($description, $code);
+      throw new FacebookRestClientException1($description, $code);
     }
 
     return $result;
@@ -3179,7 +3179,7 @@ function toggleDisplay(id, type) {
     list($get, $post) = $this->add_standard_params($method, $params);
     // we need to do this before signing the params
     $this->convert_array_values_to_json($post);
-    $post['sig'] = Facebook::generate_sig(array_merge($get, $post),
+    $post['sig'] = Facebook1::generate_sig(array_merge($get, $post),
                                           $this->secret);
     return array($get, $post);
   }
@@ -3340,7 +3340,7 @@ function toggleDisplay(id, type) {
                                 'Content-Length: ' . $content_length,
                     'content' => $content));
     $context_id = stream_context_create($context);
-    $sock = fopen($server_addr, 'r', false, $context_id);
+    $sock = @fopen($server_addr, 'r', false, $context_id);
 
     $result = '';
     if ($sock) {
@@ -3376,7 +3376,7 @@ function toggleDisplay(id, type) {
 }
 
 
-class FacebookRestClientException extends Exception {
+class FacebookRestClientException1 extends Exception {
 }
 
 // Supporting methods and values------
