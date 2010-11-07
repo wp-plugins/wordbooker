@@ -87,12 +87,12 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 				try {
 					$permy = $fbclient->users_hasAppPermission("publish_stream",$page['page_id']);
 					$error_code = null;
-					if($permy==0) {$add_auths=1;wordbooker_debugger("Page needs permissions for ".$page['page_id']," ",0) ;} 
+					if($permy==0) {$add_auths=1;wordbooker_debugger("Page needs publish stream permission for ".$page['page_id']," ",0) ;} 
 					else { wordbooker_debugger("No permissions needed for page : ".$page['page_id']," ",0);}
 					
 					$error_msg = null;
 				} catch (Exception $e) {
-					wordbooker_debugger("Page needs permissions for ".$page['page_id'],$page['page_id'],0);
+					wordbooker_debugger("Permission Exception for page ".$page['page_id'],$e->getMessage(),0);
 					$users = null;
 					$add_auths=1;
 				}
@@ -102,7 +102,7 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 		# Now lets check over the over permissions and build up the bit mask
 		$perms_to_check= array(WORDBOOKER_FB_PUBLISH_STREAM,WORDBOOKER_FB_STATUS_UPDATE,WORDBOOKER_FB_READ_STREAM,WORDBOOKER_FB_CREATE_NOTE);
 		foreach(array_keys($perms_to_check) as $key){
-	 		if (! $fbclient->users_hasAppPermission($perms_to_check[$key],$uid)) { $add_auths = $add_auths | pow(2,$key);}
+	 		if (! $fbclient->users_hasAppPermission($perms_to_check[$key],$uid)) { wordbooker_debugger("Additional Permissions needed : ",$key,0) ; $add_auths = $add_auths | pow(2,$key);}
 		}
 		# And update the table. We do this here just in case the FQL_Multi fails.
 		wordbooker_debugger("Additional Permissions needed : ",$add_auths,0) ;
@@ -155,6 +155,7 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 		}
 		$fb_app_info=$fb_app_info[0];
 		$all_pages=array();
+		#var_dump($fb_page_info);
 			if (is_array($fb_page_info)) { 
 				if (is_array($fb_page_info)) { $encoded_names=str_replace('\\','\\\\',serialize($fb_page_info));}
 					 foreach ( $fb_page_info as $pageinfo ) {	

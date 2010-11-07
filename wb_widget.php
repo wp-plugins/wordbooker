@@ -57,7 +57,7 @@ class WordbookWidget extends WP_Widget {
 	
                 if ($result->status) {			
 			$current_offset=0;
-			#$current_offset = get_option('gmt_offset');
+			$current_offset = get_option('gmt_offset');
                 	echo '<p><br /><a href="'.$result->url.'">'.$name.'</a> : ';
 			echo '<i>'.$result->status.'</i><br />';
        			if ($instance['df']=='fbt') { 
@@ -191,13 +191,17 @@ function widget_facebook($args) {
 	$name=$result->name;
  	if (strlen($dispname)>0) $name=$dispname; 
         if ($result->status) {
+		$current_offset=0;
+		$current_offset = get_option('gmt_offset');
         	echo '<br /><a href="'.$result->url.'">'.$name.'</a> : ';
 		echo '<i>'.$result->status.'</i><br />';
 		if ($dformat=='fbt') { 
  			echo '('.nicetime($result->updated).').'; 
 		}
  		else {
-			echo '('.date($dformat, $result->updated).').';
+			echo '('.date($dformat, $result->updated+(3600*$current_offset)).').';
+
+	
 		}
 	}
 	echo $after_widget;

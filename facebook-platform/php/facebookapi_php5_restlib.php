@@ -79,9 +79,9 @@ class FacebookRestClient {
     $this->call_as_apikey = '';
     $this->use_curl_if_available = true;
     $this->server_addr =
-      Facebook::get_facebook_url('api') . '/restserver.php';
+      Facebook1::get_facebook_url('api') . '/restserver.php';
     $this->photo_server_addr =
-      Facebook::get_facebook_url('api-photo') . '/restserver.php';
+      Facebook1::get_facebook_url('api-photo') . '/restserver.php';
 
     if (!empty($GLOBALS['facebook_config']['debug'])) {
       $this->cur_id = 0;
@@ -1689,7 +1689,7 @@ function toggleDisplay(id, type) {
                                      array('title' => $title,
                                            'description' => $description),
                                      $file,
-                                     Facebook::get_facebook_url('api-video') . '/restserver.php');
+                                     Facebook1::get_facebook_url('api-video') . '/restserver.php');
   }
 
   /**
@@ -3179,7 +3179,7 @@ function toggleDisplay(id, type) {
     list($get, $post) = $this->add_standard_params($method, $params);
     // we need to do this before signing the params
     $this->convert_array_values_to_json($post);
-    $post['sig'] = Facebook::generate_sig(array_merge($get, $post),
+    $post['sig'] = Facebook1::generate_sig(array_merge($get, $post),
                                           $this->secret);
     return array($get, $post);
   }
@@ -3340,7 +3340,7 @@ function toggleDisplay(id, type) {
                                 'Content-Length: ' . $content_length,
                     'content' => $content));
     $context_id = stream_context_create($context);
-    $sock = fopen($server_addr, 'r', false, $context_id);
+    $sock = @fopen($server_addr, 'r', false, $context_id);
 
     $result = '';
     if ($sock) {
