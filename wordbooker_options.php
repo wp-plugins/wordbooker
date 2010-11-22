@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Options 
 Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.8.11
+Version: 1.8.17
 Description: Advanced Options for the WordBooker Plugin
 Author: Steve Atty
 */
@@ -76,7 +76,7 @@ function wordbooker_option_manager() {
 	# If we dont have any settings then try to recover them from old settings.
 	if (! isset($wordbooker_settings["wordbook_default_author"])) {
 		$wordbooker_settings =get_option('wordbook_settings');
-		$wordbooker_settings[WORDBOOKER_OPTION_SCHEMAVERS]=WORDBOOKER_SCHEMA_VERSION;
+		$wordbooker_settings['schemavers']=WORDBOOKER_SCHEMA_VERSION;
 		wordbooker_set_options($wordbooker_settings);
 		$wordbooker_settings =wordbooker_options();
 	}
@@ -151,7 +151,7 @@ function wordbooker_option_manager() {
 				$x=$_POST['wordbooker_settings']['wordbook_default_author'];
 				if (isset($x)) { 
 					delete_option('wordbooker_settings');
-					$wordbooker_settings[WORDBOOKER_OPTION_SCHEMAVERS]=WORDBOOKER_SCHEMA_VERSION;
+					$wordbooker_settings['schemavers']=WORDBOOKER_SCHEMA_VERSION;
 					wordbooker_set_options($wordbooker_settings);
 					#var_dump($_POST);
 					foreach (array_keys($_POST['wordbooker_settings']) as $key) {$wordbooker_settings[$key]=$_POST['wordbooker_settings'][$key];}
@@ -207,8 +207,8 @@ function wordbooker_option_manager() {
 		$checked_flag=array('on'=>'checked','off'=>'');
 		$fbclient = wordbooker_fbclient($wbuser);
 		$missing=0;
-		if (!method_exists( 'FacebookRestClient', 'stream_publish' ) ){ $missing=1;}
-		if (!method_exists( 'FacebookRestClient', 'stream_addcomment' ) ){ $missing=1;}
+		if (!method_exists( 'FacebookRestClient1', 'stream_publish' ) ){ $missing=1;}
+		if (!method_exists( 'FacebookRestClient1', 'stream_addcomment' ) ){ $missing=1;}
 		if ($missing > 0 ) {
 			_e("Fatal Error. Facebook Client libraries missing key functions. Please check your installed plugins for other Facebook plugins");
 			echo "&nbsp;:<br /><br />";
@@ -243,7 +243,7 @@ function wordbooker_option_manager() {
 		_e('Blog Level Customisation');
 		echo'</h3><form action="options.php" method="post" action="">';
 		settings_fields('wordbooker_options');
-		echo '<input type="hidden" name="wordbooker_settings[schemavers]" value='.$wordbooker_settings[schemavers].' />';
+		echo '<input type="hidden" name="wordbooker_settings[schemavers]" value='.$wordbooker_settings['schemavers'].' />';
 		$sql="select wpu.ID,wpu.display_name from $wpdb->users wpu,".WORDBOOKER_USERDATA." wud where wpu.ID=wud.user_id;";
 		$wb_users = $wpdb->get_results($sql); 
 
@@ -263,7 +263,7 @@ function wordbooker_option_manager() {
 		echo '</select><br />';
 
                 echo '<label for="wb_extract_length">'.__('Length of Extract').' :</label> <select id="wordbook_extract_length" name="wordbooker_settings[wordbook_extract_length]"  >';
-	        $arr = array(200=> "200",  250=> "250", 256=>__("256 (Default) "), 270=>"270", 300=>"300", 350 => "350",400 => "400");
+	        $arr = array(10=> "10",20=> "20",50=> "50",100=> "100",120=> "120",150=> "150",175=> "175",200=> "200",  250=> "250", 256=>__("256 (Default) "), 270=>"270", 300=>"300", 350 => "350",400 => "400");
                 foreach ($arr as $i => $value) {
                         if ($i==$wordbooker_settings['wordbook_extract_length']){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
                        else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}}
@@ -279,7 +279,7 @@ function wordbooker_option_manager() {
 
 		echo '<label for="wb_facebook_like">'.__("Include a Facebook Like button in blog"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_show]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_show"]].' ><br />';
-		if (!is_numeric($wordbooker_settings[wordbooker_like_width]) || $wordbooker_settings[wordbooker_like_width] <0) {$wordbooker_settings[wordbooker_like_width]=250;}
+		if (!is_numeric($wordbooker_settings['wordbooker_like_width']) || $wordbooker_settings['wordbooker_like_width'] <0) {$wordbooker_settings['wordbooker_like_width']=250;}
 		echo '<label for="wb_facebook_like_width">'.__("Width of Facebook Like box"). ' : </label>';
 		echo '<INPUT TYPE=text NAME="wordbooker_settings[wordbooker_like_width]"  size="7"value="'.$wordbooker_settings["wordbooker_like_width"].'" ><br />';
 
@@ -302,6 +302,12 @@ function wordbooker_option_manager() {
 		echo '<label for="wb_facebook_share_front">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Share button on front page"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_share_button_frontpage]" '.$checked_flag[$wordbooker_settings["wordbooker_share_button_frontpage"]].' ><br />';
 
+
+		echo '<label for="wb_facebook_like_front">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Like button on Category pages"). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_category]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_category"]].' ><br />';
+
+		echo '<label for="wb_facebook_share_front">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Share button on Category pages"). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_share_button_category]" '.$checked_flag[$wordbooker_settings["wordbooker_share_button_category"]].' ><br />';
 		echo '<label for="wb_fbshare_location">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__('Facebook Share - Display Button ').' :</label> <select id="wordbook_fbshare_location" name="wordbooker_settings[wordbook_fbshare_location]"  >';
 		foreach ($fblike_location as $i => $value) {
 			if ($i==$wordbooker_settings['wordbook_fbshare_location']){ print '<option selected="yes" value="'.$i.'" >'.$fblike_location[$i].'</option>';}
@@ -399,7 +405,7 @@ function wordbooker_option_manager() {
 	if ($oldv==1) {
 		echo'<p><hr><h3>'.__("Blog Level Customisation").' : </h3>';
 		echo'<form action="" method="post">';
-		echo '<input type="hidden" name="wordbooker_settings[schemavers]" value='.$wordbooker_settings[schemavers].' />';
+		echo '<input type="hidden" name="wordbooker_settings[schemavers]" value='.$wordbooker_settings['schemavers'].' />';
 		echo '<input type="hidden" name="token" value="' . wbs_retrieve_hash() . '" />';
 		$sql="select wpu.ID,wpu.display_name from $wpdb->users wpu,".WORDBOOKER_USERDATA." wud where wpu.ID=wud.user_id;";
 		$wb_users = $wpdb->get_results($sql); 
@@ -419,7 +425,7 @@ function wordbooker_option_manager() {
 		echo '</select><br />';
 
                 echo '<label for="wb_extract_length">'.__('Length of Extract').' :</label> <select id="wordbook_extract_length" name="wordbooker_settings[wordbook_extract_length]"  >';
-	        $arr = array(200=> "200",  250=> "250", 256=>__("256 (Default) "), 270=>"270", 300=>"300", 350 => "350",400 => "400");
+	      	        $arr = array(10=> "10",20=> "20",50=> "50",100=> "100",120=> "120",150=> "150",175=> "175",200=> "200",  250=> "250", 256=>__("256 (Default) "), 270=>"270", 300=>"300", 350 => "350",400 => "400");
                 foreach ($arr as $i => $value) {
                         if ($i==$wordbooker_settings['wordbook_extract_length']){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
                        else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}}
@@ -452,6 +458,19 @@ function wordbooker_option_manager() {
 
 		echo '<label for="wb_facebook_like_front">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Like button on front page"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_frontpage]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_frontpage"]].' ><br />';
+
+		echo '<label for="wb_facebook_like_front">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Share button on front page"). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_share_button_frontpage]" '.$checked_flag[$wordbooker_settings["wordbooker_share_button_frontpage"]].' ><br />';
+
+		echo '<label for="wb_facebook_like_front">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Like button on Category pages"). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_category]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_category"]].' ><br />';
+
+		echo '<label for="wb_facebook_like_front">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Share button on Category pages"). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_share_button_category]" '.$checked_flag[$wordbooker_settings["wordbooker_share_button_category"]].' ><br />';
+
+
+
+
 
 
 		echo '<label for="wb_fbshare_location">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__('Facebook Share - Display Button ').' :</label> <select id="wordbook_fbshare_location" name="wordbooker_settings[wordbook_fbshare_location]"  >';
@@ -562,7 +581,7 @@ function wordbooker_option_manager() {
                 echo "<</select><br />";
 
  		echo '<label for="wb_extract_length">'.__('Length of Extract').' : </label><select id="wordbook_extract_length" name="wordbook_extract_length"  >';
-	        $arr = array(0=> __("Same as Blog"), 200=> "200",  250=> "250", 256=>"256", 270=>"270", 300=>"300", 350 => "350",400 => "400");
+	        $arr = array(0=> __("Same as Blog"),10=> "10",20=> "20",50=> "50",100=> "100",120=> "120",150=> "150",175=> "175",200=> "200",  250=> "250", 256=>__("256 (Default) "), 270=>"270", 300=>"300", 350 => "350",400 => "400");
                 foreach ($arr as $i => $value) {
                         if ($i==$wordbookuser_settings['wordbook_extract_length']){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
                        else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
@@ -685,12 +704,13 @@ function wordbooker_option_manager() {
 		wordbooker_option_setup($wbuser);
 		wordbooker_render_diagnosticlogs();
 		wordbooker_option_support();
-	}
+	}	
 
+	}	
+#var_dump($wordbooker_settings);
 	// Lets poll if they want to - we only poll for this user
 	if ( isset($wordbooker_settings["wordbook_comment_poll"])){
 		$dummy=wordbooker_poll_facebook($user_ID);
-	}
 }
 
 /* Use the admin_menu action to define the custom boxes. Dont do this unless we have options set */
@@ -717,7 +737,6 @@ function wordbooker_inner_custom_box() {
 	$wordbook_user_settings_id="wordbookuser".$blog_id;
 	# We need to do some more checking here. If the user does not have an entry in the wordbooker user table then we should get the user options for the user set as the default user.
 	$wordbookuser=get_usermeta($wb_user_id,$wordbook_user_settings_id);
-	#var_dump($wordbookuser);
 	# If we have user settings then lets go through and override the blog level defaults.
 	if(is_array($wordbookuser)) {
 		foreach (array_keys($wordbookuser) as $key) {
@@ -736,11 +755,13 @@ function wordbooker_inner_custom_box() {
 	}	
 	# If we have post settings then lets go through and override the blog level defaults.
 	if(is_array($post_meta)) {
-		foreach (array_keys($post_meta) as $key) {
-			if ((strlen($post_meta[$key])>0) && ($post_meta[$key]!="0") ) {
-				$wordbooker_settings[$key]=$post_meta[$key];
-			} 
-		}
+	#	foreach (array_keys($post_meta) as $key) {
+	#		if ((strlen($post_meta[$key])>0) && ($post_meta[$key]!="0") ) {
+	#			$wordbooker_settings[$key]=$post_meta[$key];
+	#			echo "replacing ".$key."<br>";
+	#		} 
+		$wordbooker_settings=$post_meta;
+		#}
 
 	}
 	if (wordbooker_get_userdata($user_ID)) {
@@ -791,7 +812,7 @@ function wordbooker_inner_custom_box() {
 		}
 
 		echo __('Length of Extract').' : <select id="wordbook_extract_length" name="wordbook_extract_length"  >';
-		$arr = array( 200=> "200",  250=> "250", 256=>"256", 270=>"270", 300=>"300", 350 => "350",400 => "400");
+		$arr = array( 10=> "10",20=> "20",50=> "50",100=> "100",120=> "120",150=> "150",175=> "175", 200=> "200",  250=> "250", 256=>"256", 270=>"270", 300=>"300", 350 => "350",400 => "400");
 	        foreach ($arr as $i => $value) {
 	                if ($i==$wordbooker_settings['wordbook_extract_length']){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
 	               else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
