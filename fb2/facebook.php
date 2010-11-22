@@ -344,11 +344,10 @@ class Facebook2
 
       // try loading session from $_REQUEST
       if (!$session && isset($_REQUEST['session'])) {
-        $session = json_decode(
+      $session = (array) json_decode(
           get_magic_quotes_gpc()
             ? stripslashes($_REQUEST['session'])
-            : $_REQUEST['session'],
-          true
+            : $_REQUEST['session']
         );
         $session = $this->validateSessionObject($session);
       }
@@ -505,10 +504,10 @@ class Facebook2
     $params['api_key'] = $this->getAppId();
     $params['format'] = 'json-strings';
 
-    $result = json_decode($this->_oauthRequest(
+    $result = (array) json_decode($this->_oauthRequest(
       $this->getApiUrl($params['method']),
       $params
-    ), true);
+    ));
 
     // results are returned, errors are thrown
     if (is_array($result) && isset($result['error_code'])) {
@@ -533,10 +532,10 @@ class Facebook2
     }
     $params['method'] = $method; // method override as we always do a POST
 
-    $result = json_decode($this->_oauthRequest(
+    $result = (array) json_decode($this->_oauthRequest(
       $this->getUrl('graph', $path),
       $params
-    ), true);
+    ));
 
     // results are returned, errors are thrown
     if (is_array($result) && isset($result['error'])) {
@@ -752,7 +751,7 @@ class Facebook2
 
     // decode the data
     $sig = self::base64UrlDecode($encoded_sig);
-    $data = json_decode(self::base64UrlDecode($payload), true);
+    $data = (array) json_decode(self::base64UrlDecode($payload));
 
     if (strtoupper($data['algorithm']) !== 'HMAC-SHA256') {
       self::errorLog('Unknown algorithm. Expected HMAC-SHA256');

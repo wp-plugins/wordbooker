@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
 Requires at least: 2.8
 Tested up to: 3.0.1
-Stable tag: 1.8.16
+Stable tag: 1.8.17
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any  Facebook Fan Page that you are an administrator for
 
@@ -137,6 +137,26 @@ If you are upgrading from an earlier version of wordbooker then DO NOT deactivat
 
 == Changelog ==
 
+= Version 1.8.17  22/11/2010 =
+- Fixed a bug with Like and Share logic and added missing options to pre 2.9 Options page
+- Fixed a bug where the publish window check fired and stopped a post being made.
+- Fixed a bug where urls were lost doing scheduled posts with URL shorteners enabled
+- Fixed a bug where setting were sometimes getting lost for Scheduled posts.
+- Fixed a bug which may have caused comments not to be processed
+- Changed the email for imported comments so it now will use a Wordbooker Gravtar
+- Settings were getting trashed when Autosave ran. Changed Wordbooker to basically do nothing when Autosave fires so changes to Wordbooker options are not lost.
+- Null values for Update time from Facebook now handled.
+- Changed some JSON calls to handle older versions of JSON which expect a different number of parameters.
+- Changed extract trim length to handle multibyte characters (Thanks to Kensuke Akai for the fix)
+- Changed the Page fetch code in the cron job to hopefully handle FB FQL failures.
+- Added support for Like/Share on Category pages
+- Added support for YAPB plugin
+- Added a error/diagnostic log clear down call to the cron to keep the log file "tidy".
+- Added a check for broken JSON installs where the function is there but PHP returns no version information.
+- Added a check to the header function so that it only works on published posts (This fixes a problem with the "Share Drafts" plugin)
+- Finally put some diagnostics in the comment handling code.
+
+
 = Version 1.8.16   07/11/2010 =
 - SVN mess up caused incorrect file versions to get released
 
@@ -147,7 +167,6 @@ If you are upgrading from an earlier version of wordbooker then DO NOT deactivat
 - Changed the debug process so that key process stages are always written to the diagnostic log
 - Changed some more function/class names to try to avoid clashes with other FB related plugins.
 - Changed some internal calls which were depreciated.
-- Added FB's own CDN server to the list of excluded images - they dont allow posts to FB walls containing FBCDN images.
 
 
 

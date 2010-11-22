@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Cron
 Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.8.11
+Version: 1.8.17
 Description: Collection of processes that are often handled by wp_cron scheduled jobs
 Author: Steve Atty
 */
@@ -87,8 +87,8 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 				try {
 					$permy = $fbclient->users_hasAppPermission("publish_stream",$page['page_id']);
 					$error_code = null;
-					if($permy==0) {$add_auths=1;wordbooker_debugger("Page needs publish stream permission for ".$page['page_id']," ",0) ;} 
-					else { wordbooker_debugger("No permissions needed for page : ".$page['page_id']," ",0);}
+					if($permy==0) {$add_auths=1;wordbooker_debugger("Page needs publish stream permission for : ",$page['page_id'],0) ;} 
+					else { wordbooker_debugger("No permissions needed for page : ",$page['page_id'],0);}
 					
 					$error_msg = null;
 				} catch (Exception $e) {
@@ -123,16 +123,17 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 		}
 		catch (Exception $e) {
 			$error_msg = $e->getMessage();
-			wordbooker_debugger("Failed to get Status  : ".$error_msg," ",0);
+			wordbooker_debugger("Cache: Failed to get Status  : ".$error_msg," ",99);
 		}
 		$fb_status_info=$fb_status_info[0];
 		try {
 			$query="SELECT name, url, pic FROM profile WHERE id=$suid ";
 			$fb_profile_info = $fbclient->fql_query($query);
+		
 		} 
 		catch (Exception $e) {
 			$error_msg = $e->getMessage();
-			wordbooker_debugger("Failed to get user inf : ".$error_msg," ",0);
+			wordbooker_debugger("Cache: Failed to get user info : ".$error_msg," ",99);
 		}
 		$fb_profile_info=$fb_profile_info[0];
 		try {
@@ -142,7 +143,7 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 		catch (Exception $e) 
 		{
 		$error_msg = $e->getMessage();
-		wordbooker_debugger("Failed to get page info : ".$error_msg," ",0);
+		wordbooker_debugger("Cache: Failed to get page info : ".$error_msg," ",99);
 		}
 		try {
 			$query="Select is_app_user FROM user where uid=$uid";
@@ -151,10 +152,10 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 		catch (Exception $e) 
 		{
 			$error_msg = $e->getMessage();
-			wordbooker_debugger("Failed to get app_user inf : ".$error_msg," ",0);
+			wordbooker_debugger("Cache: Failed to get app_user inf : ".$error_msg," ",99);
 		}
 		$fb_app_info=$fb_app_info[0];
-		$all_pages=array();
+		$sql="update ".WORDBOOKER_USERDATA." set name='".mysql_real_escape_string($fb_profile_info["name"])."'";$all_pages=array();
 		#var_dump($fb_page_info);
 			if (is_array($fb_page_info)) { 
 				if (is_array($fb_page_info)) { $encoded_names=str_replace('\\','\\\\',serialize($fb_page_info));}
@@ -170,26 +171,30 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 					$all_pages[]=$pages;
 				 	wordbooker_debugger("Page info for page ID ".$pages["page_id"],mysql_real_escape_string($pages["name"]),0) ;
 					}
-			} else {wordbooker_debugger("Failed to get page information from FB"," ",0); }
-			wordbooker_debugger("Setting name as  : ",mysql_real_escape_string($fb_profile_info["name"]),0) ;
-			$sql="update ".WORDBOOKER_USERDATA." set name='".mysql_real_escape_string($fb_profile_info["name"])."'";
+				$sql.=", pages= '".mysql_real_escape_string($encoded_names)."'";
+			} else {wordbooker_debugger( "Cache: Failed to get page information from FB"," ",99); }
+			
+
 			if (is_array($fb_status_info)) {
+					wordbooker_debugger("Setting name as  : ",mysql_real_escape_string($fb_profile_info["name"]),0) ;
 				if (stristr($fb_status_info["message"],"[[PV]]")) {
 					wordbooker_debugger("Found [[PV]] - not updating status"," ",0);
 				} 
 				else {
+					
 					wordbooker_debugger("Setting status as  : ",mysql_real_escape_string($fb_status_info["message"]),0) ;
 					$sql.=", status='".mysql_real_escape_string($fb_status_info["message"])."'";
-					$sql.=", updated=".mysql_real_escape_string($fb_status_info["time"]);
+					$sql.=", updated= Coalesce(".mysql_real_escape_string($fb_status_info["time"].",1)");
 				}
-			} else {wordbooker_debugger("Failed to get Status information from FB"," ",0); }
+			} 
+		#	else {wordbooker_debugger("Cache: Failed to get Status information from FB"," ",99); }
 			if (is_array($fb_profile_info)) {
 				wordbooker_debugger("Setting URL as  : ",mysql_real_escape_string($fb_profile_info["url"]),0) ;
 				$sql.=", url='".mysql_real_escape_string($fb_profile_info["url"])."'";
 				$sql.=", pic='".mysql_real_escape_string($fb_profile_info["pic"])."'";
-			}	else {wordbooker_debugger("Failed to get Image information from FB"," ",0); }
+			}	else {wordbooker_debugger("Cache: Failed to get Image information from FB"," ",99); }
 			$sql.=", facebook_id='".$uid."'";
-			$sql.=", pages= '".mysql_real_escape_string($encoded_names)."'";
+			
 			if (is_array($fb_app_info)) {
 				$sql.=", use_facebook=".$fb_app_info["is_app_user"];
 			}
@@ -206,7 +211,9 @@ function wordbooker_poll_facebook($single_user=null) {
 	$limit_user="";
 	if (isset($single_user)) {$limit_user=" where user_id=".$single_user." limit 1";}
 	define ('DEBUG', false);
+	wordbooker_trim_errorlogs();
 	$wordbooker_settings =get_option('wordbooker_settings'); 
+	#var_dump($wordbooker_settings);
 	$debug_file='/tmp/wordbook_'.$table_prefix.'debug';
 	if (DEBUG) {
 		$fp = fopen($debug_file, 'a');
@@ -233,6 +240,7 @@ function wordbooker_poll_facebook($single_user=null) {
 	}
 
 	if ( !isset($wordbooker_settings['wordbook_comment_get'])) {
+		wordbooker_debugger("Comment Scrape not active. Cron Finished "," ",0) ; 
 		if (DEBUG) {
 			$debug_string=date("Y-m-d H:i:s",time())." : Comment Scrape not active. Cron Finished\n";
 			fwrite($fp, $debug_string);
@@ -248,6 +256,7 @@ function wordbooker_poll_facebook($single_user=null) {
 		return;
 	}
 	foreach ($wb_users as $wb_user){
+		wordbooker_debugger("Processing comment data for user ",$wb_user->user_id,0) ;
 		if (DEBUG) {
 			$debug_string="Processing data for user ".$wb_user->user_id."\n";
 			fwrite($fp, $debug_string);
@@ -257,6 +266,7 @@ function wordbooker_poll_facebook($single_user=null) {
 		// Now we need to check if they've set Auto Approve on comments.
 		$comment_approve=0;
 		if (isset($wordbooker_settings['wordbook_comment_approve'])) {$comment_approve=1;}
+		wordbooker_debugger("Checking to see if we have any posts to check for comment ",' ',0) ;
 		if (DEBUG) {
 			$debug_string=date("Y-m-d H:i:s",time())." : Checking to see if we have any posts to check for comments\n";
 			fwrite($fp, $debug_string);
@@ -264,6 +274,7 @@ function wordbooker_poll_facebook($single_user=null) {
 		// Go the postcomments table - this contains a list of FB post_ids, the wp post_id that corresponds to it and the timestamps of the last FB comment pulled.
 		$sql='Select fb_post_id,comment_timestamp,wp_post_id from ' . WORDBOOKER_POSTCOMMENTS . ' where fb_post_id like "'.$fbclient->users_getLoggedInUser().'%" order by fb_post_id desc ';	
 		$rows = $wpdb->get_results($sql);
+		wordbooker_debugger("Incoming Comment count: ".count($rows)," ",0) ;
 		// For each FB post ID we find we go out to the stream on Facebook and grab the comments.
 		if (count($rows)>0) {
 			foreach ($rows as $comdata_row) {
@@ -273,7 +284,8 @@ function wordbooker_poll_facebook($single_user=null) {
 					if (DEBUG) {
 						$debug_string="Number of comments to process for post ".$comdata_row->fb_post_id." is ".count($fbcomments) ."\n";
 						fwrite($fp, $debug_string);
-					}	
+					}
+					wordbooker_debugger("Incoming Comment count for Post ".$comdata_row->fb_post_id,count($fbcomments),0) ;	
 					foreach ($fbcomments as $comment) {
 						if (DEBUG) {
 							$debug_string="incoming comment time is ".$comment[xid]." and the last recorded comment time stamp was ".$comdata_row->comment_timestamp."\n";
@@ -282,6 +294,7 @@ function wordbooker_poll_facebook($single_user=null) {
 						// If the comment has a later timestamp than the one we currently have recorded then lets get some more information 
 						if ($comment[time]>$comdata_row->comment_timestamp) {
 							$fbuserinfo=$fbclient->users_getInfo($comment[fromid],'name,profile_url');
+							wordbooker_debugger("Comment found from ",$fbuserinfo[0][name],0) ;	
 							if (DEBUG) {
 								$debug_string="Comment : ".$comment[text]." was made at ".date("Y-m-d H:i:s",$comment[time])." by ".$fbuserinfo[0][name]." (".$comment[fromid].")\n";
 								fwrite($fp, $debug_string);
@@ -290,7 +303,7 @@ function wordbooker_poll_facebook($single_user=null) {
 							$data = array(
 								'comment_post_ID' => $comdata_row->wp_post_id,
 								'comment_author' => $fbuserinfo[0][name],
-								'comment_author_email' => get_bloginfo( 'admin_email' ),
+								'comment_author_email' => 'spambucket@tty.org.uk',
 								'comment_author_url' => $fbuserinfo[0][profile_url],
 								'comment_content' => $comment[text],
 								'comment_author_IP' => '127.0.0.1',
@@ -301,13 +314,17 @@ function wordbooker_poll_facebook($single_user=null) {
 							);
 							// change this to use wp_new_comment /includes/comment.php for docs
 							$pos = strripos($comment[text], "Comment: [from blog ]");
-							if ($pos === false) {wp_new_comment($data); }
+							if ($pos === false) {
+								wordbooker_debugger("Posting comment to blog"," ",0) ;
+								wp_new_comment($data);
+							}
 							$sql='update '. WORDBOOKER_POSTCOMMENTS .' set comment_timestamp='.$comment[time].' where fb_post_id="'.$comdata_row->fb_post_id.'" and wp_post_id='.$comdata_row->wp_post_id;
 							$result = $wpdb->query($sql);
 						} // end of new comment process	
 					} // End of Foreach process
 				}  // End of is_array check
 				else {
+					wordbooker_debugger("No Incoming Comments for Post : ",$comdata_row->fb_post_id,0) ;	
 					if (DEBUG) {
 						$debug_string=date("Y-m-d H:i:s",time())." : No comments to process for post :".$comdata_row->fb_post_id."\n";
 						fwrite($fp, $debug_string);
@@ -315,6 +332,7 @@ function wordbooker_poll_facebook($single_user=null) {
 				}
 			} // End of Foreach 
 		} // End of if count
+		wordbooker_debugger("No Incoming Comments : ",' ',0) ;	
 	} // end of foreach user
 	if (DEBUG) {
 		$debug_string=date("Y-m-d H:i:s",time())." : Cron Finished \n";

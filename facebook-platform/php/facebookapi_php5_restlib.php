@@ -159,8 +159,8 @@ function toggleDisplay(id, type) {
    */
   public function begin_batch() {
     if ($this->pending_batch()) {
-      $code = FacebookAPIErrorCodes::API_EC_BATCH_ALREADY_STARTED;
-      $description = FacebookAPIErrorCodes::$api_error_descriptions[$code];
+      $code = FacebookAPIErrorCodes1::API_EC_BATCH_ALREADY_STARTED;
+      $description = FacebookAPIErrorCodes1::$api_error_descriptions[$code];
       throw new FacebookRestClientException1($description, $code);
     }
 
@@ -173,8 +173,8 @@ function toggleDisplay(id, type) {
    */
   public function end_batch() {
     if (!$this->pending_batch()) {
-      $code = FacebookAPIErrorCodes::API_EC_BATCH_NOT_STARTED;
-      $description = FacebookAPIErrorCodes::$api_error_descriptions[$code];
+      $code = FacebookAPIErrorCodes1::API_EC_BATCH_NOT_STARTED;
+      $description = FacebookAPIErrorCodes1::$api_error_descriptions[$code];
       throw new FacebookRestClientException1($description, $code);
     }
 
@@ -3124,8 +3124,8 @@ function toggleDisplay(id, type) {
     if (!$this->pending_batch()) {
       if (!file_exists($file)) {
         $code =
-          FacebookAPIErrorCodes::API_EC_PARAM;
-        $description = FacebookAPIErrorCodes::$api_error_descriptions[$code];
+          FacebookAPIErrorCodes1::API_EC_PARAM;
+        $description = FacebookAPIErrorCodes1::$api_error_descriptions[$code];
         throw new FacebookRestClientException1($description, $code);
       }
 
@@ -3145,8 +3145,8 @@ function toggleDisplay(id, type) {
     }
     else {
       $code =
-        FacebookAPIErrorCodes::API_EC_BATCH_METHOD_NOT_ALLOWED_IN_BATCH_MODE;
-      $description = FacebookAPIErrorCodes::$api_error_descriptions[$code];
+        FacebookAPIErrorCodes1::API_EC_BATCH_METHOD_NOT_ALLOWED_IN_BATCH_MODE;
+      $description = FacebookAPIErrorCodes1::$api_error_descriptions[$code];
       throw new FacebookRestClientException1($description, $code);
     }
 
@@ -3385,7 +3385,7 @@ class FacebookRestClientException1 extends Exception {
  * Error codes and descriptions for the Facebook API.
  */
 
-class FacebookAPIErrorCodes {
+class FacebookAPIErrorCodes1 {
 
   const API_EC_SUCCESS = 0;
 
