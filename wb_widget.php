@@ -4,7 +4,7 @@
 Description: Facebook Status Widget. Needs Wordbook installing to work.
 Author: Stephen Atty
 Author URI: http://canalplan.blogdns.com/steve
-Version: 1.8.11
+Version: 1.8.14
 */
 
 /*
@@ -57,7 +57,7 @@ class WordbookWidget extends WP_Widget {
 	
                 if ($result->status) {			
 			$current_offset=0;
-			#$current_offset = get_option('gmt_offset');
+			$current_offset = get_option('gmt_offset');
                 	echo '<p><br /><a href="'.$result->url.'">'.$name.'</a> : ';
 			echo '<i>'.$result->status.'</i><br />';
        			if ($instance['df']=='fbt') { 
@@ -119,7 +119,7 @@ class WordbookWidget extends WP_Widget {
 
 
 /* register widget when loading the WP core */
-add_action('widgets_init', wordbooker_widgets);
+add_action('widgets_init', 'wordbooker_widgets');
 $plugin_dir = basename(dirname(__FILE__));
 #load_plugin_textdomain( 'wordbook', 'wp-content/plugins/' . $plugin_dir, $plugin_dir );
 
@@ -129,8 +129,8 @@ function wordbooker_widgets(){
 
 }
 
-register_sidebar_widget('FaceBook Status', 'widget_facebook');
-register_widget_control('FaceBook Status', 'fb_widget_control', '500', '500');
+wp_register_sidebar_widget('WP_SW1','FaceBook Status', 'widget_facebook');
+wp_register_widget_control('WP_SWC1','FaceBook Status', 'fb_widget_control', '500', '500');
 
 function nicetime($date)
 {
@@ -191,13 +191,17 @@ function widget_facebook($args) {
 	$name=$result->name;
  	if (strlen($dispname)>0) $name=$dispname; 
         if ($result->status) {
+		$current_offset=0;
+		$current_offset = get_option('gmt_offset');
         	echo '<br /><a href="'.$result->url.'">'.$name.'</a> : ';
 		echo '<i>'.$result->status.'</i><br />';
 		if ($dformat=='fbt') { 
  			echo '('.nicetime($result->updated).').'; 
 		}
  		else {
-			echo '('.date($dformat, $result->updated).').';
+			echo '('.date($dformat, $result->updated+(3600*$current_offset)).').';
+
+	
 		}
 	}
 	echo $after_widget;
