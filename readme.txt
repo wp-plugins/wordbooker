@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
 Requires at least: 2.8
 Tested up to: 3.0.1
-Stable tag: 1.8.17
+Stable tag: 1.8.18
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any  Facebook Fan Page that you are an administrator for
 
@@ -17,6 +17,11 @@ Various options including "attribute" lines and polling for comments and automat
 NOTE : You have to have PHP V5 installed for this plugin to work as the code contains several PHP V5 specific features.
 
 
+== IMPORTANT ==  
+
+Wordbooker 1.8 uses the new Faceobok OAUTH authorisation method. This means that when you upgrade you may find that you loose your "Session" with Facebook and you only get a partial option screen displayed. If this happens then simply reload the Wordbooker Options page and follow the instructions.
+
+
 == Installation ==
 
 1. [Download] (http://wordpress.org/extend/plugins/wordbooker/) the ZIP file.
@@ -24,10 +29,6 @@ NOTE : You have to have PHP V5 installed for this plugin to work as the code con
 1. Upload the `wordbooker` directory to the `/wp-content/plugins/` directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 1. Navigate to `Options` &rarr; `Wordbooker` for configuration and follow the on-screen prompts.
-
-== IMPORTANT ==  
-
-Wordbooker 1.8 uses the new Faceobok OAUTH authorisation method. This means that when you upgrade you may find that you loose your "Session" with Facebook and you only get a partial option screen displayed. If this happens then simply reload the Wordbooker Options page and follow the instructions.
 
 
 == Features ==
@@ -128,7 +129,7 @@ If you have [Facebook Connect](http://wordpress.org/extend/plugins/wp-facebookco
 
 == Upgrade Notice ==
 
-If you've upgrading from  Robert Tsai'ss Wordbook plugin ( http://wordpress.org/extend/plugins/wordbook ) then you'll have to deactivate it first and make sure that the tables have been deleted from the database. If they haven't then Wordbooker will do some odd things and the fix is then to deactivate Wordbooker and then re-activate it again
+If you've upgrading from  Robert Tsai's Wordbook plugin ( http://wordpress.org/extend/plugins/wordbook ) then you'll have to deactivate it first and make sure that the tables have been deleted from the database. If they haven't then Wordbooker will do some odd things and the fix is then to deactivate Wordbooker and then re-activate it again
 
 If you are upgrading from an earlier version of wordbooker then DO NOT deactivate the plugin before you upgrade as this will remove the tables. Simply delete the contents of the wordbooker folder and upload the new version.
 
@@ -136,6 +137,19 @@ If you are upgrading from an earlier version of wordbooker then DO NOT deactivat
 
 
 == Changelog ==
+
+= Version 1.8.18  24/11/2010 =
+- Fixed the huge fatal bug in comment handling which affected some users
+- Revised the Like / Share options to make them more flexible
+- Added option to hide the FB Recent Activity on the Wordbooker Options Page
+- Added option to change email address used when importing comments from FB
+- Added an index to the error log table
+- Changed the code that checks for bouncing comments
+- Added a check for duplicate comment content coming from FB to stop Wordpress blowing up
+- Hid / Deactivated the "Poll for comments when visiting this page" option
+- Added more debugging to the comment handling code
+- Added some .2 second pauses in the cron processes to stop the plugin exceeding the FB transaction per second limit
+
 
 = Version 1.8.17  22/11/2010 =
 - Fixed a bug with Like and Share logic and added missing options to pre 2.9 Options page
