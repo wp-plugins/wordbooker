@@ -3,7 +3,7 @@
 Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
 Requires at least: 2.8
-Tested up to: 3.0.1
+Tested up to: 3.1-RC2
 Stable tag: 1.8.18
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any  Facebook Fan Page that you are an administrator for
@@ -22,9 +22,17 @@ NOTE : You have to have PHP V5 installed for this plugin to work as the code con
 Wordbooker 1.8 uses the new Faceobok OAUTH authorisation method. This means that when you upgrade you may find that you loose your "Session" with Facebook and you only get a partial option screen displayed. If this happens then simply reload the Wordbooker Options page and follow the instructions.
 
 
+== Upgrading Wordbooker ==
+
+If you are upgrading from an earlier version of wordbooker then DO NOT deactivate the plugin before you upgrade as this will remove all the settings and remove the tables which means you will loose all your configuration and posting/comment history. To upgrade Wordbooker you should download the latest version of the plugin, then upload the contents so that the existing Wordbooker files on the server are over-written.
+
+
+If you've upgrading from  Robert Tsai's Wordbook plugin ( http://wordpress.org/extend/plugins/wordbook ) then you'll have to deactivate it first and make sure that the tables have been deleted from the database. If they haven't then Wordbooker will do some odd things and the fix is then to deactivate Wordbooker and then re-activate it again
+
+
 == Installation ==
 
-1. [Download] (http://wordpress.org/extend/plugins/wordbooker/) the ZIP file.
+1. [Download] (http://wordpress.org/extend/plugins/wordbooker/) the latest version of Wordbooker.
 1. Unzip the ZIP file.
 1. Upload the `wordbooker` directory to the `/wp-content/plugins/` directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
@@ -127,16 +135,23 @@ If you have [Facebook Connect](http://wordpress.org/extend/plugins/wp-facebookco
 2. Wordbooker Options : Overrides when posting
 
 
-== Upgrade Notice ==
-
-If you've upgrading from  Robert Tsai's Wordbook plugin ( http://wordpress.org/extend/plugins/wordbook ) then you'll have to deactivate it first and make sure that the tables have been deleted from the database. If they haven't then Wordbooker will do some odd things and the fix is then to deactivate Wordbooker and then re-activate it again
-
-If you are upgrading from an earlier version of wordbooker then DO NOT deactivate the plugin before you upgrade as this will remove the tables. Simply delete the contents of the wordbooker folder and upload the new version.
-
 
 
 
 == Changelog ==
+
+= Version 1.8.19   06/01/2011 =
+- "Real Comment" check stopped comments from non-logged in users from being processed. Changed this to look for Facebook links
+- "Auto approve comments" option now does a direct insert to the comments table : which should bypass some of the problems with Spam checkers eating comments.
+- Duplicate post checking re-coded, now if a post has been handled within the last 60 seconds its deemed a re-fire and ignored
+- Redundant code for handling posts made by XMLRPC clients commented out.
+- Tweaked some of the debug code
+- Minor changes to the Cache handling code to make it slightly more resilient.
+- Changed the code for handling og:image tags
+- Changed Curl/Fopen check code as it could mis-report
+- Changed SimpleXML check code as it was mis-reporting.
+- Checked compatability with Wordpress 3.1
+
 
 = Version 1.8.18  24/11/2010 =
 - Fixed the huge fatal bug in comment handling which affected some users

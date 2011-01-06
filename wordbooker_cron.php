@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Cron
 Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.8.18
+Version: 1.8.19
 Description: Collection of processes that are often handled by wp_cron scheduled jobs
 Author: Steve Atty
 */
@@ -13,11 +13,10 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 	wordbooker_debugger("Cache Refresh Commence ",$user_id,0) ; 
 	$result = $wpdb->get_row("select facebook_id from ".WORDBOOKER_USERDATA." where user_ID=".$user_id);
 	$uid=$result->facebook_id;
+	$user_info = get_userdata($user_id);
 	$wordbooker_settings =get_option('wordbooker_settings'); 
-	$debug_file='/tmp/wordbook_cache_'.$table_prefix.'debug';
-	$debug_string=date("Y-m-d H:i:s",time())." : Processing for ".$uid."\n";
-	wordbooker_debugger("Cache Refresh for ",$uid,0) ;
-	wordbooker_debugger("UID length : ",strlen($uid),0) ;  
+	wordbooker_debugger("Cache Refresh for ",$user_info->user_login,0) ;
+#	wordbooker_debugger("UID length : ",strlen($uid),0) ;  
 	# If we've not got the ID from the table lets try to get it from the logged in user
 	if (strlen($uid)==0) {
 		wordbooker_debugger("No Cache record for user - getting Logged in user ",$uid,0) ; 
@@ -34,8 +33,8 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 	usleep(200000);
 	# If we now have a uid lets go and do a few things.
 	if (strlen($uid)>0){
-		wordbooker_debugger("Cache processing for user : ",$uid,0) ;
-		wordbooker_debugger("Getting Permisions for : ",$uid,0) ;
+		wordbooker_debugger("Cache processing for user : ",$user_info->user_login,0) ;
+		wordbooker_debugger("Getting Permisions for : ",$user_info->user_login,0) ;
 		$permlist= array(WORDBOOKER_FB_PUBLISH_STREAM,WORDBOOKER_FB_STATUS_UPDATE,WORDBOOKER_FB_READ_STREAM,WORDBOOKER_FB_CREATE_NOTE);
 		foreach($permlist as $perm){
 		try {
@@ -163,9 +162,11 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 		#var_dump($fb_page_info);
 			if (is_array($fb_page_info)) { 
 				if (is_array($fb_page_info)) { $encoded_names=str_replace('\\','\\\\',serialize($fb_page_info));}
+					$mbc=false;
+					if (function_exists('mb_convert_encoding')) { $mbc=true;}
 					 foreach ( $fb_page_info as $pageinfo ) {	
 					$pages["page_id"]=$pageinfo["page_id"];
-					if (function_exists('mb_convert_encoding')) {
+					if ($mbc) {
 						$pages["name"]=mb_convert_encoding($pageinfo["name"],'UTF-8');
 					}
 					else
@@ -185,13 +186,11 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 					wordbooker_debugger("Found [[PV]] - not updating status"," ",0);
 				} 
 				else {
-					
 					wordbooker_debugger("Setting status as  : ",mysql_real_escape_string($fb_status_info["message"]),0) ;
 					$sql.=", status='".mysql_real_escape_string($fb_status_info["message"])."'";
 					$sql.=", updated= Coalesce(".mysql_real_escape_string($fb_status_info["time"].",1)");
 				}
 			} 
-		#	else {wordbooker_debugger("Cache: Failed to get Status information from FB"," ",99); }
 			if (is_array($fb_profile_info)) {
 				wordbooker_debugger("Setting URL as  : ",mysql_real_escape_string($fb_profile_info["url"]),0) ;
 				$sql.=", url='".mysql_real_escape_string($fb_profile_info["url"])."'";
@@ -213,11 +212,8 @@ function wordbooker_poll_facebook($single_user=null) {
 	# If a user ID has been passed in then restrict to that single user.
 	$limit_user="";
 	if (isset($single_user)) {$limit_user=" where user_id=".$single_user." limit 1";}
-	define ('DEBUG', false);
 	wordbooker_trim_errorlogs();
 	$wordbooker_settings =get_option('wordbooker_settings'); 
-	$debug_file='/tmp/wordbook_'.$table_prefix.'debug';
-
 	# This runs through the Cached users and refreshes them
       	$sql="Select user_id from ".WORDBOOKER_USERDATA.$limit_user;
         $wb_users = $wpdb->get_results($sql);
@@ -228,7 +224,7 @@ function wordbooker_poll_facebook($single_user=null) {
 			$wbuser = wordbooker_get_userdata($wb_user->user_id);
 			$fbclient = wordbooker_fbclient($wbuser);
 			wordbooker_cache_refresh($wb_user->user_id,$fbclient);
-			sleep(1);
+			usleep(200000);
 		}
 		wordbooker_debugger("Batch Cache Refresh completed "," ",0) ; 
 	}
@@ -247,17 +243,19 @@ function wordbooker_poll_facebook($single_user=null) {
 	foreach ($wb_users as $wb_user){
 		wordbooker_debugger("Processing comment data for user ",$wb_user->user_id,0) ;	
 		$wbuser = wordbooker_get_userdata($wb_user->user_id);
-		$fbclient = wordbooker_fbclient($wbuser);
+		$fbuserid=wordbooker_get_cache($wb_user->user_id,'facebook_id'); 
 		// Now we need to check if they've set Auto Approve on comments.
 		$comment_approve=0;
 		if (isset($wordbooker_settings['wordbook_comment_approve'])) {$comment_approve=1;}
 		wordbooker_debugger("Checking to see if we have any posts to check for comment ",' ',0) ;
 		// Go the postcomments table - this contains a list of FB post_ids, the wp post_id that corresponds to it and the timestamps of the last FB comment pulled.
-		$sql='Select fb_post_id,comment_timestamp,wp_post_id from ' . WORDBOOKER_POSTCOMMENTS . ' where fb_post_id like "'.$fbclient->users_getLoggedInUser().'%" order by fb_post_id desc ';	
+		$sql='Select fb_post_id,comment_timestamp,wp_post_id from ' . WORDBOOKER_POSTCOMMENTS . ' where fb_post_id like "'.$fbuserid->facebook_id.'%" order by fb_post_id desc ';	
 		$rows = $wpdb->get_results($sql);
+
 		wordbooker_debugger("Number of posts to check for comments : ",count($rows),0) ;
 		// For each FB post ID we find we go out to the stream on Facebook and grab the comments.
-		if (count($rows)>0) {
+		if (count($rows)>0) {		
+			$fbclient = wordbooker_fbclient($wbuser);
 			foreach ($rows as $comdata_row) {
 				$fbsql='select time,text,fromid,xid from comment where time >'.$comdata_row->comment_timestamp." and post_id='".$comdata_row->fb_post_id."'";
 				try {
@@ -273,22 +271,23 @@ function wordbooker_poll_facebook($single_user=null) {
 					foreach ($fbcomments as $comment) {
 						// If the comment has a later timestamp than the one we currently have recorded then lets get some more information 
 						if ($comment[time]>$comdata_row->comment_timestamp) {
-						#	$fbuserinfo=array();
 							$fbuserinfo=$fbclient->users_getInfo($comment[fromid],'name,profile_url');
-					#		var_dump($fbuserinfo);
 							if (is_array($fbuserinfo[0])) {
-							wordbooker_debugger("Comment found from ",$fbuserinfo[0][name],0) ;	
+							wordbooker_debugger("Comment found from ",$fbuserinfo[0]['name'],0) ;	
 							$commemail=$wordbooker_settings['wordbooker_comment_email'];
 							$time = date("Y-m-d H:i:s",$comment[time]);
 							$data = array(
 								'comment_post_ID' => $comdata_row->wp_post_id,
-								'comment_author' => $fbuserinfo[0][name],
+								'comment_author' => $fbuserinfo[0]['name'],
 								'comment_author_email' => $commemail,
-								'comment_author_url' => $fbuserinfo[0][profile_url],
-								'comment_content' => $comment[text],
+								'comment_author_url' => $fbuserinfo[0]['profile_url'],
+								'comment_content' => $comment['text'],
 								'comment_author_IP' => '127.0.0.1',
 								'comment_date' => $time,
 								'comment_date_gmt' => $time,
+								'comment_parent'=> 0,
+								'user_id' => 1,
+							   	'comment_agent' => 'Wordbooker plugin '.WORDBOOKER_CODE_RELEASE,
 								'comment_approved' => $comment_approve,
 							);
 							// change this to use wp_new_comment /includes/comment.php for docs
@@ -304,13 +303,16 @@ function wordbooker_poll_facebook($single_user=null) {
 									wordbooker_debugger("Looks like a duplicate comment so discarding it"," ",0) ;
 								} else {
 									wordbooker_debugger("Posting comment to blog"," ",0) ;
-									wp_new_comment($data);
+									if ($comment_approve==1){
+										 wp_insert_comment($data);
+									} else {
+										wp_new_comment($data);
+									}
 								}
 							}
-							}
-							$sql='update '. WORDBOOKER_POSTCOMMENTS .' set comment_timestamp='.$comment[time].' where fb_post_id="'.$comdata_row->fb_post_id.'" and wp_post_id='.$comdata_row->wp_post_id;
-							$result = $wpdb->query($sql);
-							
+						}
+						$sql='update '. WORDBOOKER_POSTCOMMENTS .' set comment_timestamp='.$comment['time'].' where fb_post_id="'.$comdata_row->fb_post_id.'" and wp_post_id='.$comdata_row->wp_post_id;
+						$result = $wpdb->query($sql);
 						} // end of new comment process	
 					sleep(1);
 					} // End of Foreach process

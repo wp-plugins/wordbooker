@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Options 
 Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.8.18
+Version: 1.8.19
 Description: Advanced Options for the WordBooker Plugin
 Author: Steve Atty
 */
@@ -313,10 +313,10 @@ function wordbooker_option_manager() {
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_share_button_category]" '.$checked_flag[$wordbooker_settings["wordbooker_share_button_category"]].' ><br />';
 
 		echo '<label for="wb_facebook_like_page">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Share button on Pages"). ' : </label>';
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_share_button_page]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_page"]].' ><br />';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_share_button_page]" '.$checked_flag[$wordbooker_settings["wordbooker_share_button_page"]].' ><br />';
 
 		echo '<label for="wb_facebook_like">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Share button in each post"). ' : </label>';
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_share_button_post]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_post"]].' ><br />';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_share_button_post]" '.$checked_flag[$wordbooker_settings["wordbooker_share_button_post"]].' ><br />';
 
 
 		echo '<label for="wb_fbshare_location">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__('Facebook Share - Display Button ').' :</label> <select id="wordbook_fbshare_location" name="wordbooker_settings[wordbook_fbshare_location]"  >';
@@ -364,7 +364,7 @@ function wordbooker_option_manager() {
 
 
 		echo '<label for="wb_attribute">'.__("Post Attribute"). ' : </label>';
-		echo '<INPUT NAME="wordbooker_settings[wordbook_attribute]" size=60 maxlength=60 value="'.stripslashes($wordbooker_settings["wordbook_attribute"]).'"><br />';
+		echo '<INPUT NAME="wordbooker_settings[wordbook_attribute]" size=60 maxlength=240 value="'.stripslashes($wordbooker_settings["wordbook_attribute"]).'"><br />';
 
 		echo '<label for="wb_publish_timeframe">'.__("Republish Post if edited more than"). ' : </label>';
 		echo '<INPUT NAME="wordbooker_settings[wordbook_republish_time_frame]" size=3 maxlength=3 value='.$wordbooker_settings["wordbook_republish_time_frame"].'> '.__("days ago").' <INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbook_republish_time_obey]" '.$checked_flag[$wordbooker_settings["wordbook_republish_time_obey"]].' ><br />';
@@ -395,7 +395,7 @@ function wordbooker_option_manager() {
 		echo '<label for="wb_import_comment">'.__("Import Comments from Facebook for Wordbook Posts"). ': </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbook_comment_get]" '.$checked_flag[$wordbooker_settings["wordbook_comment_get"]]. '/> ( '.__("Next Scheduled fetch is in").' : '.date('i',(wp_next_scheduled('wb_cron_job') - time ())).' minute(s) )<br />';
 
-		echo '<label for="wb_publish_comment_approve">'.__("Auto Approve imported comments"). ' :</label> ';
+		echo '<label for="wb_publish_comment_approve">'.__("Auto Approve imported comments / Bypass Spam checks"). ' :</label> ';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbook_comment_approve]" '.$checked_flag[$wordbooker_settings["wordbook_comment_approve"]].' /><br />';
 
 		echo '<label for="wb_publish_comment_push">'.__("Push Comments up to Facebook"). ' : </label>';
@@ -479,12 +479,12 @@ if(ADVANCED_DEBUG) {
 		echo '<label for="wb_facebook_like_front">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Share button on front page"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_share_button_frontpage]" '.$checked_flag[$wordbooker_settings["wordbooker_share_button_frontpage"]].' ><br />';
 
-		echo '<label for="wb_facebook_like">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Share button in each post"). ' : </label>';
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_share_button_post]" '.$checked_flag[$wordbooker_settings["wordbooker_share_button_post"]].' ><br />';
-
 		echo '<label for="wb_facebook_like_page">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Share button on Pages"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_share_button_page]" '.$checked_flag[$wordbooker_settings["wordbooker_share_button_page"]].' ><br />';
 
+
+		echo '<label for="wb_facebook_like">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Share button in each post"). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_share_button_post]" '.$checked_flag[$wordbooker_settings["wordbooker_share_button_post"]].' ><br />';
 
 
 		echo '<label for="wb_facebook_like_front">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Show Facebook Share button on Category pages"). ' : </label>';
@@ -538,7 +538,7 @@ if(ADVANCED_DEBUG) {
 		echo "</select><br />";
 
 		echo '<label for="wb_attribute">'.__("Post Attribute"). ' : </label>';
-		echo '<INPUT NAME="wordbooker_settings[wordbook_attribute]" size=60 maxlength=60 value="'.stripslashes($wordbooker_settings["wordbook_attribute"]).'"><br />';
+		echo '<INPUT NAME="wordbooker_settings[wordbook_attribute]" size=60 maxlength=240 value="'.stripslashes($wordbooker_settings["wordbook_attribute"]).'"><br />';
 
 		echo '<label for="wb_publish_timeframe">'.__("Republish Post if edited more than"). ' : </label>';
 		echo '<INPUT NAME="wordbooker_settings[wordbook_republish_time_frame]" size=3 maxlength=3 value='.$wordbooker_settings["wordbook_republish_time_frame"].'> '.__("days ago").' <INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbook_republish_time_obey]" '.$checked_flag[$wordbooker_settings["wordbook_republish_time_obey"]].' ><br />';
@@ -563,7 +563,7 @@ if(ADVANCED_DEBUG) {
 		echo '<label for="wb_import_comment">'.__("Import Comments from Facebook for Wordbook Posts"). ': </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbook_comment_get]" '.$checked_flag[$wordbooker_settings["wordbook_comment_get"]]. '/> ( '.__("Next Scheduled fetch is at").' : '.date_i18n(get_option('time_format'),wp_next_scheduled('wb_cron_job')).' ) <br />';
 
-		echo '<label for="wb_publish_comment_approve">'.__("Auto Approve imported comments"). ' :</label> ';
+		echo '<label for="wb_publish_comment_approve">'.__("Auto Approve imported comments / Bypass Spam Checks"). ' :</label> ';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbook_comment_approve]" '.$checked_flag[$wordbooker_settings["wordbook_comment_approve"]].' /><br />';
 
 		echo '<label for="wb_publish_comment_push">'.__("Push Comments up to Facebook"). ' : </label>';
@@ -627,9 +627,10 @@ if(ADVANCED_DEBUG) {
 			echo '&nbsp;'.__('publishing to a personal wall, post to the following fan page').' : <select name="wordbook_page_post" ><option selected="yes" value=-100>'.__('No Fan Page').'&nbsp;&nbsp;</option>';
 			$option="";
 			foreach ($fanpages as $fan_page) {
-				if ($fan_page[page_id]==$wordbookuser_settings["wordbook_page_post"] ) {$option .= '<option selected="yes" value='.$fan_page[page_id].'>';} else { $option .= '<option value='.$fan_page[page_id].'>';}
-				$option .= $fan_page[name]."&nbsp;&nbsp;";
-				$option .= '</option>';
+				if (strlen($fan_page['name'])>=2) {
+				if ($fan_page['page_id']==$wordbookuser_settings["wordbook_page_post"] ) {$option .= '<option selected="yes" value='.$fan_page['page_id'].'>';} else { $option .= '<option value='.$fan_page['page_id'].'>';}
+				$option .= $fan_page['name']." (".$fan_page['page_id'].")&nbsp;&nbsp;";
+				$option .= '</option>';}
 			}
 			echo $option;
 			echo '</select><br />'; 
@@ -646,7 +647,7 @@ if(ADVANCED_DEBUG) {
 		echo '</select><br />';
 
 		echo '<label for="wb_attribute">'.__('Post Attribute').' : </label>';
-		echo '<INPUT NAME="wordbook_attribute" size=60 maxlength=60 value="'.stripslashes($wordbookuser_settings["wordbook_attribute"]).'"><br />';
+		echo '<INPUT NAME="wordbook_attribute" size=60 maxlength=240 value="'.stripslashes($wordbookuser_settings["wordbook_attribute"]).'"><br />';
 
 		echo '<label for="wb_action_link">'.__('Action Link Option').' : </label><select id="wordbook_actionlink" name="wordbook_actionlink"  >';	
        		$arr = array(0=> __("Same as Blog"), 100=> __("None"),  200=> __("Share Link"), 300=>__("Read Full Article"));
@@ -691,6 +692,7 @@ if(ADVANCED_DEBUG) {
 		echo '<input type="submit" value="'.__("Save User Options").'" name="swbus" class="button-primary"  />&nbsp;&nbsp;&nbsp;<input type="submit" name="rwbus" value="'.__("Reset to Blog Defaults").'" class="button-primary"  /></form><br /></div><hr>';
 		
 	// Lets poll if they want to - we only poll for this user
+			#$dummy=wordbooker_poll_facebook($user_ID);
 		if ( isset($wordbooker_settings["wordbook_comment_poll"])  && ADVANCED_DEBUG ){
 			$dummy=wordbooker_poll_facebook($user_ID);
 		}
@@ -826,9 +828,10 @@ function wordbooker_inner_custom_box() {
 			$option='<select name="wordbook_page_post" > ';
 			if ($wordbooker_settings['wordbook_page_post']==-100) { $option .= '<option selected="yes" value=-100>'.__('No Fan Page').'</option>';} else { $option .= '<option value=-100>'.__('Select Fan Page').'</option>';}
 			foreach ($fanpages as $fan_page) {
-				if ($fan_page[page_id]==$wordbooker_settings['wordbook_page_post']){ $option .= '<option selected="yes" value="'.$fan_page[page_id].'" >'.$fan_page[name].'</option>';}
-		       		else {$option .= '<option value="'.$fan_page[page_id].'" >'.$fan_page[name].'&nbsp;&nbsp;</option>';}
-				$option .= '</option>';
+				if (strlen($fan_page['name'])>=2) {
+				if ($fan_page['page_id']==$wordbooker_settings['wordbook_page_post']){ $option .= '<option selected="yes" value="'.$fan_page['page_id'].'" >'.$fan_page['name'].'</option>';}
+		       		else {$option .= '<option value="'.$fan_page['page_id'].'" >'.$fan_page['name'].' ('.$fan_page['page_id'].')&nbsp;&nbsp;</option>';}
+				$option .= '</option>';}
 			}
 			echo  ": ".$option;
 			echo '</select><br />'; 

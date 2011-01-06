@@ -497,7 +497,7 @@ class Facebook2
    *
    * @param Array $params method call object
    * @return the decoded response object
-   * @throws FacebookApiException
+   * @throws FacebookApiException2
    */
   protected function _restserver($params) {
     // generic application level parameters
@@ -511,7 +511,7 @@ class Facebook2
 
     // results are returned, errors are thrown
     if (is_array($result) && isset($result['error_code'])) {
-      throw new FacebookApiException($result);
+      throw new FacebookApiException2($result);
     }
     return $result;
   }
@@ -523,7 +523,7 @@ class Facebook2
    * @param String $method the http method (default 'GET')
    * @param Array $params the query/post data
    * @return the decoded response object
-   * @throws FacebookApiException
+   * @throws FacebookApiException2
    */
   protected function _graph($path, $method='GET', $params=array()) {
     if (is_array($method) && empty($params)) {
@@ -539,7 +539,7 @@ class Facebook2
 
     // results are returned, errors are thrown
     if (is_array($result) && isset($result['error'])) {
-      $e = new FacebookApiException($result);
+      $e = new FacebookApiException2($result);
       switch ($e->getType()) {
         // OAuth 2.0 Draft 00 style
         case 'OAuthException':
@@ -558,7 +558,7 @@ class Facebook2
    * @param String $path the path (required)
    * @param Array $params the query/post data
    * @return the decoded response object
-   * @throws FacebookApiException
+   * @throws FacebookApiException2
    */
   protected function _oauthRequest($url, $params) {
     if (!isset($params['access_token'])) {
@@ -610,7 +610,7 @@ class Facebook2
     curl_setopt_array($ch, $opts);
     $result = curl_exec($ch);
     if ($result === false) {
-      $e = new FacebookApiException(array(
+      $e = new FacebookApiException2(array(
         'error_code' => curl_errno($ch),
         'error'      => array(
           'message' => curl_error($ch),
