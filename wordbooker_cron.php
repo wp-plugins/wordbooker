@@ -248,12 +248,22 @@ function wordbooker_poll_facebook($single_user=null) {
 		wordbooker_debugger("Processing comment data for user ",$wb_user->user_id,0) ;	
 		$wbuser = wordbooker_get_userdata($wb_user->user_id);
 		$fbclient = wordbooker_fbclient($wbuser);
+		try {
+			$fbuserid=$fbclient->users_getLoggedInUser()
+			var_dump($fbuserid);
+		}
+		catch (Exception $e) 
+		{
+			$error_msg = $e->getMessage();
+			wordbooker_debugger("Comment : Failed to get User session : ".$error_msg," ",99);
+
+		}
 		// Now we need to check if they've set Auto Approve on comments.
 		$comment_approve=0;
 		if (isset($wordbooker_settings['wordbook_comment_approve'])) {$comment_approve=1;}
 		wordbooker_debugger("Checking to see if we have any posts to check for comment ",' ',0) ;
 		// Go the postcomments table - this contains a list of FB post_ids, the wp post_id that corresponds to it and the timestamps of the last FB comment pulled.
-		$sql='Select fb_post_id,comment_timestamp,wp_post_id from ' . WORDBOOKER_POSTCOMMENTS . ' where fb_post_id like "'.$fbclient->users_getLoggedInUser().'%" order by fb_post_id desc ';	
+		$sql='Select fb_post_id,comment_timestamp,wp_post_id from ' . WORDBOOKER_POSTCOMMENTS . ' where fb_post_id like "'.$fbuserid.'%" order by fb_post_id desc ';	
 		$rows = $wpdb->get_results($sql);
 		wordbooker_debugger("Number of posts to check for comments : ",count($rows),0) ;
 		// For each FB post ID we find we go out to the stream on Facebook and grab the comments.
