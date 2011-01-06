@@ -3,10 +3,10 @@
 Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
 Requires at least: 2.8
-Tested up to: 3.0
-Stable tag: 1.8.13
+Tested up to: 3.1-RC2
+Stable tag: 1.8.18
 
-This plugin allows you to cross-post your blog posts to your Facebook Wall. 
+This plugin allows you to cross-post your blog posts to your Facebook Wall and to any  Facebook Fan Page that you are an administrator for
 
 == Description ==
 
@@ -17,17 +17,26 @@ Various options including "attribute" lines and polling for comments and automat
 NOTE : You have to have PHP V5 installed for this plugin to work as the code contains several PHP V5 specific features.
 
 
+== IMPORTANT ==  
+
+Wordbooker 1.8 uses the new Faceobok OAUTH authorisation method. This means that when you upgrade you may find that you loose your "Session" with Facebook and you only get a partial option screen displayed. If this happens then simply reload the Wordbooker Options page and follow the instructions.
+
+
+== Upgrading Wordbooker ==
+
+If you are upgrading from an earlier version of wordbooker then DO NOT deactivate the plugin before you upgrade as this will remove all the settings and remove the tables which means you will loose all your configuration and posting/comment history. To upgrade Wordbooker you should download the latest version of the plugin, then upload the contents so that the existing Wordbooker files on the server are over-written.
+
+
+If you've upgrading from  Robert Tsai's Wordbook plugin ( http://wordpress.org/extend/plugins/wordbook ) then you'll have to deactivate it first and make sure that the tables have been deleted from the database. If they haven't then Wordbooker will do some odd things and the fix is then to deactivate Wordbooker and then re-activate it again
+
+
 == Installation ==
 
-1. [Download] (http://wordpress.org/extend/plugins/wordbooker/) the ZIP file.
+1. [Download] (http://wordpress.org/extend/plugins/wordbooker/) the latest version of Wordbooker.
 1. Unzip the ZIP file.
 1. Upload the `wordbooker` directory to the `/wp-content/plugins/` directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 1. Navigate to `Options` &rarr; `Wordbooker` for configuration and follow the on-screen prompts.
-
-== IMPORTANT ==  
-
-Wordbooker 1.8 uses the new Faceobok OAUTH authorisation method. This means that when you upgrade you may find that you loose your "Session" with Facebook and you only get a partial option screen displayed. If this happens then simply reload the Wordbooker Options page and follow the instructions.
 
 
 == Features ==
@@ -126,16 +135,82 @@ If you have [Facebook Connect](http://wordpress.org/extend/plugins/wp-facebookco
 2. Wordbooker Options : Overrides when posting
 
 
-== Upgrade Notice ==
-
-If you've upgrading from  Robert Tsai'ss Wordbook plugin ( http://wordpress.org/extend/plugins/wordbook ) then you'll have to deactivate it first and make sure that the tables have been deleted from the database
-
-If you are upgrading from an earlier version of wordbooker then DO NOT deactivate the plugin before you upgrade as this will remove the tables. Simply delete the contents of the wordbooker folder and upload the new version.
-
 
 
 
 == Changelog ==
+
+= Version 1.8.19   06/01/2011 =
+- "Real Comment" check stopped comments from non-logged in users from being processed. Changed this to look for Facebook links
+- "Auto approve comments" option now does a direct insert to the comments table : which should bypass some of the problems with Spam checkers eating comments.
+- Duplicate post checking re-coded, now if a post has been handled within the last 60 seconds its deemed a re-fire and ignored
+- Redundant code for handling posts made by XMLRPC clients commented out.
+- Tweaked some of the debug code
+- Minor changes to the Cache handling code to make it slightly more resilient.
+- Changed the code for handling og:image tags
+- Changed Curl/Fopen check code as it could mis-report
+- Changed SimpleXML check code as it was mis-reporting.
+- Checked compatability with Wordpress 3.1
+
+
+= Version 1.8.18  24/11/2010 =
+- Fixed the huge fatal bug in comment handling which affected some users
+- Revised the Like / Share options to make them more flexible
+- Added option to hide the FB Recent Activity on the Wordbooker Options Page
+- Added option to change email address used when importing comments from FB
+- Added an index to the error log table
+- Changed the code that checks for bouncing comments
+- Added a check for duplicate comment content coming from FB to stop Wordpress blowing up
+- Hid / Deactivated the "Poll for comments when visiting this page" option
+- Added more debugging to the comment handling code
+- Added some .2 second pauses in the cron processes to stop the plugin exceeding the FB transaction per second limit
+
+
+= Version 1.8.17  22/11/2010 =
+- Fixed a bug with Like and Share logic and added missing options to pre 2.9 Options page
+- Fixed a bug where the publish window check fired and stopped a post being made.
+- Fixed a bug where urls were lost doing scheduled posts with URL shorteners enabled
+- Fixed a bug where setting were sometimes getting lost for Scheduled posts.
+- Fixed a bug which may have caused comments not to be processed
+- Changed the email for imported comments so it now will use a Wordbooker Gravtar
+- Settings were getting trashed when Autosave ran. Changed Wordbooker to basically do nothing when Autosave fires so changes to Wordbooker options are not lost.
+- Null values for Update time from Facebook now handled.
+- Changed some JSON calls to handle older versions of JSON which expect a different number of parameters.
+- Changed extract trim length to handle multibyte characters (Thanks to Kensuke Akai for the fix)
+- Changed the Page fetch code in the cron job to hopefully handle FB FQL failures.
+- Added support for Like/Share on Category pages
+- Added support for YAPB plugin
+- Added a error/diagnostic log clear down call to the cron to keep the log file "tidy".
+- Added a check for broken JSON installs where the function is there but PHP returns no version information.
+- Added a check to the header function so that it only works on published posts (This fixes a problem with the "Share Drafts" plugin)
+- Finally put some diagnostics in the comment handling code.
+
+
+= Version 1.8.16   07/11/2010 =
+- SVN mess up caused incorrect file versions to get released
+
+
+= Version 1.8.15   07/11/2010 =
+- Fixed a bug where the image links were broken
+- Fixed a bug where the post links were broken
+- Changed the debug process so that key process stages are always written to the diagnostic log
+- Changed some more function/class names to try to avoid clashes with other FB related plugins.
+- Changed some internal calls which were depreciated.
+
+
+
+= Version 1.8.14   04/11/2010 =
+- Added support for quicktranslate tags
+- Fixed a bug where wpg2 tags were left in the excerpt.
+- Fixed a bug where post level options were being ignored
+- Fixed a bug where post level options were being lost on Draft save.
+- Moved Graph API calls back to Curl - but have left fopen based library in archive
+- Made Fopen calls silent to stop it barfing messages on screen on incorrectly configured webservers.
+- Added wp-includes to the list of excluded image directories
+- Changed name of a couple of internal functions to stop clashes with other plugins.
+- Changed names of a couple of classes to avoid clashes with badly coded Facebook plugins
+- Added support for URL shortener plugins : currently works with "YOURLS: WordPress to Twitter" and "url_shortener" plugins
+
 
 = Version 1.8.13   30/09/2010 =
 - Fixed a bug where images were not being published - was resetting an array by accident.
