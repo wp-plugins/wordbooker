@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Cron
 Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.8.20
+Version: 1.8.21
 Description: Collection of processes that are often handled by wp_cron scheduled jobs
 Author: Steve Atty
 */
@@ -286,7 +286,7 @@ function wordbooker_poll_facebook($single_user=null) {
 								'comment_date' => $time,
 								'comment_date_gmt' => $time,
 								'comment_parent'=> 0,
-								'user_id' => 1,
+								'user_id' => 0,
 							   	'comment_agent' => 'Wordbooker plugin '.WORDBOOKER_CODE_RELEASE,
 								'comment_approved' => $comment_approve,
 							);
