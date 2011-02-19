@@ -2,8 +2,8 @@
 
 /**
 Extension Name: Wordbooker Options 
-Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.8.21
+Extension URI: http://wordbooker.tty.org.uk
+Version: 1.8.22
 Description: Advanced Options for the WordBooker Plugin
 Author: Steve Atty
 */
@@ -65,9 +65,17 @@ function wbs_retrieve_hash() {
 	return $ret;
 }
 
+function wordbooker_microtime_float()
+{
+    list($utime, $time) = explode(" ", microtime());
+    return ((float)$utime + (float)$time);
+}
+
 
 function wordbooker_option_manager() {
-	global $ol_flash, $wordbooker_settings, $_POST, $wp_rewrite,$user_ID,$wpdb, $table_prefix,$current_blog,$blog_id,$db_prefix;
+	global $ol_flash, $wordbooker_settings, $_POST, $wp_rewrite,$user_ID,$wpdb, $table_prefix,$current_blog,$blog_id,$db_prefix,$wordbooker_script_start;
+
+	$wordbooker_script_start = wordbooker_microtime_float();
 	echo '<div class="wrap">';
 	echo '<h2>WordBooker Plugin</h2>';
 	if ( isset ($_POST["reset_user_config"])) {wordbooker_delete_userdata(); }
@@ -224,14 +232,22 @@ function wordbooker_option_manager() {
 			echo "</b></div>";
 			return;
 		}
+
+		$wordbooker_script_end = wordbooker_microtime_float();
+		echo "Script executed in ".bcsub($wordbooker_script_end, $wordbooker_script_start, 4)." seconds.";
 		# Populate  the cache table for this user if its not there.
 		$result = $wpdb->get_row("select facebook_id from ".WORDBOOKER_USERDATA." where user_id=".$user_ID);
 		if (strlen($result->facebook_id)<4) {
+			
 			wordbooker_cache_refresh($user_ID,$fbclient);
  		}
+
+		$wordbooker_script_end = wordbooker_microtime_float();
+		echo "Script executed in ".bcsub($wordbooker_script_end, $wordbooker_script_start, 4)." seconds.";
 		# If the user saved their config after setting permissions or chose to refresh the cache then lets refresh the cache
 		if ( isset ($_POST["perm_save"])) { wordbooker_cache_refresh($user_ID,$fbclient); }
-
+	$wordbooker_script_end = wordbooker_microtime_float();
+		echo "Script executed in ".bcsub($wordbooker_script_end, $wordbooker_script_start, 4)." seconds.";
 		$fblike_action=array('recommend'=>'Recommend ','like'=>'Like ');
 		$fblike_colorscheme=array('dark'=>'Dark','light'=>'Light');
 		$fblike_font=array('arial'=>'Arial','lucida grande'=>'Lucida grande ','segoe ui'=>'Segoe ui','tahoma'=>'Tahoma','trebuchet ms'=>'Trebuchet ms ','verdana'=>'Verdana');
@@ -584,7 +600,8 @@ if(ADVANCED_DEBUG) {
 		# Set a couple of options that we really need.
 		if( !isset($wordbookuser_settings['wordbook_orandpage'])) {$wordbookuser_settings['wordbook_orandpage']=2;}
 		if( !isset($wordbookuser_settings['wordbooker_publish_default'])) {$wordbookuser_settings['wordbooker_publish_default']=$wordbooker_settings['wordbooker_publish_default'];}
-
+		$wordbooker_script_end = wordbooker_microtime_float();
+		echo "Script executed in ".bcsub($wordbooker_script_end, $wordbooker_script_start, 4)." seconds.";
 		echo '<div class="wrap">';
 		echo '<h3>'.__('User Level Customisation').'</h3>';
 		_e("If set, these options will override the Blog Level options for this user");
@@ -700,7 +717,8 @@ if(ADVANCED_DEBUG) {
 		wordbooker_render_diagnosticlogs();
 		wordbooker_status($user_ID);
 		wordbooker_option_status($wbuser);
-
+		$wordbooker_script_end = wordbooker_microtime_float();
+		echo "Script executed in ".bcsub($wordbooker_script_end, $wordbooker_script_start, 4)." seconds.";
 		echo "<br /><hr><h3>";
  	_e("Donate");
 		echo "</h3>";

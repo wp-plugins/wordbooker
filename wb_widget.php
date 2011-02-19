@@ -4,7 +4,7 @@
 Description: Facebook Status Widget. Needs Wordbook installing to work.
 Author: Stephen Atty
 Author URI: http://canalplan.blogdns.com/steve
-Version: 1.8.21
+Version: 1.8.22
 */
 
 /*

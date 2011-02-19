@@ -2,8 +2,8 @@
 
 /**
 Extension Name: Wordbooker Cron
-Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.8.21
+Extension URI: http://wordbooker.tty.org.uk
+Version: 1.8.22
 Description: Collection of processes that are often handled by wp_cron scheduled jobs
 Author: Steve Atty
 */
@@ -271,7 +271,7 @@ function wordbooker_poll_facebook($single_user=null) {
 					foreach ($fbcomments as $comment) {
 						// If the comment has a later timestamp than the one we currently have recorded then lets get some more information 
 						if ($comment[time]>$comdata_row->comment_timestamp) {
-							$fbuserinfo=$fbclient->users_getInfo($comment[fromid],'name,profile_url');
+							$fbuserinfo=$fbclient->users_getInfo($comment['fromid'],'name,profile_url');
 							if (is_array($fbuserinfo[0])) {
 							wordbooker_debugger("Comment found from ",$fbuserinfo[0]['name'],0) ;	
 							$commemail=$wordbooker_settings['wordbooker_comment_email'];
@@ -304,10 +304,12 @@ function wordbooker_poll_facebook($single_user=null) {
 								} else {
 									wordbooker_debugger("Posting comment to blog"," ",0) ;
 									if ($comment_approve==1){
-										 wp_insert_comment($data);
+										 $newComment = wp_insert_comment($data);
 									} else {
-										wp_new_comment($data);
+										 $newComment = wp_new_comment($data);
 									}
+									//Allows integration with WP-FB-AutoConnect to get correct avatars.
+									update_comment_meta($newComment, "fb_uid", $comment['fromid']);
 								}
 							}
 						}

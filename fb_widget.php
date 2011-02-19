@@ -3,8 +3,8 @@
 /*
 Description: Facebook Fan Box Widget. Needs Wordbook installing to work.
 Author: Stephen Atty
-Author URI: http://canalplan.blogdns.com/steve
-Version: 1.8.21
+Author URI: http://wordbooker.tty.org.uk
+Version: 1.8.22
 */
 
 /*
