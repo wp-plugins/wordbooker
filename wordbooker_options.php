@@ -234,7 +234,7 @@ function wordbooker_option_manager() {
 		}
 
 		$wordbooker_script_end = wordbooker_microtime_float();
-		echo "Script executed in ".bcsub($wordbooker_script_end, $wordbooker_script_start, 4)." seconds.";
+		#echo "Script executed in ".bcsub($wordbooker_script_end, $wordbooker_script_start, 4)." seconds.";
 		# Populate  the cache table for this user if its not there.
 		$result = $wpdb->get_row("select facebook_id from ".WORDBOOKER_USERDATA." where user_id=".$user_ID);
 		if (strlen($result->facebook_id)<4) {
@@ -243,11 +243,11 @@ function wordbooker_option_manager() {
  		}
 
 		$wordbooker_script_end = wordbooker_microtime_float();
-		echo "Script executed in ".bcsub($wordbooker_script_end, $wordbooker_script_start, 4)." seconds.";
+	#	echo "Script executed in ".bcsub($wordbooker_script_end, $wordbooker_script_start, 4)." seconds.";
 		# If the user saved their config after setting permissions or chose to refresh the cache then lets refresh the cache
 		if ( isset ($_POST["perm_save"])) { wordbooker_cache_refresh($user_ID,$fbclient); }
 	$wordbooker_script_end = wordbooker_microtime_float();
-		echo "Script executed in ".bcsub($wordbooker_script_end, $wordbooker_script_start, 4)." seconds.";
+		#echo "Script executed in ".bcsub($wordbooker_script_end, $wordbooker_script_start, 4)." seconds.";
 		$fblike_action=array('recommend'=>'Recommend ','like'=>'Like ');
 		$fblike_colorscheme=array('dark'=>'Dark','light'=>'Light');
 		$fblike_font=array('arial'=>'Arial','lucida grande'=>'Lucida grande ','segoe ui'=>'Segoe ui','tahoma'=>'Tahoma','trebuchet ms'=>'Trebuchet ms ','verdana'=>'Verdana');
@@ -601,7 +601,7 @@ if(ADVANCED_DEBUG) {
 		if( !isset($wordbookuser_settings['wordbook_orandpage'])) {$wordbookuser_settings['wordbook_orandpage']=2;}
 		if( !isset($wordbookuser_settings['wordbooker_publish_default'])) {$wordbookuser_settings['wordbooker_publish_default']=$wordbooker_settings['wordbooker_publish_default'];}
 		$wordbooker_script_end = wordbooker_microtime_float();
-		echo "Script executed in ".bcsub($wordbooker_script_end, $wordbooker_script_start, 4)." seconds.";
+		#echo "Script executed in ".bcsub($wordbooker_script_end, $wordbooker_script_start, 4)." seconds.";
 		echo '<div class="wrap">';
 		echo '<h3>'.__('User Level Customisation').'</h3>';
 		_e("If set, these options will override the Blog Level options for this user");
@@ -718,7 +718,7 @@ if(ADVANCED_DEBUG) {
 		wordbooker_status($user_ID);
 		wordbooker_option_status($wbuser);
 		$wordbooker_script_end = wordbooker_microtime_float();
-		echo "Script executed in ".bcsub($wordbooker_script_end, $wordbooker_script_start, 4)." seconds.";
+		#echo "Script executed in ".bcsub($wordbooker_script_end, $wordbooker_script_start, 4)." seconds.";
 		echo "<br /><hr><h3>";
  	_e("Donate");
 		echo "</h3>";
