@@ -3,8 +3,8 @@
 Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
 Requires at least: 2.8
-Tested up to: 3.1-RC4
-Stable tag: 1.8.23
+Tested up to: 3.1
+Stable tag: 1.8.24
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any  Facebook Fan Page that you are an administrator for
 
@@ -136,9 +136,14 @@ If you have [Facebook Connect](http://wordpress.org/extend/plugins/wp-facebookco
 
 
 
-
-
 == Changelog ==
+
+= Version 1.8.24   26/02/2011 =
+- Change to comment handling code to trap both "approve" and "approved" as good comment status
+- Changed Youtube URL parsing to handle the embed option
+- Wrapped some of the Facebook tags in comments to keep W3C validators "happy"
+- Added locale to the iframe tag for like/recommend button. Uses the Wordpress WP_LANG constant
+
 
 = Version 1.8.23   21/02/2011 =
 - Fixed Cat introduced error in comment handling check code.
