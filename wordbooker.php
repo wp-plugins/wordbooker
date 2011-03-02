@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.  <strong>Do Not Auto-Upgrade this plugin - follow the upgrade instructions in the <a href="../wp-content/plugins/wordbooker/readme.txt" target="wordpress">Read me</a></strong>
 Author: Steve Atty 
 Author URI: http://blogs.canalplan.org.uk/steve/
-Version: 1.8.24
+Version: 1.8.25
 */
 
  /*
@@ -38,7 +38,7 @@ if (! isset($wordbooker_settings['wordbook_extract_length'])) $wordbooker_settin
 
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
-define('WORDBOOKER_CODE_RELEASE','1.8.24.r00');
+define('WORDBOOKER_CODE_RELEASE','1.8.25.r00');
 
 # For Troubleshooting 
 define('ADVANCED_DEBUG',false);
@@ -1841,8 +1841,9 @@ function wordbooker_header($blah){
 	global $post;
 	# Stops the code firing on non published posts
 	if ('publish' != get_post_status($post->ID)) {return;}
-	$wordbooker_settings = wordbooker_options(); 
+	$wordbooker_settings = wordbooker_options(); 	
 	if ( (isset($wordbooker_settings['wordbooker_like_button_show']) || isset($wordbooker_settings['wordbooker_like_share_too']))) {
+		echo ' <!-- Wordbooker created Open Graph tags --> ';
 		$x = get_post_meta($post->ID, 'wordbooker_options', true); 
 		if (is_array($x)){
 			foreach (array_keys($x) as $key ) {
@@ -1855,52 +1856,41 @@ function wordbooker_header($blah){
 		if (is_array($wordbooker_post_options)){
 			if  ($wordbooker_post_options["wordbook_default_author"] > 0 ) {$wpuserid=$wordbooker_post_options["wordbook_default_author"];}
 		}
-		if (is_single() || is_page()) {
-			
-		$post_link = get_permalink($post->ID);
-			$post_title=$post->post_title;
-			$blog_name=get_bloginfo('name');
-			$xxx=wordbooker_get_cache( $wpuserid,facebook_id);
 
-			echo '<!-- Wordbooker created FB tags ';
-			if (is_null($xxx->facebook_id)) {
-				echo '<meta property = "fb:app_id" content = "'.WORDBOOKER_FB_ID.'" />';
-			} else {
-				echo '<meta property="fb:admins" content="'.$xxx->facebook_id.'"/>';
-			}
-			echo '<meta property="og:title" content="'.htmlspecialchars(strip_tags($post_title),ENT_QUOTES).'"/>';
-			echo '<meta property="og:site_name" content="'.$blog_name.'"/>';
-			echo '<meta property="og:url" content="'.$post_link.'"/>';
-			echo '<meta property="og:type" content="article"/>';
+		$blog_name=get_bloginfo('name');
+		echo '<meta property="og:site_name" content="'.$blog_name.'"/> ';
+		$xxx=wordbooker_get_cache( $wpuserid,facebook_id);
+		if (is_null($xxx->facebook_id)) {
+			echo '<meta property = "fb:app_id" content = "'.WORDBOOKER_FB_ID.'" /> ';
+		} else {
+			echo '<meta property="fb:admins" content="'.$xxx->facebook_id.'"/> ';
+		}
+		if ( (is_single() || is_page()) && !is_front_page() && !is_category() && !is_home() ) {
+			$post_link = get_permalink($post->ID);
+			$post_title=$post->post_title;
+			echo '<meta property="og:title" content="'.htmlspecialchars(strip_tags($post_title),ENT_QUOTES).'"/> ';
+			echo '<meta property="og:url" content="'.$post_link.'"/> ';
+			echo '<meta property="og:type" content="article"/> ';
 			$ogimage=get_post_meta($post->ID, 'wordbooker_thumb', TRUE);
-			if ( function_exists( 'get_the_post_thumbnail' ) ) { 	
+			if ( function_exists( 'get_the_post_thumbnail' ) && strlen($ogimage)>5 ) { 	
 				if (get_the_post_thumbnail($post->ID)) {  
 					preg_match_all('/<img \s+ ([^>]*\s+)? src \s* = \s* [\'"](.*?)[\'"]/ix',get_the_post_thumbnail($post->ID), $matches);
 					$ogimage= $matches[2][0];
 				
 				}
 			}
-			echo '<meta property="og:image" content="'.$ogimage.'"/>  -->';
+			echo '<meta property="og:image" content="'.$ogimage.'"/> ';
 		} 
 		else
-		{ # Not a single post so we need a different set of tags
-			$blog_name=get_bloginfo('name');
-			echo '<!-- Wordbooker created FB tags ';
-			$xxx=wordbooker_get_cache( $wpuserid,facebook_id);
-			if (is_null($xxx->facebook_id)) {
-				echo '<meta property = "fb:app_id" content = "'.WORDBOOKER_FB_ID.'" />';
-			} else {
-				echo '<meta property="fb:admins" content="'.$xxx->facebook_id.'"/>';
-			}
-			echo '<!-- Wordbooker created FB tags --> <meta property="og:site_name" content="'.$blog_name.'"/>';
-			echo '<meta property="og:type" content="blog"/> -->';
-	
+		{ # Not a single post so we only need the og:type tag
+			echo '<meta property="og:type" content="blog"/> ';
 		}
-	}
+		echo " <!-- End of Wordbooker created Open Graph tags --> ";
+	}		
+
 		#wordbooker_get_option('wordbook_description_meta_length')
 	if ($meta_length = wordbooker_get_option('wordbook_description_meta_length')) {
 		if (is_single() || is_page()) {
-
 			$excerpt=get_post_meta($post->ID, 'wordbooker_extract', TRUE);
 			# If we've got an excerpt use that instead
 			if ((strlen($post->post_excerpt)>3) && (strlen($excerpt) <=3)) { 
@@ -1915,13 +1905,13 @@ function wordbooker_header($blah){
 			}
 			# Now if we've got something put the meta tag out.
 			if (isset($excerpt)){ 
-				$meta_string = sprintf("<meta name=\"description\" content=\"%s\"/>", htmlspecialchars($excerpt,ENT_QUOTES));
+				$meta_string = sprintf("<meta name=\"description\" content=\"%s\"/> ", htmlspecialchars($excerpt,ENT_QUOTES));
 				echo $meta_string;
 			}
 		}
-		else
+	else
 		{		
-			$meta_string = sprintf("<meta name=\"description\" content=\"%s\"/>", get_bloginfo('description'));
+			$meta_string = sprintf("<meta name=\"description\" content=\"%s\"/> ", get_bloginfo('description'));
 			echo $meta_string;
 		}
 	}
@@ -2069,7 +2059,7 @@ function wordbooker_contributed($url=0) {
 	if ($url==0){
 		$contributors=array('1595132200','100000818019269','39203171','666800299','500073624','711830142','503549492','100000589976474','254577506873','1567300610','701738627','100000442094620','754015348','29404010','748636937',
  '676888540','768354692','1607820784','1709067850','769804853','100001597808077','1162591229','736138968','532656880','1000013707847','1352285955','836328641',
- '23010694256','129976890383044','679511648'
+ '23010694256','129976890383044','679511648','100001305747796'
 );
 		$facebook_id=wordbooker_get_cache($user_ID,'facebook_id');
 		return in_array($facebook_id->facebook_id,$contributors);
@@ -2087,8 +2077,8 @@ function wordbooker_contributed($url=0) {
 "tina rawatta photography" => 'www.tinarawatta.com',"Gary Said..."=>'GarySaid.com',"Bachateros Online Magazine"=>'www.bachateros.com.au/',"Linh's e-place"=>'www.linh.se',
 "InkMusings" => 'www.inkmusings.com',"Jürgen Koller's website"=>'www.kollermedia.at',"Walk With Ben"=>'www.walkwithben.com',"GardenFork"=>'www.http://www.gardenfork.tv/',
 "A Low Man's Lyric"=>'vivekiyer.net/',"OutofRange.net"=>'www.outofrange.net/',"This Ambitious Orchestra"=>'ambitiousorchestra.com',"Lydia Salnikova"=>'www.lydiasalnikova.com/',
-"Westpark Gamers"=>'www.westpark-gamers.de/', "The Camera Zealot"=>'www.camerazealot.com'
-
+"Westpark Gamers"=>'www.westpark-gamers.de/', "The Camera Zealot"=>'www.camerazealot.com', " Best Raw Organic" => 'BestRawOrganic.com',"Gibson Designs"=>'gibsondesigns.net',
+"Looking out from Under"=>'www.lookingoutfromunder.com',"Our Excellent Adventures"=>'www.ourexcellentadventures.com'
 );
 		$keys = array_keys($blogs);
 		shuffle($keys);
@@ -2670,7 +2660,7 @@ function wordbooker_init () {
 }
 
 function wordbooker_schema($attr) {
-        $attr .= " xmlns:fb=\"http://www.facebook.com/2008/fbml\" xmlns:og=\"http://opengraphprotocol.org/schema/\" ";
+        $attr .= " xmlns:fb=\"http://www.facebook.com/2008/fbml\" xmlns:og=\"http://ogp.me/ns#\" ";
         return $attr;
 }
 
