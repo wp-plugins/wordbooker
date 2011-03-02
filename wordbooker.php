@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.  <strong>Do Not Auto-Upgrade this plugin - follow the upgrade instructions in the <a href="../wp-content/plugins/wordbooker/readme.txt" target="wordpress">Read me</a></strong>
 Author: Steve Atty 
 Author URI: http://blogs.canalplan.org.uk/steve/
-Version: 1.8.25
+Version: 1.8.26
 */
 
  /*
@@ -38,7 +38,7 @@ if (! isset($wordbooker_settings['wordbook_extract_length'])) $wordbooker_settin
 
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
-define('WORDBOOKER_CODE_RELEASE','1.8.25.r00');
+define('WORDBOOKER_CODE_RELEASE','1.8.26.r00');
 
 # For Troubleshooting 
 define('ADVANCED_DEBUG',false);
@@ -2550,7 +2550,7 @@ function wordbooker_set_comment_status($commentid, $comment_status) {
 		wordbooker_debugger("Found a comment type - so probably a trackback or ping "," ",$cpid) ;	
 	}
 	
-	if (strpos($curl,'facebook.com/profile.php')) {
+	if (strpos($curl,'facebook.com/')) {
 		$real_comment=false;
 		wordbooker_debugger("Found a link back to Facebook - so we can't accept it as it might be one of our own comments "," ",$cpid) ;	
 	}
