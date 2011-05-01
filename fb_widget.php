@@ -3,8 +3,8 @@
 /*
 Description: Facebook Fan Box Widget. Needs Wordbook installing to work.
 Author: Stephen Atty
-Author URI: http://wordbooker.tty.org.uk
-Version: 1.8.22
+Author URI: http://canalplan.blogdns.com/steve
+Version: 1.8.27
 */
 
 /*
@@ -71,7 +71,7 @@ class FacebookWidget extends WP_Widget {
 			echo'<iframe style="border: medium none; overflow: hidden; height: '.$height.'px; width: '.$width.'px;" src="http://www.facebook.com/plugins/fan.php?api_key=254577506873&amp;connections='.$connections.'&amp;height='.$height.'&amp;id='.$instance['pid'].'&amp;locale='.$wplang.'&amp;logobar='.$header.'&amp;header='.$header.'&amp;stream='.$stream.'&amp;width='.$width.'"></iframe>';
 		}
 		else {
-			echo '<fb:fan profile_id="'.$instance['pid'].'" width="'.$instance['width'].'" height="'.$instance['height'].'" connections="'.$instance['connections'].'" stream="'.$stream.'" logobar="'.$header.'" header="'.$header.'" locale="'.$wplang.'" ></fb:fan>';
+			echo '<div id="fb-root"> <fb:fan profile_id="'.$instance['pid'].'" width="'.$instance['width'].'" height="'.$instance['height'].'" connections="'.$instance['connections'].'" stream="'.$stream.'" logobar="'.$header.'" header="'.$header.'" locale="'.$wplang.'" ></fb:fan> </div >';
 		}	
 		
 	

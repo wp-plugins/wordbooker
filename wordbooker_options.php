@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Options 
 Extension URI: http://wordbooker.tty.org.uk
-Version: 1.8.22
+Version: 1.8.27
 Description: Advanced Options for the WordBooker Plugin
 Author: Steve Atty
 */
@@ -252,7 +252,8 @@ function wordbooker_option_manager() {
 		$fblike_colorscheme=array('dark'=>'Dark','light'=>'Light');
 		$fblike_font=array('arial'=>'Arial','lucida grande'=>'Lucida grande ','segoe ui'=>'Segoe ui','tahoma'=>'Tahoma','trebuchet ms'=>'Trebuchet ms ','verdana'=>'Verdana');
 		$fblike_button=array('button_count'=>'Button Count ','standard'=>'Standard ');
-		$fblike_faces=array('false'=>'No','true'=>'Yes');
+		$fblike_faces=array('false'=>'No','true'=>'Yes');	
+		$fblike_send=array('false'=>'No','true'=>'Yes');
 		$fblike_location=array('top'=>'Above Post ','bottom'=>'Below Post');
 
 	if ($oldv==0) {
@@ -378,6 +379,11 @@ function wordbooker_option_manager() {
 		echo "</select><br />";
 
 
+		echo '<label for="wb_fblike_send">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__('Facebook Show Send	Button').' :</label> <select id="wordbook_fblike_send" name="wordbooker_settings[wordbook_fblike_send]"  >';
+		foreach ($fblike_send as $i => $value) {
+			if ($i==$wordbooker_settings['wordbook_fblike_send']){ print '<option selected="yes" value="'.$i.'" >'.$fblike_send[$i].'</option>';}
+		       else {print '<option value="'.$i.'" >'.$fblike_send[$i].'</option>';}}
+		echo "</select><br />";
 
 		echo '<label for="wb_attribute">'.__("Post Attribute"). ' : </label>';
 		echo '<INPUT NAME="wordbooker_settings[wordbook_attribute]" size=60 maxlength=240 value="'.stripslashes($wordbooker_settings["wordbook_attribute"]).'"><br />';
@@ -878,7 +884,7 @@ function wordbooker_inner_custom_box() {
 		}
 
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbook_use_excerpt" '.$checked_flag[$wordbooker_settings["wordbook_use_excerpt"]].' > Use Wordpress Excerpt for Wall Post <br />';
-		echo 'Facebook Post Attribute line: <INPUT NAME="wordbook_attribute" size=60 maxlength=60 value="'.stripslashes($wordbooker_settings["wordbook_attribute"]).'"><br />';	
+		echo 'Facebook Post Attribute line: <INPUT NAME="wordbook_attribute" size=60 maxlength=240 value="'.stripslashes($wordbooker_settings["wordbook_attribute"]).'"><br />';	
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_status_update" '.$checked_flag[$wordbooker_settings["wordbooker_status_update"]].' > '.__('Facebook Status Update text').' : <INPUT NAME="wordbooker_status_update_text" size=60 maxlength=60 value="'.stripslashes($wordbooker_settings["wordbooker_status_update_text"]).'"><br />';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbook_comment_get" '.$checked_flag[$wordbooker_settings["wordbook_comment_get"]].' > '.__('Fetch comments from Facebook for this post').'<br />';
 	} else {

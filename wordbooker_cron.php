@@ -2,8 +2,8 @@
 
 /**
 Extension Name: Wordbooker Cron
-Extension URI: http://wordbooker.tty.org.uk
-Version: 1.8.22
+Extension URI: http://blogs.canalplan.org.uk/steve
+Version: 1.8.27
 Description: Collection of processes that are often handled by wp_cron scheduled jobs
 Author: Steve Atty
 */
@@ -16,7 +16,7 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 	$user_info = get_userdata($user_id);
 	$wordbooker_settings =get_option('wordbooker_settings'); 
 	wordbooker_debugger("Cache Refresh for ",$user_info->user_login,0) ;
-#	wordbooker_debugger("UID length : ",strlen($uid),0) ;  
+	wordbooker_debugger("Using APP ID : ",WORDBOOKER_FB_ID,0) ;  
 	# If we've not got the ID from the table lets try to get it from the logged in user
 	if (strlen($uid)==0) {
 		wordbooker_debugger("No Cache record for user - getting Logged in user ",$uid,0) ; 
@@ -26,7 +26,7 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 		catch (Exception $e) {
 			$error_code = $e->getCode();
 			$error_msg = $e->getMessage();
-			wordbooker_debugger($error_msg," ",0) ;
+			wordbooker_debugger("Logged in user ".$error_msg," ",0) ;
 			unset($uid);
 		}
 	}
@@ -174,25 +174,25 @@ function wordbooker_cache_refresh ($user_id,$fbclient) {
 						$pages["name"]=$pageinfo["name"];
 					}
 					$all_pages[]=$pages;
-				 	wordbooker_debugger("Page info for page ID ".$pages["page_id"],mysql_real_escape_string($pages["name"]),0) ;
+				 	wordbooker_debugger("Page info for page ID ".$pages["page_id"],$pages["name"],0) ;
 					}
 				$sql.=", pages= '".mysql_real_escape_string($encoded_names)."'";
 			} else {wordbooker_debugger( "Cache: Failed to get page information from FB"," ",99); }
 			
 
 			if (is_array($fb_status_info)) {
-					wordbooker_debugger("Setting name as  : ",mysql_real_escape_string($fb_profile_info["name"]),0) ;
+					wordbooker_debugger("Setting name as  : ",$fb_profile_info["name"],0) ;
 				if (stristr($fb_status_info["message"],"[[PV]]")) {
 					wordbooker_debugger("Found [[PV]] - not updating status"," ",0);
 				} 
 				else {
-					wordbooker_debugger("Setting status as  : ",mysql_real_escape_string($fb_status_info["message"]),0) ;
+					wordbooker_debugger("Setting status as  : ",$fb_status_info["message"],0) ;
 					$sql.=", status='".mysql_real_escape_string($fb_status_info["message"])."'";
 					$sql.=", updated= Coalesce(".mysql_real_escape_string($fb_status_info["time"].",1)");
 				}
 			} 
 			if (is_array($fb_profile_info)) {
-				wordbooker_debugger("Setting URL as  : ",mysql_real_escape_string($fb_profile_info["url"]),0) ;
+				wordbooker_debugger("Setting URL as  : ",$fb_profile_info["url"],0) ;
 				$sql.=", url='".mysql_real_escape_string($fb_profile_info["url"])."'";
 				$sql.=", pic='".mysql_real_escape_string($fb_profile_info["pic"])."'";
 			}	else {wordbooker_debugger("Cache: Failed to get Image information from FB"," ",99); }
@@ -276,6 +276,8 @@ function wordbooker_poll_facebook($single_user=null) {
 							wordbooker_debugger("Comment found from ",$fbuserinfo[0]['name'],0) ;	
 							$commemail=$wordbooker_settings['wordbooker_comment_email'];
 							$time = date("Y-m-d H:i:s",$comment[time]);
+							$current_offset = get_option('gmt_offset');
+							$atime = date("Y-m-d H:i:s",$comment[time]+(3600*$current_offset));
 							$data = array(
 								'comment_post_ID' => $comdata_row->wp_post_id,
 								'comment_author' => $fbuserinfo[0]['name'],
@@ -283,7 +285,7 @@ function wordbooker_poll_facebook($single_user=null) {
 								'comment_author_url' => $fbuserinfo[0]['profile_url'],
 								'comment_content' => $comment['text'],
 								'comment_author_IP' => '127.0.0.1',
-								'comment_date' => $time,
+								'comment_date' => $atime,
 								'comment_date_gmt' => $time,
 								'comment_parent'=> 0,
 								'user_id' => 0,
@@ -291,7 +293,7 @@ function wordbooker_poll_facebook($single_user=null) {
 								'comment_approved' => $comment_approve,
 							);
 							// change this to use wp_new_comment /includes/comment.php for docs
-							$pos = strripos($comment[text], "Comment: [from blog ]");
+							$pos = strripos($comment[text], "Comment: [");
 							if ($pos === false) {
 								$comname=$fbuserinfo[0][name];
 								$dupe = "SELECT comment_ID FROM $wpdb->comments WHERE comment_post_ID = '$comdata_row->wp_post_id' AND comment_approved != 'trash' AND ( comment_author = '$comname' ";
