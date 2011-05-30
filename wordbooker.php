@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.  <strong>Do Not Auto-Upgrade this plugin - follow the upgrade instructions in the <a href="../wp-content/plugins/wordbooker/readme.txt" target="wordpress">Read me</a></strong>
 Author: Steve Atty 
 Author URI: http://blogs.canalplan.org.uk/steve/
-Version: 1.9.0
+Version: 1.9.1
 */
 
  /*
@@ -38,7 +38,7 @@ if (! isset($wordbooker_settings['wordbook_extract_length'])) $wordbooker_settin
 
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
-define('WORDBOOKER_CODE_RELEASE','1.9.0 r0');
+define('WORDBOOKER_CODE_RELEASE','1.9.1 r0');
 
 # For Troubleshooting 
 define('ADVANCED_DEBUG',false);
