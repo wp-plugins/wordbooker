@@ -4,7 +4,7 @@
 Description: Facebook Fan Box Widget. Needs Wordbook installing to work.
 Author: Stephen Atty
 Author URI: http://canalplan.blogdns.com/steve
-Version: 1.8.27
+Version: 1.9.0
 */
 
 /*

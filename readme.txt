@@ -3,8 +3,8 @@
 Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
 Requires at least: 2.8
-Tested up to: 3.1
-Stable tag: 1.8.27
+Tested up to: 3.1.3
+Stable tag: 1.9.0
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any  Facebook Fan Page that you are an administrator for
 
@@ -18,6 +18,8 @@ NOTE : You have to have PHP V5 installed for this plugin to work as the code con
 
 
 == IMPORTANT ==  
+
+Wordbooker 1.9.x uses the even newer Faceobok OAUTH2 authorisation method. Theoretically you should just be able to upgrade to 1.9.x from 1.8.x with no issues but if you do have problems simply do a Reset Settings and then get a new session from Facebook.
 
 Wordbooker 1.8.x uses the new Faceobok OAUTH authorisation method. This means that when you upgrade you may find that you loose your "Session" with Facebook and you only get a partial option screen displayed. If this happens then simply reload the Wordbooker Options page and follow the instructions.
 
@@ -137,6 +139,21 @@ If you have [Facebook Connect](http://wordpress.org/extend/plugins/wp-facebookco
 
 
 == Changelog ==
+
+
+= Version 1.9.0  31/05/2011 =
+- Changed Authentication method again to OAUTH2 client side authentication.
+- Added support for Authentication using SSL 
+- Made Auth returns use POST rather than query string to tighten up security
+- Added hook so that like/share buttons appear when excerpts are used on category pages rather than only when the full post was used.
+- Removed SEND from iframe code as it doesn't actually work
+- Changed Options page to indicate SEND only works with FBXML
+- Revisted the post age calculations to handle TZ offsets
+- Added an option to allow Non Wordbooker users to chose if a post should be published or not.
+- Changed priority of publish_post hook to try to fix refire logic issues introduced by sluggish server response.
+- Changed Image handling logic to discard arrays caused by a problematic adverts plugin.
+- Added additional OG Tags					
+
 
 = Version 1.8.27  01/05/2011 =
 - Added support for the Facebook SEND option

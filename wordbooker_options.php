@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Options 
 Extension URI: http://wordbooker.tty.org.uk
-Version: 1.8.27
+Version: 1.9.0
 Description: Advanced Options for the WordBooker Plugin
 Author: Steve Atty
 */
@@ -251,7 +251,7 @@ function wordbooker_option_manager() {
 		$fblike_action=array('recommend'=>'Recommend ','like'=>'Like ');
 		$fblike_colorscheme=array('dark'=>'Dark','light'=>'Light');
 		$fblike_font=array('arial'=>'Arial','lucida grande'=>'Lucida grande ','segoe ui'=>'Segoe ui','tahoma'=>'Tahoma','trebuchet ms'=>'Trebuchet ms ','verdana'=>'Verdana');
-		$fblike_button=array('button_count'=>'Button Count ','standard'=>'Standard ');
+		$fblike_button=array('button_count'=>'Button Count ','standard'=>'Standard ','box_count'=>'Box Count');
 		$fblike_faces=array('false'=>'No','true'=>'Yes');	
 		$fblike_send=array('false'=>'No','true'=>'Yes');
 		$fblike_location=array('top'=>'Above Post ','bottom'=>'Below Post');
@@ -293,6 +293,9 @@ function wordbooker_option_manager() {
 
 		echo '<label for="wb_publish_no_user">'.__("Publish Posts by non Wordbooker users"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbook_publish_no_user]" '.$checked_flag[$wordbooker_settings["wordbook_publish_no_user"]].' ><br />';
+
+		echo '<label for="wb_publish_user_publish">'.__("Allow non Wordbooker users to chose to publish a post"). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbook_allow_publish_select]" '.$checked_flag[$wordbooker_settings["wordbook_allow_publish_select"]].' ><br />';
 
 		echo '<label for="wb_wordbooker_fb_rec_act">'.__("Include FB Recent activity on Wordbooker Options page"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_fb_rec_act]" '.$checked_flag[$wordbooker_settings["wordbooker_fb_rec_act"]].' ><br />';
@@ -372,14 +375,14 @@ function wordbooker_option_manager() {
 		       else {print '<option value="'.$i.'" >'.$fblike_button[$i].'</option>';}}
 		echo "</select><br />";
 
-		echo '<label for="wb_fblike_faces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__('Facebook Like - Display Faces').' :</label> <select id="wordbook_fblike_faces" name="wordbooker_settings[wordbook_fblike_faces]"  >';
+		echo '<label for="wb_fblike_faces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__('Facebook Like - Display Faces (Standard layout only)').' :</label> <select id="wordbook_fblike_faces" name="wordbooker_settings[wordbook_fblike_faces]"  >';
 		foreach ($fblike_faces as $i => $value) {
 			if ($i==$wordbooker_settings['wordbook_fblike_faces']){ print '<option selected="yes" value="'.$i.'" >'.$fblike_faces[$i].'</option>';}
 		       else {print '<option value="'.$i.'" >'.$fblike_faces[$i].'</option>';}}
 		echo "</select><br />";
 
 
-		echo '<label for="wb_fblike_send">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__('Facebook Show Send	Button').' :</label> <select id="wordbook_fblike_send" name="wordbooker_settings[wordbook_fblike_send]"  >';
+		echo '<label for="wb_fblike_send">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__('Facebook Show Send	Button (Only when using FBXML)').' :</label> <select id="wordbook_fblike_send" name="wordbooker_settings[wordbook_fblike_send]"  >';
 		foreach ($fblike_send as $i => $value) {
 			if ($i==$wordbooker_settings['wordbook_fblike_send']){ print '<option selected="yes" value="'.$i.'" >'.$fblike_send[$i].'</option>';}
 		       else {print '<option value="'.$i.'" >'.$fblike_send[$i].'</option>';}}
@@ -887,9 +890,15 @@ function wordbooker_inner_custom_box() {
 		echo 'Facebook Post Attribute line: <INPUT NAME="wordbook_attribute" size=60 maxlength=240 value="'.stripslashes($wordbooker_settings["wordbook_attribute"]).'"><br />';	
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_status_update" '.$checked_flag[$wordbooker_settings["wordbooker_status_update"]].' > '.__('Facebook Status Update text').' : <INPUT NAME="wordbooker_status_update_text" size=60 maxlength=60 value="'.stripslashes($wordbooker_settings["wordbooker_status_update_text"]).'"><br />';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbook_comment_get" '.$checked_flag[$wordbooker_settings["wordbook_comment_get"]].' > '.__('Fetch comments from Facebook for this post').'<br />';
-	} else {
-		echo "Wordbooker Blog level settings are in force";	
-		}
+} else {
+echo "Wordbooker Blog level settings are in force<br>";
+
+if ( isset($wordbooker_settings['wordbook_allow_publish_select'])) { 
+echo '<input type="hidden" name="crabstick" value="stairwell" />';
+echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_publish_default" '.$checked_flag[$wordbooker_settings["wordbooker_publish_default"]].' > '.__('Publish Post to Facebook').'<br />';
+echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_publish_override" '.$checked_flag[$wordbooker_settings["wordbooker_publish_override"]].' >'.__('Force Re-Publish Post to Facebook on Edit (overrides republish window)').'<br />';
+}
+}
 
 }
 if (WORDBOOKER_WP_VERSION > 27) {
