@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Options 
 Extension URI: http://wordbooker.tty.org.uk
-Version: 1.9.0
+Version: 1.9.3
 Description: Advanced Options for the WordBooker Plugin
 Author: Steve Atty
 */
@@ -306,6 +306,9 @@ function wordbooker_option_manager() {
 
 		echo '<label for="wb_facebook_like">'.__("Include a Facebook Like button in blog"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_show]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_show"]].' ><br />';
+		echo '<label for="wb_facebook_like">'.__("Don't show Like or Share on Sticky Posts"). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_no_share_like_stick]" '.$checked_flag[$wordbooker_settings["wordbooker_no_share_like_stick"]].' ><br />';
+
 		if (!is_numeric($wordbooker_settings['wordbooker_like_width']) || $wordbooker_settings['wordbooker_like_width'] <0) {$wordbooker_settings['wordbooker_like_width']=250;}
 		echo '<label for="wb_facebook_like_width">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.__("Width of Facebook Like box"). ' : </label>';
 		echo '<INPUT TYPE=text NAME="wordbooker_settings[wordbooker_like_width]"  size="7"value="'.$wordbooker_settings["wordbooker_like_width"].'" ><br />';
@@ -568,7 +571,7 @@ if(ADVANCED_DEBUG) {
 		echo '<label for="wb_publish_timeframe">'.__("Republish Post if edited more than"). ' : </label>';
 		echo '<INPUT NAME="wordbooker_settings[wordbook_republish_time_frame]" size=3 maxlength=3 value='.$wordbooker_settings["wordbook_republish_time_frame"].'> '.__("days ago").' <INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbook_republish_time_obey]" '.$checked_flag[$wordbooker_settings["wordbook_republish_time_obey"]].' ><br />';
 
-		echo '<label for="wb_publish_republicatio">'.__("Override Re-Publication window "). ' : </label>';
+		echo '<label for="wb_publish_republication">'.__("Override Re-Publication window "). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_publish_override]" '.$checked_flag[$wordbooker_settings["wordbooker_publish_override"]].' > ( '.__("Force Re-Publish Post to Facebook on Edit").')<br />';
 
 		echo '<label for="wb_status_update">'.__("Update Facebook Status"). ' :</label>';

@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
 Requires at least: 2.8
 Tested up to: 3.1.3
-Stable tag: 1.9.2
+Stable tag: 1.9.3
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any  Facebook Fan Page that you are an administrator for
 
@@ -140,11 +140,28 @@ If you have [Facebook Connect](http://wordpress.org/extend/plugins/wp-facebookco
 
 == Changelog ==
 
+= Version 1.9.3  02/06/2011 =
+- Changed FB PHP SDK to supress session cache limiter error message
+- Changed FB PHP SDK to fix class redeclaration error.
+- Changed Post age time calculations to try to resolve issues with misbehaving Wordpress functions
+- Revised post status transition checking code to identify new posts properly
+- Fixed issue with user user settings being lost at publication time
+- Added Verbose option to Curl checking to place diagnostic info into the server error log.
+- Added some extra checks to imaging handling logic to discard null image strings.
+- Removed exta OG tag code that slipped in sometime when I wasn't looking
+- Fixed some bugs in the Like Widget which meant settings weren't stored properly and were ignored.
+- Added ability to supress like/share on sticky posts.
+- Removed some junk code that wasn't being used.
+- Added strip_tags to remove html from comments pushed up to FB.
+
+
 = Version 1.9.2  31/05/2011 =
 - Remove Redundant code from base_facebook.php
 
+
 = Version 1.9.1  31/05/2011 =
 - Lost in SVN
+
 
 = Version 1.9.0  31/05/2011 =
 - Changed Authentication method again to OAUTH2 client side authentication.

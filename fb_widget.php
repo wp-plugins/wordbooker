@@ -4,7 +4,7 @@
 Description: Facebook Fan Box Widget. Needs Wordbook installing to work.
 Author: Stephen Atty
 Author URI: http://canalplan.blogdns.com/steve
-Version: 1.9.0
+Version: 1.9.3
 */
 
 /*
@@ -71,7 +71,7 @@ class FacebookWidget extends WP_Widget {
 			echo'<iframe style="border: medium none; overflow: hidden; height: '.$height.'px; width: '.$width.'px;" src="http://www.facebook.com/plugins/fan.php?api_key=254577506873&amp;connections='.$connections.'&amp;height='.$height.'&amp;id='.$instance['pid'].'&amp;locale='.$wplang.'&amp;logobar='.$header.'&amp;header='.$header.'&amp;stream='.$stream.'&amp;width='.$width.'"></iframe>';
 		}
 		else {
-			echo '<div id="fb-root"> <fb:fan profile_id="'.$instance['pid'].'" width="'.$instance['width'].'" height="'.$instance['height'].'" connections="'.$instance['connections'].'" stream="'.$stream.'" logobar="'.$header.'" header="'.$header.'" locale="'.$wplang.'" ></fb:fan> </div >';
+			echo '<div id="fb-root"> <fb:fan profile_id="'.$instance['pid'].'" width="'.$width.'" height="'.$height.'" connections="'.$instance['connections'].'" stream="'.$stream.'" logobar="'.$header.'" header="'.$header.'" locale="'.$wplang.'" ></fb:fan> </div >';
 		}	
 		
 	
@@ -157,10 +157,10 @@ class FacebookWidget extends WP_Widget {
 		echo '</select></p>';
 
 		echo '<p><label for="'.$stream_id.'">'.__("Include Stream ", 'wordbooker'). ' : </label>';
-		echo '<INPUT TYPE=CHECKBOX class="widefat"id="'.$stream_id.'" name="'.$stream_name.'" "'.$checked_flag[attribute_escape( $instance['stream'])].'" /></p>';
+		echo '<INPUT TYPE=CHECKBOX class="widefat"id="'.$stream_id.'" name="'.$stream_name.'" '.$checked_flag[attribute_escape( $instance['stream'])].' /></p>';
 
 		echo '<p><label for="'.$stream_id.'">'.__("Include Header ", 'wordbooker'). ' : </label>';
-		echo '<INPUT TYPE=CHECKBOX class="widefat"id="'.$header_id.'" name="'.$header_name.'" "'.$checked_flag[attribute_escape( $instance['header'])].'" /></p>';
+		echo '<INPUT TYPE=CHECKBOX class="widefat"id="'.$header_id.'" name="'.$header_name.'" '.$checked_flag[attribute_escape( $instance['header'])].' /></p>';
 		
 		echo '<p><label for="'.$connections_id.'">'.__('Number of Connections','wordbooker').': </label> <input type="text" size="4" id="'.$connections_id.'" name="'.$connections_name.'" value="'.attribute_escape( $instance['connections'] ).'" /></p>';
 

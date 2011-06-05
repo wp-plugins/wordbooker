@@ -21,7 +21,7 @@
  *
  * @author Naitik Shah <naitik@facebook.com>
  */
-class FacebookApiException extends Exception
+class FacebookApiException2 extends Exception
 {
   /**
    * The result from the API server that represents the exception information.
@@ -552,7 +552,7 @@ abstract class BaseFacebook
     try {
       $user_info = $this->api('/me');
       return $user_info['id'];
-    } catch (FacebookApiException $e) {
+    } catch (FacebookApiException2 $e) {
       return 0;
     }
   }
@@ -611,7 +611,7 @@ abstract class BaseFacebook
                           'client_secret' => $this->getApiSecret(),
                           'redirect_uri' => $this->getCurrentUrl(),
                           'code' => $code));
-    } catch (FacebookApiException $e) {
+    } catch (FacebookApiException2 $e) {
       // most likely that user very recently revoked authorization.
       // In any event, we don't have an access token, so say so.
       return false;
@@ -635,7 +635,7 @@ abstract class BaseFacebook
    *
    * @param Array $params method call object
    * @return the decoded response object
-   * @throws FacebookApiException
+   * @throws FacebookApiException2
    */
   protected function _restserver($params) {
     // generic application level parameters
@@ -649,7 +649,7 @@ abstract class BaseFacebook
 
     // results are returned, errors are thrown
     if (is_array($result) && isset($result['error_code'])) {
-      throw new FacebookApiException($result);
+      throw new FacebookApiException2($result);
     }
 
     return $result;
@@ -662,7 +662,7 @@ abstract class BaseFacebook
    * @param String $method the http method (default 'GET')
    * @param Array $params the query/post data
    * @return the decoded response object
-   * @throws FacebookApiException
+   * @throws FacebookApiException2
    */
   protected function _graph($path, $method = 'GET', $params = array()) {
     if (is_array($method) && empty($params)) {
@@ -690,7 +690,7 @@ abstract class BaseFacebook
    * @param String $path the path (required)
    * @param Array $params the query/post data
    * @return the decoded response object
-   * @throws FacebookApiException
+   * @throws FacebookApiException2
    */
   protected function _oauthRequest($url, $params) {
     if (!isset($params['access_token'])) {
@@ -752,7 +752,7 @@ abstract class BaseFacebook
     }
 
     if ($result === false) {
-      $e = new FacebookApiException(array(
+      $e = new FacebookApiException2(array(
         'error_code' => curl_errno($ch),
         'error' => array(
         'message' => curl_error($ch),
@@ -950,7 +950,7 @@ abstract class BaseFacebook
    *        by a failed API call.
    */
   protected function throwAPIException($result) {
-    $e = new FacebookApiException($result);
+    $e = new FacebookApiException2($result);
     switch ($e->getType()) {
       // OAuth 2.0 Draft 00 style
       case 'OAuthException':
