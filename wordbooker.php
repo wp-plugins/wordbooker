@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.  <strong>Do Not Auto-Upgrade this plugin - follow the upgrade instructions in the <a href="../wp-content/plugins/wordbooker/readme.txt" target="wordpress">Read me</a></strong>
 Author: Steve Atty 
 Author URI: http://blogs.canalplan.org.uk/steve/
-Version: 1.9.3
+Version: 1.9.4
 */
 
  /*
@@ -38,7 +38,7 @@ if (! isset($wordbooker_settings['wordbook_extract_length'])) $wordbooker_settin
 
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
-define('WORDBOOKER_CODE_RELEASE','1.9.3 r00');
+define('WORDBOOKER_CODE_RELEASE','1.9.4 r00');
 
 # For Troubleshooting 
 define('ADVANCED_DEBUG',false);
@@ -362,6 +362,7 @@ function wordbooker_fbclient_getsession($fbclient, $token) {
  */
 
 function wordbooker_options() {
+	#var_dump(get_option(WORDBOOKER_SETTINGS));
 	return get_option(WORDBOOKER_SETTINGS);
 }
 
@@ -1341,7 +1342,7 @@ global  $wpdb,$user_ID;
 	echo '</form> </div>';
 
 	$description=__("Recent Facebook Activity for this site");
-	$iframe='<iframe src="http://www.facebook.com/plugins/activity.php?site='.get_bloginfo('url').'&amp;width=600&amp;height=400&amp;header=true&amp;colorscheme=light" scrolling="no" frameborder="no" style="border:none; overflow:hidden; width:600px; height:400px"></iframe>';
+	$iframe='<iframe src="http://www.facebook.com/plugins/activity.php?site='.get_bloginfo('url').'&amp;width=600&amp;height=400&amp;header=true&amp;colorscheme=light" scrolling="no" frameborder="no" style="border:none; overflow:hidden; width:620px; height:400px"></iframe>';
 	$activity="<hr><div class='wrap'<h3>".__("Recent Facebook Activity for this site")."</h3><p>$iframe</p></div>";
 	$options = wordbooker_options();
 	if (isset($options["wordbooker_fb_rec_act"])) { echo $activity; }
@@ -1429,7 +1430,7 @@ function wordbooker_option_support() {
 		$fopenstat2="Fopen is available ";
 		if ($fp = @fopen('https://api.facebook.com/restserver.php', 'r')) {
 		   $content = '';
-		   while ($line = fread($fp, 1024)) {
+		   while ($line = @fread($fp, 1024)) {
 		      $content.=$line;
 		   }
 		}
@@ -2057,30 +2058,34 @@ function wordbooker_check_permissions($wbuser,$user) {
 	$perm_miss=wordbooker_get_cache($user_ID,'auths_needed');
 	if ($perm_miss->auths_needed==0) { return;}
 	$fbclient = wordbooker_fbclient($wbuser);
-	$loginUrl='https://www.facebook.com/dialog/oauth?client_id='.WORDBOOKER_FB_ID.'&redirect_uri=http://ccgi.pemmaquid.plus.com/cgi-bin/index2.html?br='.urlencode(get_bloginfo('wpurl')).'&display=popup&extern=1&enable_profile_selector=1&scope=';
+	$loginUrl="http://www.facebook.com/dialog/oauth/?scope=";
+	$loginUrl2="&client_id=".WORDBOOKER_FB_ID."&redirect_uri=http://ccgi.pemmaquid.plus.com/cgi-bin/index2.html?br=http%3A%2F%2Fblogs.canalplan.org.uk%2Fsteve&response_type=token&enable_profile_selector=1";
 
-
-	#$loginUrl2="https://www.facebook.com/dialog/oauth?client_id='.WORDBOOKER_FB_ID.'&redirect_uri=https://wordboker.tty.org.uk/index2.html?br=".urlencode(get_bloginfo('wpurl'))."&display=popup"."&extern=1&enable_profile_selector=1&scope=";
-	#$loginUrl2="https://www.facebook.com/dialog/oauth?client_id=254577506873&redirect_uri=https://wordbooker.tty.org.uk/index2.html?br=".urlencode(get_bloginfo('wpurl'))."&display=popup"."&extern=1&enable_profile_selector=1&scope=";
 
 	$perms_to_check= array(WORDBOOKER_FB_PUBLISH_STREAM,WORDBOOKER_FB_STATUS_UPDATE,WORDBOOKER_FB_READ_STREAM);
 	$perm_messages= array( __('publish content to your Wall/Fan pages'), __('update your status'), __('read your News Feed and Wall'),__('create notes'));
 	$preamble= __("Wordbooker requires authorization to ");
 	$postamble= __(" on Facebook. Click on the following link to grant permission");
 	echo "<br />";
-
+	$scopes="";
 	if(is_array($perms_to_check)) {
 		foreach(array_keys($perms_to_check) as $key){
 			# Bit map check to put out the right text for the missing permissions.
 			if (pow(2,$key) & $perm_miss->auths_needed ) {
-				$url=$loginUrl.$perms_to_check[$key];
-			       echo '<p>'.$preamble.$perm_messages[$key].$postamble.'</p><div style="text-align: center;"><a href="'.$url.'" > <img src="http://static.ak.facebook.com/images/devsite/facebook_login.gif"  alt="Facebook Login Button" /></a><br /></div>';
+				$scopes.=$perms_to_check[$key].',';
+			       echo '<p>'.$preamble.$perm_messages[$key].$postamble.'</p>';
 			}
 		}
+
+	$opurl="http://www.facebook.com/connect/prompt_permissions.php?v=1&api_key=0cbf13c858237f5d74ef0c32a4db11fd&ext_perm=".trim($scopes,',')."&fbconnect=true&display=popup&extern=1&enable_profile_selector=1&next=http%3A%2F%2Fccgi.pemmaquid.plus.com%2Fcgi-bin%2Findex2.html%3Fbr=".urlencode(get_bloginfo('wpurl'));
+echo "<div align=center><a href='".$opurl."' > <img src='http://static.ak.facebook.com/images/devsite/facebook_login.gif'  alt='Facebook Login Button' /></a><br /></div>";
+	#echo '<a href="'.$loginUrl.$scopes.$loginUrl2.'" > <img src="http://static.ak.facebook.com/images/devsite/facebook_login.gif"  alt="Facebook Login Button" /></a><br />';
 	}
 	echo "and then save your settings<br />";
+	#echo "<br/> <b>NOTE: </b> If you have just added a NEW page to your list of pages then you have to Manually add Wordbooker to it by going to the <a href=http://www.facebook.com/Wordbooker> Wordbooker Main Page </a> and clicking on 'Add to my Page'";
 	echo '<form action="'.WORDBOOKER_SETTINGS_URL.'" method="post"> <input type="hidden" name="action" value="" />';
-	echo '<p style="text-align: center;"><input type="submit" name="perm_save" class="button-primary" value="'. __('Save Configuration').'" /></p></form>';
+	echo '<p style="text-align: center;"><input type="submit" name="perm_save" class="button-primary" value="'. __('Save Configuration').'" /></p></form></div>';
+	
 }
 
 function wordbooker_contributed($url=0) {
@@ -2088,7 +2093,7 @@ function wordbooker_contributed($url=0) {
 	if ($url==0){
 		$contributors=array('1595132200','100000818019269','39203171','666800299','500073624','711830142','503549492','100000589976474','254577506873','1567300610','701738627','100000442094620','754015348','29404010','748636937',
  '676888540','768354692','1607820784','1709067850','769804853','100001597808077','1162591229','736138968','532656880','1000013707847','1352285955','836328641',
- '23010694256','129976890383044','679511648','100001305747796','138561766210548','535106029','202891313077099','567894174','10150158518404391','689075829'
+ '23010694256','129976890383044','679511648','100001305747796','138561766210548','535106029','202891313077099','567894174','10150158518404391','689075829','1517916635'
 );
 		$facebook_id=wordbooker_get_cache($user_ID,'facebook_id');
 		return in_array($facebook_id->facebook_id,$contributors);
@@ -2109,7 +2114,7 @@ function wordbooker_contributed($url=0) {
 "Westpark Gamers"=>'www.westpark-gamers.de/', "The Camera Zealot"=>'www.camerazealot.com', " Best Raw Organic" => 'BestRawOrganic.com',"Gibson Designs"=>'gibsondesigns.net',
 "Looking out from Under"=>'www.lookingoutfromunder.com',"Our Excellent Adventures"=>'www.ourexcellentadventures.com',
 "wisiwi.com - Das Magazin für Unternehmer"=>'www.wisiwi.com/',"Just One Cookbook"=>'justonecookbook.com/blog/',"Surfdog 2011"=>'hastenteufel.name/blog',
-"Vice Versa Advertising Photography"=>'www.viceversa.gr/',"Swimming Pools Designs"=>'www.swimming-pools-designs.com',"Eastleigh District Scouts"=>'www.eastleigh-scouts.org.uk',"Sparkpr"=>'www.sparkpr.com',"Charlie Glickman - Adult Sexuality Education"=>'www.charlieglickman.com/'
+"Vice Versa Advertising Photography"=>'www.viceversa.gr/',"Swimming Pools Designs"=>'www.swimming-pools-designs.com',"Eastleigh District Scouts"=>'www.eastleigh-scouts.org.uk',"Sparkpr"=>'www.sparkpr.com',"Charlie Glickman - Adult Sexuality Education"=>'www.charlieglickman.com/',"iEatAtTheBar | A pessimist's optimistic view on food"=>'www.iEatAtTheBar.com',"DevilsCove.com | Boats, Booze & Fun on Lake Travis"=>'www.DevilsCove.com'
 );
 		$keys = array_keys($blogs);
 		shuffle($keys);
@@ -2223,24 +2228,27 @@ function wordbooker_post_excerpt($excerpt, $maxlength,$doyoutube=1) {
 
 function wordbooker_publish_action($post) {
 	global $user_ID, $user_identity, $user_login, $wpdb,$wordbooker_post_options;
-	$x = get_post_meta($post->ID, 'wordbooker_options', true); 
+
 		if ($post->post_password != '') {
 		/* Don't publish password-protected posts to news feed. */
 		return 27;
-	}
+	}	
+	$wordbooker_settings=wordbooker_options(); 
+	$wordbooker_post_options= get_post_meta($post->ID, 'wordbooker_options', true); 
+	#var_dump($wordbooker_post_options);
 	#var_dump($x);
 	# Get the settings from the post_meta.
-	if (is_array($x)){
-		foreach (array_keys($x) as $key ) {
-			if (substr($key,0,8)=='wordbook') {
-				$wordbooker_post_options[$key]=str_replace( array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),array('&','"','\'','<','>',"\t"),$x[$key]);
-			}
-		}
-	}
+#	if (is_array($x)){
+#		foreach (array_keys($x) as $key ) {
+#			if (substr($key,0,8)=='wordbook') {
+#				$wordbooker_post_options[$key]=str_replace( array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),array('&','"','\'','<','>',"\t"),$x[$key]);
+#			}
+#		}
+#	}
 	
-		if (is_array($wordbooker_post_options)){
+	if (is_array($wordbooker_post_options)){
 		foreach (array_keys($wordbooker_post_options) as $key){
-			wordbooker_debugger("Post option : ".$key,$wordbooker_post_options[$key],$post->ID) ;
+		wordbooker_debugger("Post option : ".$key,$wordbooker_post_options[$key],$post->ID) ;
 		}
 	}
 	
@@ -2294,9 +2302,6 @@ function wordbooker_publish_action($post) {
 	} else
 #	if (!wordbooker_postlogged($post->ID)) 
 	{
-
-		
-
 		wordbooker_debugger("Calling wordbooker_fbclient_publishaction"," ",$post->ID) ;
 		list($result1,$result2)=wordbooker_fbclient_publishaction($wbuser, $fbclient, $post->ID);
 		
@@ -2344,12 +2349,12 @@ function wordbooker_publish($postid) {
 	$post = get_post($postid);
 	# If its less than 10 seconds since we saw this post last we give up
 	$ts=wordbooker_postlogged($postid,1);
-	if (isset($ts) && $ts<=60 && $ts>1) {wordbooker_debugger("Publish hook re-fire, ignoring ",$ts,$postid,99) ; return;}
+	#if (isset($ts) && $ts<=60 && $ts>1) {wordbooker_debugger("Publish hook re-fire, ignoring ",$ts,$postid,99) ; return;}
 	# Clear down the error / diagnostic logs for this post.
 	#wordbooker_deletefrom_errorlogs($postid);
 	if ((isset($user_ID) && $user_ID>0) &&  (!current_user_can(WORDBOOKER_MINIMUM_ADMIN_LEVEL))) { wordbooker_debugger("This user doesn't have enough rights"," ",$post->ID) ; return; }
 	
-	wordbooker_debugger("Commence Publish "," ",$post->ID,99) ; 
+	wordbooker_debugger("Commence Publish "," ",$postid,99) ; 
 	$wb_params = get_post_meta($postid, 'wordbooker_options', true); 
 	$wordbooker_settings = wordbooker_options();
 	# If there is no user row for this user then set the user id to the default author. If the default author is set to 0 (i.e current logged in user) then only blog level settings apply.
@@ -2358,6 +2363,93 @@ function wordbooker_publish($postid) {
 	# If we've no FB user associated with this ID and the blog owner hasn't overridden then we give up.
 	# If the referer is press-this then the user hasn't used the full edit post form so we need to get the blog/user level settings.
 	# Also check for a missing user_id (i,e, user is not a wordbooker user), or if the extract_length is empty (wp-o-matic does that)
+
+	#else 
+	#{	
+	if ((! wordbooker_get_userdata($post->post_author))  && ( !isset($wordbooker_settings['wordbook_publish_no_user'])))  { wordbooker_debugger("Not a WB user (".$post->post_author.") and no overide - give up "," ",$post->ID,99) ; return;}
+			if ((! wordbooker_get_userdata($wb_user_id))  && ( !isset($wordbooker_settings['wordbook_publish_no_user'])))  {wordbooker_debugger("Author (".$post->post_author.") not a WB user and no overide- give up "," ",$post->ID,99) ;  return;}
+		#}
+
+	if ($_POST["wordbook_default_author"]== 0 ) { wordbooker_debugger("Author of this post is the Post Author"," ",$post->ID);  $_POST["wordbook_default_author"]=$post->post_author; }
+	
+	// If soupy isn't set then its either a future post or a post inherting another users options so we need to get the meta data rather than rely on post data
+
+	wordbooker_debugger("Options Set - call transition  "," ",$post->ID) ;
+	$retcode=wordbooker_publish_action($post);
+	return $retcode;
+}
+
+
+function wordbooker_process_post_data($newstatus, $oldstatus, $post) {
+	global $user_ID, $user_identity, $user_login, $wpdb, $blog_id;
+	# If this is an autosave then we give up and return as otherwise we lose user settings.
+	#var_dump($post->post_author);
+	if ($_POST['action']=='autosave') { return;}
+	$wb_params = get_post_meta($post->ID, 'wordbooker_options', true); 
+	#wordbooker_debugger("Author data : ".$post->post_author." - ".$user_ID,' ',$post->ID,99) ;
+	#wordbooker_debugger("Status Change from ".$oldstatus." to ".$newstatus,' ',$post->ID,99) ;
+	# If the user isn't a wordbooker user and the blog admin hasn't allowed non wordbooker users to publish then we go home.
+	#if ((! wordbooker_get_userdata($user_ID))  && ( !isset($wordbooker_settings['wordbook_publish_no_user'])))  { return;}
+	# If we dont have and Wordbooker settings for this user then we need to get some from the stsete,
+	if (! wordbooker_get_userdata($post->post_author)) { $wb_user_id=$wordbooker_settings["wordbook_default_author"];}
+	if  ($wordbooker_settings["wordbook_default_author"] == 0 ) {$wb_user_id=$post->post_author;} else {$wb_user_id=$wordbooker_settings["wordbook_default_author"];}
+	if (! isset($_POST['soupy'])) {
+		wordbooker_debugger("Need to get options from the Meta and not the POST  "," ",$post->ID) ;
+		if (!is_array($wb_params)) {
+			# Get the blog level and then the user level settings - just in case this post predates the install.
+			$wordbooker_settings = wordbooker_options();
+			wordbooker_debugger("Getting settings for user : ",$wb_user_id,$post->ID) ; 
+			if (! wordbooker_get_userdata($wb_user_id)) { $wb_user_id=$wordbooker_settings["wordbook_default_author"];}
+			// then get the user level settings and override the blog level settings.
+
+			$wordbook_user_settings_id="wordbookuser".$blog_id;
+			$wordbookuser=get_usermeta($wb_user_id,$wordbook_user_settings_id);
+			# If we have user settings then lets go through and override the blog level defaults.
+			if(is_array($wordbookuser)) {
+				foreach (array_keys($wordbookuser) as $key) {
+					if ((strlen($wordbookuser[$key])>0) && ($wordbookuser[$key]!="0") ) {
+						$wordbooker_settings[$key]=$wordbookuser[$key];
+					} 
+				}
+
+			}
+			if (isset($_POST['crabstick'])) {
+			$wordbooker_settings['wordbooker_publish_default']=$_POST['wordbooker_publish_default'];
+			$wordbooker_settings['wordbooker_publish_override']=$_POST['wordbooker_publish_override'];
+			}
+			#Now push these into the $_POST array.
+			if(is_array($wordbooker_settings)) {
+				foreach (array_keys($wordbooker_settings) as $key ) {
+					if (substr($key,0,8)=='wordbook') {
+						$_POST[$key]=str_replace( array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),array('&','"','\'','<','>',"\t"),$wordbooker_settings[$key]);
+					}
+				}	
+			}
+			# now lets get the post meta
+			$x = get_post_meta($postid, 'wordbooker_options', true); 
+			#var_dump($x);
+
+			if(is_array($x)) {
+				foreach (array_keys($x) as $key ) {
+					if (substr($key,0,8)=='wordbook') {
+						$_POST[$key]=str_replace( array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),array('&','"','\'','<','>',"\t"),$x[$key]);
+					}
+				}
+			}
+
+		#}		
+		# Now put the $_POST data into an array
+		foreach (array_keys($_POST) as $key ) {
+			if (substr($key,0,8)=='wordbook') {
+				$wb_params[$key]=str_replace(array('&','"','\'','<','>',"\t",), array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),$_POST[$key]);
+			}
+		}
+
+		# And write that into the post_meta
+		update_post_meta($post->ID, 'wordbooker_options', $wb_params); 
+	}
+	}	
+
 	if ( (stripos($_POST["_wp_http_referer"],'press-this')) || ( stripos($_POST["_wp_http_referer"],'index.php'))   ) {
 		wordbooker_debugger("Inside the press this / quick press block "," ",$post->ID) ;
 		# New get the user level settings from the DB
@@ -2383,92 +2475,65 @@ function wordbooker_publish($postid) {
 	# Then we set soupy to stop things being blown away by the post meta.
 	$_POST['soupy']="twist";
 	}
-	
-	else 
 
-	{	if ((! wordbooker_get_userdata($post->post_author))  && ( !isset($wordbooker_settings['wordbook_publish_no_user'])))  { wordbooker_debugger("Not a WB user (".$post->post_author.") and no overide - give up "," ",$post->ID,99) ; return;}
-		if ((! wordbooker_get_userdata($wb_user_id))  && ( !isset($wordbooker_settings['wordbook_publish_no_user'])))  {wordbooker_debugger("Author (".$post->post_author.") not a WB user and no overide- give up "," ",$post->ID,99) ;  return;}
-	}
-
-	if ($_POST["wordbook_default_author"]== 0 ) { wordbooker_debugger("Author of this post is the Post Author"," ",$post->ID);  $_POST["wordbook_default_author"]=$post->post_author; }
-	
-	// If soupy isn't set then its either a future post or a post inherting another users options so we need to get the meta data rather than rely on post data
 	if (! isset($_POST['soupy'])) {
 		wordbooker_debugger("Need to get options from the Meta and not the POST  "," ",$post->ID) ;
-		# Get the blog level and then the user level settings - just in case this post predates the install.
-		$wordbooker_settings = wordbooker_options();
-		wordbooker_debugger("Getting settings for user : ",$wb_user_id,$post->ID) ; 
-		if (! wordbooker_get_userdata($wb_user_id)) { $wb_user_id=$wordbooker_settings["wordbook_default_author"];}
-		// then get the user level settings and override the blog level settings.
+		if (!is_array($wb_params)) {
+			# Get the blog level and then the user level settings - just in case this post predates the install.
+			$wordbooker_settings = wordbooker_options();
+			wordbooker_debugger("Getting settings for user : ",$wb_user_id,$post->ID) ; 
+			if (! wordbooker_get_userdata($wb_user_id)) { $wb_user_id=$wordbooker_settings["wordbook_default_author"];}
+			// then get the user level settings and override the blog level settings.
 
-		$wordbook_user_settings_id="wordbookuser".$blog_id;
-		$wordbookuser=get_usermeta($wb_user_id,$wordbook_user_settings_id);
-		# If we have user settings then lets go through and override the blog level defaults.
-		if(is_array($wordbookuser)) {
-			foreach (array_keys($wordbookuser) as $key) {
-				if ((strlen($wordbookuser[$key])>0) && ($wordbookuser[$key]!="0") ) {
-					$wordbooker_settings[$key]=$wordbookuser[$key];
-				} 
+			$wordbook_user_settings_id="wordbookuser".$blog_id;
+			$wordbookuser=get_usermeta($wb_user_id,$wordbook_user_settings_id);
+			# If we have user settings then lets go through and override the blog level defaults.
+			if(is_array($wordbookuser)) {
+				foreach (array_keys($wordbookuser) as $key) {
+					if ((strlen($wordbookuser[$key])>0) && ($wordbookuser[$key]!="0") ) {
+						$wordbooker_settings[$key]=$wordbookuser[$key];
+					} 
+				}
+
+			}
+			if (isset($_POST['crabstick'])) {
+			$wordbooker_settings['wordbooker_publish_default']=$_POST['wordbooker_publish_default'];
+			$wordbooker_settings['wordbooker_publish_override']=$_POST['wordbooker_publish_override'];
+			}
+			#Now push these into the $_POST array.
+			if(is_array($wordbooker_settings)) {
+				foreach (array_keys($wordbooker_settings) as $key ) {
+					if (substr($key,0,8)=='wordbook') {
+						$_POST[$key]=str_replace( array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),array('&','"','\'','<','>',"\t"),$wordbooker_settings[$key]);
+					}
+				}	
+			}
+			# now lets get the post meta
+			$x = get_post_meta($postid, 'wordbooker_options', true); 
+			#var_dump($x);
+
+			if(is_array($x)) {
+				foreach (array_keys($x) as $key ) {
+					if (substr($key,0,8)=='wordbook') {
+						$_POST[$key]=str_replace( array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),array('&','"','\'','<','>',"\t"),$x[$key]);
+					}
+				}
 			}
 
-		}
-		if (isset($_POST['crabstick'])) {
-		$wordbooker_settings['wordbooker_publish_default']=$_POST['wordbooker_publish_default'];
-		$wordbooker_settings['wordbooker_publish_override']=$_POST['wordbooker_publish_override'];
-		}
-		#Now push these into the $_POST array.
-		if(is_array($wordbooker_settings)) {
-			foreach (array_keys($wordbooker_settings) as $key ) {
-				if (substr($key,0,8)=='wordbook') {
-					$_POST[$key]=str_replace( array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),array('&','"','\'','<','>',"\t"),$wordbooker_settings[$key]);
-				}
-			}	
-		}
-		# now lets get the post meta
-		$x = get_post_meta($postid, 'wordbooker_options', true); 
-		#var_dump($x);
-
-		if(is_array($x)) {
-			foreach (array_keys($x) as $key ) {
-				if (substr($key,0,8)=='wordbook') {
-					$_POST[$key]=str_replace( array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),array('&','"','\'','<','>',"\t"),$x[$key]);
-				}
+		#}		
+		# Now put the $_POST data into an array
+		foreach (array_keys($_POST) as $key ) {
+			if (substr($key,0,8)=='wordbook') {
+				$wb_params[$key]=str_replace(array('&','"','\'','<','>',"\t",), array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),$_POST[$key]);
 			}
 		}
 
-	#}		
-	# Now put the $_POST data into an array
-	foreach (array_keys($_POST) as $key ) {
-		if (substr($key,0,8)=='wordbook') {
-			$wb_params[$key]=str_replace(array('&','"','\'','<','>',"\t",), array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),$_POST[$key]);
-		}
+		# And write that into the post_meta
+		update_post_meta($post->ID, 'wordbooker_options', $wb_params); 
 	}
-	$encoded_wb_params=str_replace('\\','\\\\',serialize($wb_params));
-	# And write that into the post_meta
-	update_post_meta($post->ID, 'wordbooker_options', $wb_params); 
 	}
-	wordbooker_debugger("Options Set - call transition  "," ",$post->ID) ;
-	$retcode=wordbooker_transition_post_status('publish', null, $post);
-	return $retcode;
-}
-
-
-function wordbooker_future_post($newstatus, $oldstatus=null, $post=null) {
-	# This handles option saving for future posting and also fires when auto save fires.
-	global $user_ID, $user_identity, $user_login, $wpdb, $blog_id,$post;
-	# If this is an autosave then we give up and return as otherwise we lose user settings.
-	if ($_POST['action']=='autosave') { return;}
-#	if ($newstatus=="future") { $wordbooker_settings['wordbook_scheduled_post']=1;}
-#	if ($newstatus=="publish" && (!isset($oldstatus) || $oldstatus!="publish") ) { 
-#		wordbooker_debugger("This looks like a new post ",$newstatus,$post->ID,99) ;
-#		$wordbooker_settings['wordbook_new_post']=1;
-#	}
-#	$wb_params=$wordbooker_settings;
-	if (!current_user_can(WORDBOOKER_MINIMUM_ADMIN_LEVEL)) { wordbooker_debugger("This user doesn't have enough rights"," ",$post->ID) ; return;}
-	# If the user isn't a wordbooker user and the blog admin hasn't allowed non wordbooker users to publish then we go home.
-	if ((! wordbooker_get_userdata($user_ID))  && ( !isset($wordbooker_settings['wordbook_publish_no_user'])))  {  wordbooker_debugger("Not a WB user"," ",$post->ID); return;}
-	# If we dont have and Wordbooker settings for this user then we need to get some from the stsete,
 	if ( !wordbooker_get_userdata($user_ID)) {
+		
 		$wb_user_id=$wordbooker_settings["wordbook_default_author"];
 		# New get the user level settings from the DB
 		$wordbook_user_settings_id="wordbookuser".$blog_id;
@@ -2486,7 +2551,7 @@ function wordbooker_future_post($newstatus, $oldstatus=null, $post=null) {
 			if(is_array($wordbooker_settings)) {
 			foreach (array_keys($wordbooker_settings) as $key ) {
 				if (substr($key,0,8)=='wordbook') {
-					$_POST[$key]=str_replace( array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),array('&','"','\'','<','>',"\t"),$wordbooker_settings[$key]);
+					if (!isset($_POST[$key])){$_POST[$key]=str_replace( array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),array('&','"','\'','<','>',"\t"),$wordbooker_settings[$key]);}
 				}
 			}
 		}
@@ -2494,17 +2559,33 @@ function wordbooker_future_post($newstatus, $oldstatus=null, $post=null) {
 	# OK now lets get the settings from the POST array
 	foreach (array_keys($_POST) as $key ) {
 		if (substr($key,0,8)=='wordbook') {
+			#wordbooker_debugger("Saving $key ",$_POST[$key],$post->ID,99) ;
 			$wb_params[$key]=str_replace(array('&','"','\'','<','>',"\t",), array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),$_POST[$key]);
 		}
 	}
 #	$encoded_wb_params=str_replace('\\','\\\\',serialize($wb_params));
-	if ($newstatus=="future") { $wb_params['wordbook_scheduled_post']=1;}
-	if ($newstatus=="publish" && (!isset($oldstatus) || $oldstatus!="publish") ) { 
-		wordbooker_debugger("This looks like a new post ",$newstatus,$post->ID,99) ;
-		$wb_params['wordbook_new_post']=1;
+	if ($newstatus=="future") { 
+		$wb_params['wordbook_scheduled_post']=1;
+		wordbooker_debugger("This looks like a post that is scheduled for future publishing",$newstatus,$post->ID,99);
+		wordbooker_debugger("Saving Options to Post Meta",' ',$post->ID,99) ;
+		#update_post_meta($post->ID, 'wordbooker_options', $wb_params);
 	}	
+	if ($newstatus=="publish" && (!isset($oldstatus) || $oldstatus!="publish") ) { 
+		wordbooker_debugger("This looks like a new post being published ",$newstatus,$post->ID,99) ;
+		$wb_params['wordbook_new_post']=1;
+		wordbooker_debugger("Saving Options to Post Meta",' ',$post->ID,99) ;
+		#update_post_meta($post->ID, 'wordbooker_options', $wb_params);
+	}
+
+	#foreach (array_keys($wb_params) as $key){
+	#	wordbooker_debugger("Saved Post option : ".$key,$wb_params[$key],$post->ID) ;
+	#}	
 	update_post_meta($post->ID, 'wordbooker_options', $wb_params); 
-#	var_dump($wb_params);
+
+	if ($newstatus=="publish") {
+		wordbooker_debugger("Calling Wordbooker publishing function",' ',$post->ID,99) ;
+		wordbooker_publish($post->ID);
+	}
 } 
 
 
@@ -2679,10 +2760,10 @@ function get_social_img_header() {
 add_action('wp_head', 'get_social_img_header');
 
 /* Post/page maintenance and publishing hooks. */
-add_action('transition_post_status', 'wordbooker_future_post',1,3);
+add_action('transition_post_status', 'wordbooker_process_post_data',20,3);
 add_action('delete_post', 'wordbooker_delete_post');
-add_action('publish_post', 'wordbooker_publish',5);
-add_action('publish_page', 'wordbooker_publish',5);
+#add_action('publish_post', 'wordbooker_publish',20);
+#add_action('publish_page', 'wordbooker_publish',20);
 add_action('wb_cron_job', 'wordbooker_poll_facebook',5);
 add_action('delete_post', 'wordbooker_delete_post');
 add_action('comment_post', 'wordbooker_post_comment', 20);

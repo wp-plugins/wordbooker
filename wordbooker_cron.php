@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Cron
 Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 1.9.3
+Version: 1.9.4
 Description: Collection of processes that are often handled by wp_cron scheduled jobs
 Author: Steve Atty
 */

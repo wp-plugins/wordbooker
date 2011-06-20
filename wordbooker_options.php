@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Options 
 Extension URI: http://wordbooker.tty.org.uk
-Version: 1.9.3
+Version: 1.9.4
 Description: Advanced Options for the WordBooker Plugin
 Author: Steve Atty
 */
