@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Options 
 Extension URI: http://wordbooker.tty.org.uk
-Version: 1.9.4
+Version: 1.9.5
 Description: Advanced Options for the WordBooker Plugin
 Author: Steve Atty
 */
@@ -392,7 +392,7 @@ function wordbooker_option_manager() {
 		echo "</select><br />";
 
 		echo '<label for="wb_attribute">'.__("Post Attribute"). ' : </label>';
-		echo '<INPUT NAME="wordbooker_settings[wordbook_attribute]" size=60 maxlength=240 value="'.stripslashes($wordbooker_settings["wordbook_attribute"]).'"><br />';
+		echo '<INPUT NAME="wordbooker_settings[wordbook_attribute]" size=60 maxlength=240 value="'.htmlspecialchars(stripslashes($wordbooker_settings["wordbook_attribute"])).'"><br />';
 
 		echo '<label for="wb_publish_timeframe">'.__("Republish Post if edited more than"). ' : </label>';
 		echo '<INPUT NAME="wordbooker_settings[wordbook_republish_time_frame]" size=3 maxlength=3 value='.$wordbooker_settings["wordbook_republish_time_frame"].'> '.__("days ago").' <INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbook_republish_time_obey]" '.$checked_flag[$wordbooker_settings["wordbook_republish_time_obey"]].' ><br />';
@@ -402,7 +402,7 @@ function wordbooker_option_manager() {
 
 		echo '<label for="wb_status_update">'.__("Update Facebook Status"). ' :</label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_status_update]" '.$checked_flag[$wordbooker_settings["wordbooker_status_update"]].' >';
-		echo' <INPUT NAME="wordbooker_settings[wordbooker_status_update_text]" size=60 maxlength=60 value="'.stripslashes($wordbooker_settings["wordbooker_status_update_text"]).'"> ';
+		echo' <INPUT NAME="wordbooker_settings[wordbooker_status_update_text]" size=60 maxlength=60 value="'.htmlspecialchars(stripslashes($wordbooker_settings["wordbooker_status_update_text"])).'"> ';
 
 		echo '<br /><label for="wb_action_link">'.__("Action Link Option "). ': </label><select id="wordbook_actionlink" name="wordbooker_settings[wordbook_actionlink]"  >';	
       		 $arr = array(100=> "None ",  200=> __("Share Link "), 300=>__("Read Full Article"));
@@ -672,11 +672,11 @@ if(ADVANCED_DEBUG) {
                        else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
 		}
                 echo "</select>";
-		echo '<INPUT NAME="wordbooker_status_update_text" size=60 maxlength=60 value="'.stripslashes($wordbookuser_settings["wordbooker_status_update_text"]).'"> ';
+		echo '<INPUT NAME="wordbooker_status_update_text" size=60 maxlength=60 value="'.htmlspecialchars(stripslashes($wordbookuser_settings["wordbooker_status_update_text"])).'"> ';
 		echo '</select><br />';
 
 		echo '<label for="wb_attribute">'.__('Post Attribute').' : </label>';
-		echo '<INPUT NAME="wordbook_attribute" size=60 maxlength=240 value="'.stripslashes($wordbookuser_settings["wordbook_attribute"]).'"><br />';
+		echo '<INPUT NAME="wordbook_attribute" size=60 maxlength=240 value="'.htmlspecialchars(stripslashes($wordbookuser_settings["wordbook_attribute"])).'"><br />';
 
 		echo '<label for="wb_action_link">'.__('Action Link Option').' : </label><select id="wordbook_actionlink" name="wordbook_actionlink"  >';	
        		$arr = array(0=> __("Same as Blog"), 100=> __("None"),  200=> __("Share Link"), 300=>__("Read Full Article"));
@@ -757,7 +757,7 @@ if(ADVANCED_DEBUG) {
 
 		echo "<br /><hr>";
 		wordbooker_option_support();
-		echo "</div>";
+	#	echo "</div>";
         }
 	 else {
 		wordbooker_option_setup($wbuser);
@@ -890,8 +890,8 @@ function wordbooker_inner_custom_box() {
 		}
 
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbook_use_excerpt" '.$checked_flag[$wordbooker_settings["wordbook_use_excerpt"]].' > Use Wordpress Excerpt for Wall Post <br />';
-		echo 'Facebook Post Attribute line: <INPUT NAME="wordbook_attribute" size=60 maxlength=240 value="'.stripslashes($wordbooker_settings["wordbook_attribute"]).'"><br />';	
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_status_update" '.$checked_flag[$wordbooker_settings["wordbooker_status_update"]].' > '.__('Facebook Status Update text').' : <INPUT NAME="wordbooker_status_update_text" size=60 maxlength=60 value="'.stripslashes($wordbooker_settings["wordbooker_status_update_text"]).'"><br />';
+		echo 'Facebook Post Attribute line: <INPUT NAME="wordbook_attribute" size=60 maxlength=240 value="'.htmlspecialchars(stripslashes($wordbooker_settings["wordbook_attribute"])).'"><br />';	
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_status_update" '.$checked_flag[$wordbooker_settings["wordbooker_status_update"]].' > '.__('Facebook Status Update text').' : <INPUT NAME="wordbooker_status_update_text" size=60 maxlength=60 value="'.htmlspecialchars(stripslashes($wordbooker_settings["wordbooker_status_update_text"])).'"><br />';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbook_comment_get" '.$checked_flag[$wordbooker_settings["wordbook_comment_get"]].' > '.__('Fetch comments from Facebook for this post').'<br />';
 } else {
 echo "Wordbooker Blog level settings are in force<br>";

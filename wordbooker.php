@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.  <strong>Do Not Auto-Upgrade this plugin - follow the upgrade instructions in the <a href="../wp-content/plugins/wordbooker/readme.txt" target="wordpress">Read me</a></strong>
 Author: Steve Atty 
 Author URI: http://blogs.canalplan.org.uk/steve/
-Version: 1.9.4
+Version: 1.9.5
 */
 
  /*
@@ -38,7 +38,7 @@ if (! isset($wordbooker_settings['wordbook_extract_length'])) $wordbooker_settin
 
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
-define('WORDBOOKER_CODE_RELEASE','1.9.4 r00');
+define('WORDBOOKER_CODE_RELEASE','1.9.5 r00');
 
 # For Troubleshooting 
 define('ADVANCED_DEBUG',false);
@@ -1741,7 +1741,7 @@ function wordbooker_fbclient_publishaction($wbuser, $fbclient,$postid)
 		'post_link_share' => $post_link_share,
 		'post_title' => $post_title,
 		'post_excerpt' => $post_content,
-		'post_attribute' => $post_attribute
+		'post_attribute' => htmlspecialchars_decode($post_attribute,ENT_QUOTES)
 		);
 	wordbooker_debugger("Calling wordbooker_fbclient_publishaction_impl"," ",$post->ID) ;
 	list($result, $error_code, $error_msg, $method,$result2, $error_code2, $error_msg2) = wordbooker_fbclient_publishaction_impl($fbclient, $post_data);
@@ -1905,7 +1905,7 @@ function wordbooker_header($blah){
 				
 				}
 			}
-			echo '<meta property="og:image" content="'.$ogimage.'"/> ';
+			if (strlen($ogimage)>4) {echo '<meta property="og:image" content="'.$ogimage.'"/> ';}
 		} 
 		else
 		{ # Not a single post so we only need the og:type tag
@@ -2033,7 +2033,7 @@ function wordbooker_append_post($post_cont) {
 				$post_cont2=$post_cont.'<div>'.$like_code.'<div style="float:right;">'.$share_code.'</div></div>'; 
 			} 
 			else {
-				$post_cont2= '<p><br /></p><div>'.$like_code.'<div style="float:right;">'.$share_code.'</div></div>'.$post_cont; 
+				$post_cont2= '<p><br /></p><div>'.$like_code.'<div style="float:right;">'.$share_code.'</div></div><br /> <br />'.$post_cont; 
 			}
 		}
 
@@ -2093,7 +2093,8 @@ function wordbooker_contributed($url=0) {
 	if ($url==0){
 		$contributors=array('1595132200','100000818019269','39203171','666800299','500073624','711830142','503549492','100000589976474','254577506873','1567300610','701738627','100000442094620','754015348','29404010','748636937',
  '676888540','768354692','1607820784','1709067850','769804853','100001597808077','1162591229','736138968','532656880','1000013707847','1352285955','836328641',
- '23010694256','129976890383044','679511648','100001305747796','138561766210548','535106029','202891313077099','567894174','10150158518404391','689075829','1517916635'
+ '23010694256','129976890383044','679511648','100001305747796','138561766210548','535106029','202891313077099','567894174','10150158518404391','689075829','1517916635',
+'214145618608444'
 );
 		$facebook_id=wordbooker_get_cache($user_ID,'facebook_id');
 		return in_array($facebook_id->facebook_id,$contributors);
@@ -2109,12 +2110,12 @@ function wordbooker_contributed($url=0) {
 "The GBMINI website"=>'www.gbmini.net',"Roca"=>'rocamusic.ca/home',"Drew Rozell"=>'www.drewrozell.com/',"Kartext"=>'www.nitsche.org/',
 "Doug Berch - Musician and Appalachian Mountain Dulcimer Maker"=>'dougberch.com',"My Lifestyle Blog"=>'www.mylifestyleblog.de',
 "tina rawatta photography" => 'www.tinarawatta.com',"Gary Said..."=>'GarySaid.com',"Bachateros Online Magazine"=>'www.bachateros.com.au/',"Linh's e-place"=>'www.linh.se',
-"InkMusings" => 'www.inkmusings.com',"Jürgen Koller's website"=>'www.kollermedia.at',"Walk With Ben"=>'www.walkwithben.com',"GardenFork"=>'www.http://www.gardenfork.tv/',
+"InkMusings" => 'www.inkmusings.com',"Jürgen Koller's website"=>'www.kollermedia.at',"Walk With Ben"=>'www.walkwithben.com',"GardenFork"=>'www.gardenfork.tv/',
 "A Low Man's Lyric"=>'vivekiyer.net/',"OutofRange.net"=>'www.outofrange.net/',"This Ambitious Orchestra"=>'ambitiousorchestra.com',"Lydia Salnikova"=>'www.lydiasalnikova.com/',
 "Westpark Gamers"=>'www.westpark-gamers.de/', "The Camera Zealot"=>'www.camerazealot.com', " Best Raw Organic" => 'BestRawOrganic.com',"Gibson Designs"=>'gibsondesigns.net',
 "Looking out from Under"=>'www.lookingoutfromunder.com',"Our Excellent Adventures"=>'www.ourexcellentadventures.com',
 "wisiwi.com - Das Magazin für Unternehmer"=>'www.wisiwi.com/',"Just One Cookbook"=>'justonecookbook.com/blog/',"Surfdog 2011"=>'hastenteufel.name/blog',
-"Vice Versa Advertising Photography"=>'www.viceversa.gr/',"Swimming Pools Designs"=>'www.swimming-pools-designs.com',"Eastleigh District Scouts"=>'www.eastleigh-scouts.org.uk',"Sparkpr"=>'www.sparkpr.com',"Charlie Glickman - Adult Sexuality Education"=>'www.charlieglickman.com/',"iEatAtTheBar | A pessimist's optimistic view on food"=>'www.iEatAtTheBar.com',"DevilsCove.com | Boats, Booze & Fun on Lake Travis"=>'www.DevilsCove.com'
+"Vice Versa Advertising Photography"=>'www.viceversa.gr/',"Swimming Pools Designs"=>'www.swimming-pools-designs.com',"Eastleigh District Scouts"=>'www.eastleigh-scouts.org.uk',"Sparkpr"=>'www.sparkpr.com',"Charlie Glickman - Adult Sexuality Education"=>'www.charlieglickman.com/',"iEatAtTheBar | A pessimist's optimistic view on food"=>'www.iEatAtTheBar.com',"DevilsCove.com | Boats, Booze & Fun on Lake Travis"=>'www.DevilsCove.com',"Bored. Cure your boredom!"=>'bored.overnow.com/'
 );
 		$keys = array_keys($blogs);
 		shuffle($keys);
@@ -2228,11 +2229,7 @@ function wordbooker_post_excerpt($excerpt, $maxlength,$doyoutube=1) {
 
 function wordbooker_publish_action($post) {
 	global $user_ID, $user_identity, $user_login, $wpdb,$wordbooker_post_options;
-
-		if ($post->post_password != '') {
-		/* Don't publish password-protected posts to news feed. */
-		return 27;
-	}	
+	
 	$wordbooker_settings=wordbooker_options(); 
 	$wordbooker_post_options= get_post_meta($post->ID, 'wordbooker_options', true); 
 	#var_dump($wordbooker_post_options);
@@ -2278,7 +2275,7 @@ function wordbooker_publish_action($post) {
 	if( $wordbooker_post_options["wordbooker_status_update"]=="on") {
 		wordbooker_debugger("Setting status_text".$wordbooker_post_options['wordbooker_status_update_text']," ",$post->ID) ; 
 		$status_text = parse_wordbooker_attributes(stripslashes($wordbooker_post_options['wordbooker_status_update_text']),$post->ID,strtotime($post->post_date)); 
-		$status_text = wordbooker_post_excerpt($status_text,420); 			
+		$status_text = htmlspecialchars_decode(wordbooker_post_excerpt($status_text,420),ENT_QUOTES); 			
 		try {
 			$fbclient->users_setStatus($status_text);
 		    }
@@ -2385,6 +2382,14 @@ function wordbooker_process_post_data($newstatus, $oldstatus, $post) {
 	# If this is an autosave then we give up and return as otherwise we lose user settings.
 	#var_dump($post->post_author);
 	if ($_POST['action']=='autosave') { return;}
+
+	if ($post->post_password != '') {return ;  }
+
+	if ( $post->post_status == 'publish' && $post->post_type != 'post' ) {
+		$post_type_info = get_post_type_object( $post->post_type );
+		if ( $post_type_info && !$post_type_info->public ) { return; }
+	}
+
 	$wb_params = get_post_meta($post->ID, 'wordbooker_options', true); 
 	#wordbooker_debugger("Author data : ".$post->post_author." - ".$user_ID,' ',$post->ID,99) ;
 	#wordbooker_debugger("Status Change from ".$oldstatus." to ".$newstatus,' ',$post->ID,99) ;
@@ -2762,8 +2767,6 @@ add_action('wp_head', 'get_social_img_header');
 /* Post/page maintenance and publishing hooks. */
 add_action('transition_post_status', 'wordbooker_process_post_data',20,3);
 add_action('delete_post', 'wordbooker_delete_post');
-#add_action('publish_post', 'wordbooker_publish',20);
-#add_action('publish_page', 'wordbooker_publish',20);
 add_action('wb_cron_job', 'wordbooker_poll_facebook',5);
 add_action('delete_post', 'wordbooker_delete_post');
 add_action('comment_post', 'wordbooker_post_comment', 20);
