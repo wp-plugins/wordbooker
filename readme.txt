@@ -2,34 +2,27 @@
 
 Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
-Requires at least: 2.8
+Requires at least: 2.9
 Tested up to: 3.2.1
-Stable tag: 1.9.5
+Stable tag: 2.0
 
-This plugin allows you to cross-post your blog posts to your Facebook Wall and to any  Facebook Fan Page that you are an administrator for
+This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for. The base release of Version 2 DOES NOT support comment handling - this is because V2 had to be pushed out to meet deadlines imposed by Facebook concerning application authorisation. Comment handling will be added in the first major 2.x release.
 
 == Description ==
 
-This plugin allows you to cross-post your blog posts to your Facebook Wall. You can also "cross polinate" comments between Facebook and your Wordpress blog.
+This plugin allows you to cross-post your blog posts to your Facebook Wall / Fan Page Wall / Group Wall. You can Post as an Extract, A Status Update or even as a Note. 
 
-Various options including "attribute" lines and polling for comments and automatic re-posting on edit can be configured.
-
-NOTE : You have to have PHP V5 installed for this plugin to work as the code contains several PHP V5 specific features.
+NOTE : You MUST have the PHP Curl module enabled and configured in such a way that it can connect to the Facebook Servers. If you do not have curl OR if your hosting company block curl access to externals sites you cannot use this plugin.
 
 
 == IMPORTANT ==  
 
-Wordbooker 1.9.x uses the even newer Faceobok OAUTH2 authorisation method. Theoretically you should just be able to upgrade to 1.9.x from 1.8.x with no issues but if you do have problems simply do a Reset Settings and then get a new session from Facebook.
-
-Wordbooker 1.8.x uses the new Faceobok OAUTH authorisation method. This means that when you upgrade you may find that you loose your "Session" with Facebook and you only get a partial option screen displayed. If this happens then simply reload the Wordbooker Options page and follow the instructions.
+Wordbooker 2.0 is a completely new implementation of most of the original Wordbooker functionality. You will need to revisit the Options screen to reset your configuration
 
 
-== Upgrading Wordbooker ==
+== Upgrading Wordbooker from Version 1.x ==
 
-If you are upgrading from an earlier version of wordbooker then DO NOT deactivate the plugin before you upgrade as this will remove all the settings and remove the tables which means you will loose all your configuration and posting/comment history. To upgrade Wordbooker you should download the latest version of the plugin, then upload the contents so that the existing Wordbooker files on the server are over-written.
-
-
-If you've upgrading from  Robert Tsai's Wordbook plugin ( http://wordpress.org/extend/plugins/wordbook ) then you'll have to deactivate it first and make sure that the tables have been deleted from the database. If they haven't then Wordbooker will do some odd things and the fix is then to deactivate Wordbooker and then re-activate it again
+If you are upgrading from version 1.x then DO NOT deactivate the plugin before you upgrade as this will remove all the settings and remove the tables which means you will loose all your posting/comment history. To upgrade Wordbooker to Version 2 you should download the latest version of the plugin, delete the wordbooker folder on the server and then then upload the wordbooker folder into your wp-plugins folder. Once you've done that you need to go into the Plugins menu and DE-ACTIVATE and the RE-ACTIVATE Wordbooker. People running Networked Blogs can do a Network Activation at this point. PLEASE NOTE:  Version 2 does not, at the moment import information about posts made in Version 1.x but I am planning to add it as an option in a future release.
 
 
 == Installation ==
@@ -37,7 +30,7 @@ If you've upgrading from  Robert Tsai's Wordbook plugin ( http://wordpress.org/e
 1. [Download] (http://wordpress.org/extend/plugins/wordbooker/) the latest version of Wordbooker.
 1. Unzip the ZIP file.
 1. Upload the `wordbooker` directory to the `/wp-content/plugins/` directory.
-1. Activate the plugin through the 'Plugins' menu in WordPress. You CANNOT use Network activation if running in Networked blogs mode - you must enable the plugin separately on each blog.
+1. Activate the plugin through the 'Plugins' menu in WordPress. Admins of Networked Blogs can active the plugin network wide.
 1. Navigate to `Options` &rarr; `Wordbooker` for configuration and follow the on-screen prompts.
 
 
@@ -50,9 +43,7 @@ For more details on the various features please read the additional Features.txt
 - Features a sidebar widget to display your current Facebook Status and picture. Multiple widgets can be supported in one single blog.
 - Features a sidebar widget to display a "Fan"/Like box for any of your pages. Multiple widgets can be supported in one single blog.
 - Features a Facebook Like Button which can be customised as to where it appears in your blog.
-- Supports posting of Comments from your blog to the corresponsding Facebook wall article.
-- Supports the pulling of comments FROM blogs posted to your Facebook wall, back into your blog. 
-- Supports the posting of blog posts to Fan Pages (if you are an administrator of that page). This is currently experimental and there is bug in the API
+- Supports the posting of blog posts to Fan Pages and Groups (if you are an administrator of that page or group).
 
 
 == Frequently Asked Questions ==
@@ -70,13 +61,6 @@ Wordbooker uses the Facebook API to actively update your Facebook Wall just as i
 - Your updates will show up with a nifty WordPress logo next to them instead of the normal "Notes" icon, plus a link back to the full entry on your blog.
 
 
-= How is this different from the WordPress application? =
-
-The [WordPress application](http://www.facebook.com/apps/application.php?id=2373049596) allows you to post to your [wordpress.com](http://www.wordpress.com/) blog directly from within Facebook. You cannot use the Facebook app with a self-hosted WordPress blog.
-
-This Wordbook plugin works in the reverse direction. When you publish a new post or page, the plugin, in conjunction with the [Wordbooker](http://www.facebook.com/apps/application.php?id=254577506873) Facebook application, cross-posts your new blog entry to your Facebook account. You cannot use Wordbooker with a blog hosted at wordpress.com.
-
-
 = Why doesn't the Facebook Like / Facebook Share show up properly even though I've enabled it?
 
 You may need to add the following to the HMTL tag in your theme : xmlns:fb="http://www.facebook.com/2008/fbml".
@@ -88,10 +72,6 @@ So it looks something like :  <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v
 - Wordbooker will not publish password-protected posts.
 
 - Any errors Wordbooker encounters while communicating with Facebook will be recorded in error logs; the error logs (if any) are viewable in the "Wordbooker" panel of the "Options" WordPress admin page.
-
-- To discourage spammy behavior, Facebook restricts each user of any application to approximately 25 posts within any rolling 24-hour window of time. If you've been playing around with Wordbooker and posting lots of test posts, you have likely hit this limit; it will appear in the error logs as `error_code 4: "Application request limit reached"`. There is nothing to do but wait it out.
-
-- Facebook sometimes incorrectly returns this result to application requests (other developers have also reported this problem with their Facebook apps; it's not just Wordbook); there is also nothing the Wordbook plugin can do about this.
 
 
 
@@ -127,7 +107,7 @@ Alternatively, Go to the Wordbooker Page on [GoogleCode](http://code.google.com/
 
 == KNOWN CONFLICTS ==
 
-If you have [Facebook Connect](http://wordpress.org/extend/plugins/wp-facebookconnect/) Version 1.2.1 installed then some features of Wordbooker will not work as expected. This is due to the Facebook Platform files shipped in Facebook Connect being out of date (as of 12-September-2010). To resolve this issue copy ALL the files in the /wordbooker/facebook-platform/php folder into the /wp-facebookconnect/facebook-client folder.
+There will be conflicts with other plugins providing Facebook Like/Send Share functionality
 
 
 == Screenshots ==
@@ -137,6 +117,9 @@ If you have [Facebook Connect](http://wordpress.org/extend/plugins/wp-facebookco
 2. Wordbooker Options : Overrides when posting
 
 == Changelog ==
+
+= Verson 2.0.0 30/09/2011 =
+- Major new release - too many changes to document here
 
 = Version 1.9.5 17/07/2011 =
 - Minor changes to OG Tags to handle changes in the Facebook Share/Like button functionality

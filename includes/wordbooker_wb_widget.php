@@ -4,7 +4,7 @@
 Description: Facebook Status Widget. Needs Wordbook installing to work.
 Author: Stephen Atty
 Author URI: http://canalplan.blogdns.com/steve
-Version: 1.9.4
+Version: 1.8.14
 */
 
 /*
@@ -26,7 +26,6 @@ Version: 1.9.4
  */
 
 global $wp_version;
-if((float)$wp_version >= 2.8){
 
 class WordbookWidget extends WP_Widget {
 	
@@ -34,7 +33,7 @@ class WordbookWidget extends WP_Widget {
 	 * constructor
 	 */	 
 	function WordbookWidget() {
-		parent::WP_Widget('wordbook_widget', 'Wordbooker FB Status ', array('description' => __('Allows you to have one or more Facebook Status widgets in your sidebar. The widget picks up the user id of the person who drags it onto the side bar','wordbooker') , 'class' => 'WordbookWidget'));	
+		parent::WP_Widget('wordbooker_widget', 'Wordbooker FB Status ', array('description' => __('Allows you to have one or more Facebook Status widgets in your sidebar. The widget picks up the user id of the person who drags it onto the side bar','wordbooker') , 'class' => 'WordbookWidget'));	
 	}
 	
 	/**
@@ -61,7 +60,7 @@ class WordbookWidget extends WP_Widget {
                 	echo '<p><br /><a href="'.$result->url.'">'.$name.'</a> : ';
 			echo '<i>'.$result->status.'</i><br />';
        			if ($instance['df']=='fbt') { 
-         			echo '('.nicetime($result->updated).').'; 
+         			echo '('.nicetime($result->updated+(3600*$current_offset)).').'; 
 			}
          		else {
 				echo '('.date($instance['df'], $result->updated+(3600*$current_offset)).').';
@@ -127,10 +126,8 @@ function wordbooker_widgets(){
 	register_widget('WordbookWidget');
 }
 
-}
 
-wp_register_sidebar_widget('WP_SW1','FaceBook Status', 'widget_facebook');
-wp_register_widget_control('WP_SWC1','FaceBook Status', 'fb_widget_control', '500', '500');
+
 
 function nicetime($date)
 {
@@ -169,108 +166,6 @@ function nicetime($date)
     return "$difference $periods[$j] {$tense}";
 }
 
-function widget_facebook($args) {
-	extract($args);
-	global  $wpdb, $user_ID,$table_prefix,$blog_id;
-        $fb_widget_options = unserialize(get_option('fb_widget_options'));
-	$title = stripslashes($fb_widget_options['title']);
-        $dispname = stripslashes($fb_widget_options['dispname']);
-        $dformat=$fb_widget_options['df'];
-	echo $before_widget . $before_title . $title . $after_title;
-        global $wpdb;
-        // We need to get the user_id from the userdata table for this blog.
-        $sql="Select user_id from ".WORDBOOKER_USERDATA." limit 1";
-        $result = $wpdb->get_results($sql);
-	$result = wordbooker_get_cache($result[0]->user_id);
-	$pfields=array('is_app_user','first_name','name','status','pic',);
-	if ( !empty( $title ) ) { echo $before_title . $title . $after_title; };
-        echo '<br /><div class="facebook_picture" align="center">';
-        echo '<a href="'.$result->url.'" target="facebook">';
-        echo '<img src="'. $result->pic.'" /></a>';
-        echo '</div>';
-	$name=$result->name;
- 	if (strlen($dispname)>0) $name=$dispname; 
-        if ($result->status) {
-		$current_offset=0;
-		$current_offset = get_option('gmt_offset');
-        	echo '<br /><a href="'.$result->url.'">'.$name.'</a> : ';
-		echo '<i>'.$result->status.'</i><br />';
-		if ($dformat=='fbt') { 
- 			echo '('.nicetime($result->updated).').'; 
-		}
- 		else {
-			echo '('.date($dformat, $result->updated+(3600*$current_offset)).').';
 
-	
-		}
-	}
-	echo $after_widget;
-
-}
-
-function fb_widget_control() {
-  // Check if the option for this widget exists - if it doesnt, set some default values
-  // and create the option.
-  if(!get_option('fb_widget_options'))
-  {
-    add_option('fb_widget_options', serialize(array('title'=>'Facebook Status', 'dispname'=>'', 'df'=>'D M j, g:i a')));
-  }
-  $fb_widget_options = $fb_widget_newoptions = unserialize(get_option('fb_widget_options'));
-  
-  // Check if new widget options have been posted from the form below - 
-  // if they have, we'll update the option values.
-  if ($_POST['fb_widget_title']){
-    $fb_widget_newoptions['title'] = $_POST['fb_widget_title'];
-  }
-  if ($_POST['fb_widget_dispname']){
-    $fb_widget_newoptions['dispname'] = $_POST['fb_widget_dispname'];
-  }
-  if ($_POST['fb_widget_dformat']){
-    $fb_widget_newoptions['df'] = $_POST['fb_widget_dformat'];
-  }
-  if($fb_widget_options != $fb_widget_newoptions){
-    $fb_widget_options = $fb_widget_newoptions;
-    update_option('fb_widget_options', serialize($fb_widget_options));
-  }
-  // Display html for widget form
-  ?>
-  <p>
-    <label for="fb_widget_title">Widget Title:<br />
-      <input
-      id="fb_widget_title" 
-      name="fb_widget_title" 
-      type="text" 
-      value="<?php echo stripslashes($fb_widget_options['title']); ?>"/>
-    </label>
-  </p>
-  <p>
-    <label for="fb_widget_dispname">Display this name instead of your Facebook name :<br />
-      <input
-      id="fb_widget_dispname" 
-      name="fb_widget_dispname"
-      type="text" 
-      value="<?php echo stripslashes($fb_widget_options['dispname']); ?>"/>
-    </label>
-  </p>
-  <p>
-    <label for="fb_widget_dformat">Date Format :<br />
-<select id="fb_widget_dformat" name="fb_widget_dformat"  >
-<?php
-$ds12=date('D M j, g:i a');
-$dl12=date('l F j, g:i a');
-$dl24=date('l F j, h:i');
-$ds24=date('D M j, h:i');
-$drfc=date('r');
-$arr = array('D M j, g:i a'=> "Short 12 (".$ds12.") - Default",  'l F j, g:i a'=> "Long 12 (".$dl12.") ", 'D M j, h:i'=>"Short 24 (".$ds24.") ", 'l F j, h:i'=>"Long 24 (".$dl24.")",fbt=>"Facebook Text style", r => "RFC 822 (".$drfc." ) ");
-foreach ($arr as $i => $value) {
-if ($i==$fb_widget_options['df']){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
-else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
-
-}
-?>
-</select>
-    </label>
-  </p>
-  <?php
-}  
+ 
 ?>
