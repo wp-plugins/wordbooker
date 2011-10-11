@@ -5,7 +5,7 @@ Plugin URI: http://worbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.0.0
+Version: 2.0.1
 */
 
  /*
@@ -42,7 +42,7 @@ if (! isset($wordbooker_settings['wordbooker_extract_length'])) $wordbooker_sett
 
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
-define('WORDBOOKER_CODE_RELEASE','2.0.0 - In The Woods of Kroandal ');
+define('WORDBOOKER_CODE_RELEASE','2.0.1 - Letters To A Young Rose ');
 
 # For Troubleshooting 
 define('ADVANCED_DEBUG',false);
@@ -1062,7 +1062,7 @@ function wordbooker_option_support() {
 	<ul>	
 	<li><?php _e('Check the '); ?><a href="../wp-content/plugins/wordbooker/wordbooker_user_guide.pdf" target="wordpress"><?php _e('User Guide'); ?></a>.</li>
 	<li><?php _e('Check the '); ?><a href="http://wordpress.org/extend/plugins/wordbooker/other_notes/" target="wordpress"><?php _e('WordPress.org Notes'); ?></a>.</li>
-	<li><?php _e('Try the '); ?><a href="http://www.facebook.com/apps/application.php?v=app_2373072738&id=254577506873" target="facebook"><?php _e('Wordbooker Discussion Board'); ?></a>.</li>
+	<li><?php _e('Try the '); ?><a href="http://wordbooker.tty.org.uk/forums/" target="facebook"><?php _e('Wordbooker Support Forums'); ?></a>.</li>
 		<li><?php _e('Enhancement requests can be made at the '); ?><a href="http://code.google.com/p/wordbooker/" target="facebook"><?php _e('Wordbooker Project on Google Code'); ?></a>.</li>
 	<li><?php _e('Consider upgrading to the '); ?><a href="http://wordpress.org/download/"><?php _e('latest stable release'); ?></a> <?php _e(' of WordPress. '); ?></li>
 	<li><?php _e('Read the release notes for Wordbooker on the '); ?><a href="http://wordbooker.tty.org.uk/current-release/">Wordbooker</a> <?php _e('blog.'); ?></li>
@@ -1446,7 +1446,7 @@ function wordbooker_fbclient_publishaction($wbuser,$post_id)
 				break ;
 			}
 
-		} else {wordbooker_debugger("Posting to target ".$target_name." not active","",$post_id) ; }
+		} else {wordbooker_debugger("Posting to target ".$target_name." not active","",$post_id,99) ; }
 
 }
 }
@@ -1592,7 +1592,7 @@ function wordbooker_og_tags(){
 				echo '<meta property="fb:admins" content="'.$xxx->facebook_id.'"/> ';
 			}
 		 }
-	
+	#var_dump($wordbooker_settings);
 		if (strlen($wordbooker_settings["fb_comment_app_id"])>6) {
 			echo '<meta property = "fb:app_id" content = "'.$wordbooker_settings["fb_comment_app_id"].'" /> ';
 		}
@@ -1754,8 +1754,8 @@ function wordbooker_fb_share_inline() {
 	if ($wordbooker_post_options['wordbooker_share_button_post']==2 && !is_page()) {return ;}
 	if ($wordbooker_post_options['wordbooker_share_button_page']==2 && is_page()) {return ;}
 	if (!isset($wordbooker_settings['wordbooker_like_share_too'])) {return ;}
-	if (isset($wordbooker_settings['wordbooker_share_button_post']) && is_single()  ) {$do_share=1;}
-	if (isset($wordbooker_settings['wordbooker_share_button_page']) && is_page() )  {$do_share=1;}
+	if (isset($wordbooker_settings['wordbooker_share_button_post']) && is_single() && !is_front_page() ) {$do_share=1;}
+	if (isset($wordbooker_settings['wordbooker_share_button_page']) && is_page()  && !is_front_page() )  {$do_share=1;}
 	if (isset($wordbooker_settings['wordbooker_share_button_frontpage'])  && is_front_page() ) {$do_share=1;}
 	if (isset($wordbooker_settings['wordbooker_share_button_category']) &&  is_category()  ) {$do_share=1;}
 	if ( $do_share==1  &&
@@ -1783,6 +1783,7 @@ function display_wordbooker_fb_send() {
 	global $post;
 	$wordbooker_settings = wordbooker_options(); 
 	$wordbooker_post_options= get_post_meta($post->ID, '_wordbooker_options', true);  
+	$post_link = get_permalink($post->ID);
 	if ($wordbooker_post_options['wordbooker_like_button_post']==2 && !is_page()) {return ;}
 	if ($wordbooker_post_options['wordbooker_like_button_page']==2 && is_page()) {return ;}
 	if ($wordbooker_settings['wordbooker_fblike_send_combi']=='true') {return;}
@@ -1824,7 +1825,7 @@ function wordbooker_fb_send_inline() {
 	if ($wordbooker_post_options['wordbooker_like_button_post']==2 && !is_page()) {return ;}
 	if ($wordbooker_post_options['wordbooker_like_button_page']==2 && is_page()) {return ;}
 	if ($wordbooker_settings['wordbooker_fblike_send_combi']=='true') {return;}
-
+	$post_link = get_permalink($post->ID);
 	$do_like=0;
 	if (isset($wordbooker_settings['wordbooker_like_button_post']) && is_single() && !is_front_page() ) {$do_like=1;}
 	if (isset($wordbooker_settings['wordbooker_like_button_page']) && is_page() && !is_front_page())  {$do_like=1;}
@@ -1864,7 +1865,7 @@ function display_wordbooker_fb_like() {
 	if ($wordbooker_post_options['wordbooker_like_button_page']==2 && is_page()) {return ;}
 	if (!isset($wordbooker_settings['wordbooker_like_button_show'])) {return;}
 	$do_like=0;
-
+	$post_link = get_permalink($post->ID);
 	if (isset($wordbooker_settings['wordbooker_like_button_post']) && is_single() && !is_front_page() ) {$do_like=1;}
 	if (isset($wordbooker_settings['wordbooker_like_button_page']) && is_page() && !is_front_page())  {$do_like=1;}
 	if (isset($wordbooker_settings['wordbooker_like_button_frontpage'])  && is_front_page() ) {$do_like=1;}
@@ -1905,7 +1906,7 @@ function wordbooker_fb_like_inline() {
 	if ($wordbooker_post_options['wordbooker_like_button_page']==2 && is_page()) {return ;}
 	if (!isset($wordbooker_settings['wordbooker_like_button_show'])) {return;}
 	$do_like=0;
-
+	$post_link = get_permalink($post->ID);
 	if (isset($wordbooker_settings['wordbooker_like_button_post']) && is_single() && !is_front_page() ) {$do_like=1;}
 	if (isset($wordbooker_settings['wordbooker_like_button_page']) && is_page() && !is_front_page())  {$do_like=1;}
 	if (isset($wordbooker_settings['wordbooker_like_button_frontpage'])  && is_front_page() ) {$do_like=1;}
