@@ -97,10 +97,10 @@ function wordbooker_notes_post($post_id,$access_token,$post_title,$post_data,$ta
 
 
 function wordbooker_store_post_result($post_id,$fb_post_id) {
-	global $wpdb,$blog_id;
+	global $wpdb,$blog_id,$user_ID;
 	$tstamp=time();
 	$wordbooker_settings = wordbooker_options();
-	$sql=	' INSERT INTO ' . WORDBOOKER_POSTCOMMENTS . ' (fb_post_id,comment_timestamp,wp_post_id,blog_id) VALUES ("'.$fb_post_id.'",'.$tstamp.','.$post_id.','.$blog_id.')';
+	$sql=	' INSERT INTO ' . WORDBOOKER_POSTCOMMENTS . ' (fb_post_id,comment_timestamp,wp_post_id,blog_id,user_id) VALUES ("'.$fb_post_id.'",'.$tstamp.','.$post_id.','.$blog_id.','.$user_ID.')';
 	$result = $wpdb->query($sql);
 	wordbooker_insert_into_postlogs($post_id,$blog_id);
 	# Clear down the diagnostics for this post if the user has chosen so
