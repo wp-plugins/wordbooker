@@ -103,10 +103,10 @@ class WordbookWidget extends WP_Widget {
 		echo '<select id=id="'.$df_id.'"  name="'.$df_name.'" >';
 		$ds12=date('D M j, g:i a');
 		$dl12=date('l F j, g:i a');
-		$dl24=date('l F j, h:i');
-		$ds24=date('D M j, h:i');
+		$dl24=date('l F j, G:i');
+		$ds24=date('D M j, G:i');
 		$drfc=date('r');
-		$arr = array('D M j, g:i a'=> $ds12,  'l F j, g:i a'=> $dl12, 'D M j, h:i'=>$ds24, 'l F j, h:i'=>$dl24,fbt=>__("Facebook Text style",'wordbooker'), r =>$drfc);
+		$arr = array('D M j, g:i a'=> $ds12,  'l F j, g:i a'=> $dl12, 'D M j, G:i'=>$ds24, 'l F j, G:i'=>$dl24,fbt=>__("Facebook Text style",'wordbooker'), r =>$drfc);
 		foreach ($arr as $i => $value) {
 		if ($i==attribute_escape( $instance['df'])){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
 		else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
@@ -114,8 +114,6 @@ class WordbookWidget extends WP_Widget {
 		echo '</select></p>';
 	}
 }
-
-
 
 /* register widget when loading the WP core */
 add_action('widgets_init', 'wordbooker_widgets');
@@ -125,8 +123,6 @@ $plugin_dir = basename(dirname(__FILE__));
 function wordbooker_widgets(){
 	register_widget('WordbookWidget');
 }
-
-
 
 
 function nicetime($date)

@@ -199,7 +199,7 @@ function wordbooker_cache_refresh ($user_id) {
 		
 		$all_pages_groups=array_merge($all_pages,$all_groups);
 		$encoded_names=str_replace('\\','\\\\',serialize($all_pages_groups));
-
+/*
 
 		try {
 			$query="SELECT flid, owner, name FROM friendlist WHERE owner=$uid";
@@ -244,6 +244,7 @@ function wordbooker_cache_refresh ($user_id) {
 			$result = $wpdb->get_results($sql);
 			}
 		}
+*/
 
 		wordbooker_debugger("Setting name as  : ",mysql_real_escape_string($fb_profile_info->name),0) ;
 		$sql="insert into ".WORDBOOKER_USERSTATUS." set name='".mysql_real_escape_string($fb_profile_info->name)."'";
