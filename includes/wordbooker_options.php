@@ -92,16 +92,12 @@ function wordbooker_option_manager() {
 	#var_dump($wordbooker_settings);
 	// If no default author set, lets set it
 	if (! isset($wordbooker_settings["wordbooker_default_author"])){ $wordbooker_settings["wordbooker_default_author"]=0;}
-	// If no default republish time frame set, then set it.
-	if (! isset($wordbooker_settings["wordbooker_republish_time_frame"])){ $wordbooker_settings["wordbooker_republish_time_frame"]=10;}
 	// If no attribute set, then set it.
 	if (! isset($wordbooker_settings["wordbooker_attribute"])){ $wordbooker_settings["wordbooker_attribute"]= __("Posted a new post on their blog");}
 	// If no Status line text, then set it 
 	if (! isset($wordbooker_settings["wordbooker_status_update_text"])){ $wordbooker_settings["wordbooker_status_update_text"]= __(": New blog post :  %title% - %link%");}
 	// No Share link set, then set it
 	if (! isset($wordbooker_settings["wordbooker_actionlink"])){ $wordbooker_settings["wordbooker_actionlink"]=300;}
-	// No andor set, then set it
-	if (! isset($wordbooker_settings['wordbooker_orandpage'])){ $wordbooker_settings['wordbooker_orandpage']=2;}
 	// No extract length
  	if (! isset($wordbooker_settings['wordbooker_extract_length'])) {$wordbooker_settings['wordbooker_extract_length']=256;}
  	if (! isset($wordbooker_settings['wordbooker_page_post'])) {$wordbooker_settings['wordbooker_page_post']=-100;}
@@ -242,6 +238,9 @@ function wordbooker_blog_posting_options() {
 		echo '<label for="wb_publish_no_user">'.__("Publish Posts by non Wordbooker users"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_publish_no_user]" '.$checked_flag[$wordbooker_settings["wordbooker_publish_no_user"]].' ><br />';
 
+		echo '<label for="wb_publish_user_publish">'.__("Allow non Wordbooker users to chose to publish a post"). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_allow_publish_select]" '.$checked_flag[$wordbooker_settings["wordbooker_allow_publish_select"]].' ><br />';
+
                 echo '<label for="wb_extract_length">'.__('Length of Extract').' :</label> <select id="wordbooker_extract_length" name="wordbooker_settings[wordbooker_extract_length]"  >';
 	        $arr = array(10=> "10",20=> "20",50=> "50",100=> "100",120=> "120",150=> "150",175=> "175",200=> "200",  250=> "250", 256=>__("256 (Default) "), 270=>"270", 300=>"300", 350 => "350",400 => "400",500 => "500",600 => "600",700 => "700",800 => "800",900 => "900");
                 foreach ($arr as $i => $value) {
@@ -298,6 +297,10 @@ function wordbooker_blog_facebook_options() {
 		echo '<label for="wb_facebook_like">&nbsp;'.__("Show Facebook Like button in each post"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_like_button_post]" '.$checked_flag[$wordbooker_settings["wordbooker_like_button_post"]].' ><br />';
 
+		echo '<label for="wb_facebook_like">&nbsp;'.__("Don't show Facebook Like / Send Button on Sticky Posts"). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_no_like_stick]" '.$checked_flag[$wordbooker_settings["wordbooker_no_like_stick"]].' ><br />';
+
+
 			if (!is_numeric($wordbooker_settings['wordbooker_like_width']) || $wordbooker_settings['wordbooker_like_width'] <0) {$wordbooker_settings['wordbooker_like_width']=250;}
 		echo '<label for="wb_facebook_like_width">&nbsp;'.__("Width of Facebook Like box"). ' : </label>';
 		echo '<INPUT TYPE=text NAME="wordbooker_settings[wordbooker_like_width]"  size="7"value="'.$wordbooker_settings["wordbooker_like_width"].'" ><br />';
@@ -339,13 +342,13 @@ function wordbooker_blog_facebook_options() {
 		echo "</select><br />";
 
 
-		echo '<label for="wb_fblike_send_combi">&nbsp;'.__('Combine Send with Like').' :</label> <select id="wordbook_fblike_send_combi" name="wordbooker_settings[wordbooker_fblike_send_combi]"  >';
+		echo '<label for="wb_fblike_send_combi">&nbsp;'.__('Combine Send with Like').' :</label> <select id="wordbooker_fblike_send_combi" name="wordbooker_settings[wordbooker_fblike_send_combi]"  >';
 		foreach ($fblike_send_combi as $i => $value) {
 			if ($i==$wordbooker_settings['wordbooker_fblike_send_combi']){ print '<option selected="yes" value="'.$i.'" >'.$fblike_send_combi[$i].'</option>';}
 		       else {print '<option value="'.$i.'" >'.$fblike_send_combi[$i].'</option>';}}
 		echo "</select><br/> ";
 
-		echo '<label for="wb_fblike_send">&nbsp;'.__('Facebook Send - Display Button').' :</label> <select id="wordbook_fblike_send" name="wordbooker_settings[wordbooker_fblike_send]"  >';
+		echo '<label for="wb_fblike_send">&nbsp;'.__('Facebook Send - Display Button').' :</label> <select id="wordbooker_fblike_send" name="wordbooker_settings[wordbooker_fblike_send]"  >';
 		foreach ($fblike_send as $i => $value) {
 			if ($i==$wordbooker_settings['wordbooker_fblike_send']){ print '<option selected="yes" value="'.$i.'" >'.$fblike_send[$i].'</option>';}
 		       else {print '<option value="'.$i.'" >'.$fblike_send[$i].'</option>';}}
@@ -373,7 +376,8 @@ function wordbooker_blog_facebook_options() {
 
 		echo '<label for="wb_facebook_share_post">&nbsp;'.__("Show Facebook Share button in each post"). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_share_button_post]" '.$checked_flag[$wordbooker_settings["wordbooker_share_button_post"]].' ><br />';
-
+		echo '<label for="wb_facebook_like">&nbsp;'.__("Don't show Facebook Share button on Sticky Posts"). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_no_share_stick]" '.$checked_flag[$wordbooker_settings["wordbooker_no_share_stick"]].' ><br />';
 
 }
 

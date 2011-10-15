@@ -27,55 +27,44 @@ Version: 2.0
 
 global $wp_version;
 
-function wordbooker_make_fopen_call($url) {
- 	$ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $response = curl_exec($ch);
-	$err_no=curl_errno($ch);
-        curl_close($ch);
-	$x=json_decode($response);
-	if (isset($x->error_code)) { 
-		throw new Exception ($x->error_msg);
-	}
-	 return($x);
+function wordbooker_make_fopen_post_call($url, $data, $optional_headers = null) {
+	  $params = array('http' => array(
+		      'method' => 'POST',
+		      'content' => $data
+		    ));
+	  if ($optional_headers !== null) {
+	    $params['http']['header'] = $optional_headers;
+	  }
+	  $ctx = stream_context_create($params);
+	  $fp = @fopen($url, 'rb', false, $ctx);
+	  if (!$fp) {
+	    throw new Exception("Problem with $url, $php_errormsg");
+	  }
+	  $response = @stream_get_contents($fp);
+	  if ($response === false) {
+	    throw new Exception("Problem reading data from $url, $php_errormsg");
+	  }
+	  return $response;
 }
 
 
 
-function wordbooker_make_fopen_post_call($url, $params, $ch=null) {
-    
-    $content = "";
-    foreach ($params as $key => $param) {
-        $content .= "{$key}=" . urlencode($param) . "&";
-    }
-    substr($post, 0, strlen($post) - 1);
-    
-    $user_agent = 'Wordbooker Version 2 (non-curl) ' . phpversion();
-    $content_type = 'application/x-www-form-urlencoded';
-    
-    $content_length = strlen($content);
-    $context =
-      array('http' =>
-              array('method' => 'POST',
-                    'user_agent' => $user_agent,
-                    'header' => 'Content-Type: ' . $content_type . "\r\n" .
-                                'Content-Length: ' . $content_length,
-                    'content' => $content));
-    $context_id = stream_context_create($context);
-    $sock = @fopen($url, 'r', false, $context_id);
-
-    $result = '';
-    if ($sock) {
-      while (!feof($sock)) {
-        $result .= fgets($sock, 4096);
-      }
-      fclose($sock);
-    }
-
-    //error_log("MAKE REQUEST RESULT : " . $result);
-
-    return $result;    
-    
-  }
+function wordbooker_make_fopen_call($url, $params, $optional_headers = null) {
+	  $params = array('http' => array(
+		      'content' => $data
+		    ));
+	  if ($optional_headers !== null) {
+	    $params['http']['header'] = $optional_headers;
+	  }
+	  $ctx = stream_context_create($params);
+	  $fp = @fopen($url, 'rb', false, $ctx);
+	  if (!$fp) {
+	    throw new Exception("Problem with $url, $php_errormsg");
+	  }
+	  $response = @stream_get_contents($fp);
+	  if ($response === false) {
+	    throw new Exception("Problem reading data from $url, $php_errormsg");
+	  }
+	  return $response;
+}
 ?>

@@ -77,6 +77,8 @@ function wordbooker_make_curl_call($url) {
  	$ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+	curl_setopt($ch, CURLOPT_CAINFO, dirname(__FILE__) . '/fb_ca_chain_bundle.crt');
         $response = curl_exec($ch);
 	$err_no=curl_errno($ch);
         curl_close($ch);
@@ -94,6 +96,7 @@ function wordbooker_make_curl_post_call($url,$data) {
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+   	curl_setopt($ch, CURLOPT_CAINFO, dirname(__FILE__) . '/fb_ca_chain_bundle.crt');
    	 curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         $response = curl_exec($ch);
 	$err_no=curl_errno($ch);
