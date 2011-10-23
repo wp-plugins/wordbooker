@@ -59,6 +59,13 @@ function wordbooker_me($access_token) {
         return($x);
 }
 
+function wordbooker_get_fb_id($access_token) {
+        $url = 'https://graph.facebook.com/me?fields=id&access_token='.$access_token.'&format=JSON';
+		$x=wordbooker_make_curl_call($url);
+        return($x);
+}
+
+
 function wordbooker_me_status($fb_id,$access_token) {
 	if (!isset($fb_id)){$fb_id='me';}
         $url = 'https://graph.facebook.com/'.$fb_id.'?access_token='.$access_token.'&format=JSON';

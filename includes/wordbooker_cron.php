@@ -22,8 +22,8 @@ function wordbooker_cache_refresh ($user_id) {
 	if (strlen($uid)==0) {
 		wordbooker_debugger("No Cache record for user - getting Logged in user ",$uid,0) ; 
 		try {
-			$uid=wordbooker_me($wbuser2->access_token);
-			$uid=$wbuser2->facebook_id;
+			$x=wordbooker_get_fb_id($wbuser2->access_token);
+			$uid=$x->id;
 		}
 		catch (Exception $e) {
 			$error_code = $e->getCode();
@@ -145,15 +145,16 @@ function wordbooker_cache_refresh ($user_id) {
 		try {
 			$query="Select positions, gid from group_member where uid=$uid";
 			$fb_groups= wordbooker_fql_query($query,$wbuser2->access_token);
-			foreach($fb_groups as $fb_group){
-				# Check to see if there are any positions. If not then the user is only a member of the group and thus we dont want it in the list.
-				if(count($fb_group->positions)>0) {
-					$query="Select name,gid from group where gid =".$fb_group->gid;
-					$fb_group_info= wordbooker_fql_query($query,$wbuser2->access_token);
-					$fb_group_list[]= (array) $fb_group_info;
-				}			
+			if(is_array($fb_groups)){
+				foreach($fb_groups as $fb_group){
+					# Check to see if there are any positions. If not then the user is only a member of the group and thus we dont want it in the list.
+					if(count($fb_group->positions)>0) {
+						$query="Select name,gid from group where gid =".$fb_group->gid;
+						$fb_group_info= wordbooker_fql_query($query,$wbuser2->access_token);
+						$fb_group_list[]= (array) $fb_group_info;
+					}			
+				}
 			}
-
 		} 
 
 		catch (Exception $e) 

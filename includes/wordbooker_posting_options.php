@@ -88,7 +88,7 @@ function wordbooker_inner_custom_box() {
 		# If the post has already been published then we uncheck the publish option 
 		
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_publish_default" '.$checked_flag[$wordbooker_settings["wordbooker_publish_default"]].' > '.$post_pub_prompt.'<br />';
-
+if (count($fanpages)>1){
 	echo '<p><label for="wb_primary_target">'.__('Post to the following Wall').' : </label>';
 		echo '<select id="wordbooker_primary_target" name="wordbooker_primary_target"  >';
 				$option="";
@@ -108,6 +108,22 @@ function wordbooker_inner_custom_box() {
       		 else {echo '<option value="'.$i.'" >'.$arr[$i].'</option>';}
 	}
 	echo '</select>	&nbsp;<INPUT TYPE=CHECKBOX NAME="wordbooker_primary_active" '.$checked_flag[$wordbooker_settings["wordbooker_primary_active"]].'></p><p>';
+
+
+	} else 
+
+	{
+	echo '<p><label for="wb_primary_target">'.__('Post to my Personal Wall').' : </label> ';
+	echo '<input type="hidden" name="wordbooker_primary_target" value="PW:'.$wb_users[0]->facebook_id.'" />';
+
+$arr = array(1=> __("As a Wall Post"),  2=> __("As a Note"), 3=> __("As a Status Update" )  );
+	echo '<select id="wordbooker_primary_type" name="wordbooker_primary_type"  >';
+	foreach ($arr as $i => $value) {
+       		 if ($i==$wordbookeruser_settings['wordbooker_primary_type']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
+      		 else {echo '<option value="'.$i.'" >'.$arr[$i].'</option>';}
+	}
+	echo '&nbsp;<INPUT TYPE=CHECKBOX NAME="wordbooker_primary_active" '.$checked_flag[$wordbookeruser_settings["wordbooker_primary_active"]].'></p><p>';
+	}
 		if (count($fanpages2) >0 ){
 			$have_fan_pages=1;
 
