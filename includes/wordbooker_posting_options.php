@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Posting Options 
 Extension URI: http://wordbooker.tty.org.uk
-Version: 2.0
+Version: 2.0.4
 Description: Posting Options for the WordBooker Plugin
 Author: Steve Atty
 */
@@ -49,6 +49,7 @@ function wordbooker_inner_custom_box() {
 		}
 	}
 	$x = get_post_meta($post->ID, '_wordbooker_options', true); 
+#	var_dump($x);
 	if(is_array($x)) {
 		foreach (array_keys($x) as $key ) {
 			if (substr($key,0,8)=='wordbook') {
@@ -59,11 +60,23 @@ function wordbooker_inner_custom_box() {
 	if(is_array($post_meta)) {
 		$wordbooker_settings=$post_meta;
 	}
+	#var_dump($wordbooker_settings);
+#var_dump($wordbooker_settings["wordbooker_post_edited"]);
+	$post_pub_prompt=__("Publish this post to Facebook");
+	if($post->post_type=='page'){
+		$publish=$wordbooker_settings["wordbooker_publish_page_default"];		
+		$post_pub_prompt=__("Publish this page to Facebook");
+	}
+	else {
+		$publish=$wordbooker_settings["wordbooker_publish_post_default"];
+			$post_pub_prompt=__("Publish this post to Facebook");
+	}
+
+	#var_dump($post->post_status);
+	if($wordbooker_settings["wordbooker_post_edited"]!='yes') {$wordbooker_settings["wordbooker_publish_default"]=$publish;}
+	if ($post->post_status=="publish") {$wordbooker_settings["wordbooker_publish_default"]='';}
 	if (wordbooker_get_userdata($user_ID)) {
-		if (! isset($wordbooker_settings['wordbooker_page_post'])) { $wordbooker_settings['wordbooker_page_post']=-100;}
-		if (! isset($wordbooker_settings['wordbooker_orandpage'])) { $wordbooker_settings['wordbooker_orandpage']= 2; }
-		echo '<input type="hidden" name="wordbooker_page_post" value="-100" />';
-		echo '<input type="hidden" name="wordbooker_orandpage" value="2" />';
+
 		echo __("The following options override the defaults set on the options page")."<br /><br />";
 		$sql="select wpu.ID,wpu.display_name,facebook_id from $wpdb->users wpu,".WORDBOOKER_USERDATA." wud where wpu.ID=wud.user_id;";
 		$wb_users = $wpdb->get_results($sql);
@@ -73,19 +86,10 @@ function wordbooker_inner_custom_box() {
 		$fanpages2=$fanpages;
 		$fanpages[]=array( 'id'=>'PW:'.$wb_users[0]->facebook_id, 'name'=>"Personal Wall");
 		$have_fan_pages=0;
-		$post_pub_prompt=__("Publish this post to Facebook");
-		if($post->post_type=='page'){
-			$wordbooker_settings["wordbooker_publish_default"]=$wordbooker_settings["wordbooker_publish_page_default"];		
-			$post_pub_prompt=__("Publish this page to Facebook");
-		}
-		if($post->post_type=='post'){
-			$wordbooker_settings["wordbooker_publish_default"]=$wordbooker_settings["wordbooker_publish_post_default"];
-				$post_pub_prompt=__("Publish this post to Facebook");
-		}
-		# If the post has already been published then we uncheck the publish option 
-		if ($post->post_status=='publish') {$wordbooker_settings["wordbooker_publish_default"]='';}
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_publish_default" '.$checked_flag[$wordbooker_settings["wordbooker_publish_default"]].' > '.$post_pub_prompt.'<br />';
 
+		# If the post has already been published then we uncheck the publish option 
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_publish_default" '.$checked_flag[$wordbooker_settings["wordbooker_publish_default"]].' > '.$post_pub_prompt.'<br />';
+if (count($fanpages)>1){
 	echo '<p><label for="wb_primary_target">'.__('Post to the following Wall').' : </label>';
 		echo '<select id="wordbooker_primary_target" name="wordbooker_primary_target"  >';
 				$option="";
@@ -104,11 +108,24 @@ function wordbooker_inner_custom_box() {
        		 if ($i==$wordbooker_settings['wordbooker_primary_type']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
       		 else {echo '<option value="'.$i.'" >'.$arr[$i].'</option>';}
 	}
-	echo '</select>	&nbsp;<INPUT TYPE=CHECKBOX NAME="wordbooker_primary_active" '.$checked_flag[$wordbooker_settings["wordbooker_primary_active"]].'></p><p>';
-		if (count($fanpages2) >0 ){
+	echo '</select>	&nbsp;<INPUT TYPE=CHECKBOX NAME="wordbooker_primary_active" '.$checked_flag[$wordbooker_settings["wordbooker_primary_active"]].'></p>';
+
+	} else 
+
+	{
+	echo '<p><label for="wb_primary_target">'.__('Post to my Personal Wall').' : </label> ';
+	echo '<input type="hidden" name="wordbooker_primary_target" value="PW:'.$wb_users[0]->facebook_id.'" />';
+
+$arr = array(1=> __("As a Wall Post"),  2=> __("As a Note"), 3=> __("As a Status Update" )  );
+	echo '<select id="wordbooker_primary_type" name="wordbooker_primary_type"  >';
+	foreach ($arr as $i => $value) {
+       		 if ($i==$wordbooker_settings['wordbooker_primary_type']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
+      		 else {echo '<option value="'.$i.'" >'.$arr[$i].'</option>';}
+	}
+	echo '&nbsp;<INPUT TYPE=CHECKBOX NAME="wordbooker_primary_active" '.$checked_flag[$wordbooker_settings["wordbooker_primary_active"]].'></p><p>';
+	}
+		if ($fanpages2 ){
 			$have_fan_pages=1;
-
-
 		echo '<label for="wb_secondary_target">'.__('Post to the following Wall').' : </label>';
 		echo '<select id="wordbooker_secondary_target" name="wordbooker_secondary_target"  >';
 				$option="";
@@ -126,13 +143,13 @@ function wordbooker_inner_custom_box() {
 	       		 if ($i==$wordbooker_settings['wordbooker_secondary_type']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
 	      		 else {echo '<option value="'.$i.'" >'.$arr[$i].'</option>';}
 		}
-	echo "</select>";
+	echo "</select> ";
 		echo '&nbsp;<INPUT TYPE=CHECKBOX NAME="wordbooker_secondary_active" '.$checked_flag[$wordbooker_settings["wordbooker_secondary_active"]].'></p><P>';
 
 		}
 
 		echo __('Length of Extract').' : <select id="wordbooker_extract_length" name="wordbooker_extract_length"  >';
-		$arr = array( 10=> "10",20=> "20",50=> "50",100=> "100",120=> "120",150=> "150",175=> "175", 200=> "200",  250=> "250", 256=>"256", 270=>"270", 300=>"300", 350 => "350",400 => "400");
+	        $arr = array(10=> "10",20=> "20",50=> "50",100=> "100",120=> "120",150=> "150",175=> "175",200=> "200",  250=> "250", 256=>__("256 (Default) "), 270=>"270", 300=>"300", 350 => "350",400 => "400",500 => "500",600 => "600",700 => "700",800 => "800",900 => "900");
 	        foreach ($arr as $i => $value) {
 	                if ($i==$wordbooker_settings['wordbooker_extract_length']){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
 	               else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
@@ -148,11 +165,6 @@ function wordbooker_inner_custom_box() {
 
 		echo '<input type="hidden" name="soupy" value="twist" />';
 
-	#	var_dump($post->post_type);
-	#	var_dump($post->post_status);
-	#	if ($wordbooker_settings["wordbooker_publish_default"]=='published') {$wordbooker_settings["wordbooker_publish_default"]='';}
-
-
 	#	echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_publish_override" '.$checked_flag[$wordbooker_settings["wordbooker_publish_override"]].' >'.__('Force Re-Publish Post to Facebook on Edit (overrides republish window)').'<br />';
 		if ( function_exists( 'get_the_post_thumbnail' ) ) {
 			echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_thumb_only" '.$checked_flag[$wordbooker_settings["wordbooker_thumb_only"]].'>'.__(' Use Thumbnail as only image').' <br />';
@@ -161,27 +173,6 @@ function wordbooker_inner_custom_box() {
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_use_excerpt" '.$checked_flag[$wordbooker_settings["wordbooker_use_excerpt"]].' > Use Wordpress Excerpt for Wall Post <br />';
 		echo 'Facebook Post Attribute line: <INPUT NAME="wordbooker_attribute" size=80 maxlength=240 value="'.stripslashes($wordbooker_settings["wordbooker_attribute"]).'"><br />';	
 		echo __('Facebook Status Update text').' : <INPUT NAME="wordbooker_status_update_text" size=60 maxlength=240 value="'.stripslashes($wordbooker_settings["wordbooker_status_update_text"]).'"><br />';
-
-		if($post->post_type=='post'){
-
-			if(!isset($wordbooker_settings['wordbooker_like_button_post'])) {$wordbooker_settings['wordbooker_like_button_post']=1;}
-			if(!isset($wordbooker_settings['wordbooker_share_button_post'])) {$wordbooker_settings['wordbooker_share_button_post']=1;}
-			echo __('Show Facebook Like/Send for this Post').' : <select id="wordbooker_like_button_post" name="wordbooker_like_button_post"  >';
-			$arr = array(1=> __("Yes"),  2=> __("No") );
-				foreach ($arr as $i => $value) {
-					if ($i==$wordbooker_settings['wordbooker_like_button_post']){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
-				       else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
-				}
-				echo "</select><br />";
-		
-			echo __('Show Facebook Share for this Post').' : <select id="wordbooker_share_button_post" name="wordbooker_share_button_post"  >';
-			$arr = array(1=> __("Yes"),  2=> __("No") );
-				foreach ($arr as $i => $value) {
-					if ($i==$wordbooker_settings['wordbooker_share_button_post']){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
-				       else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
-				}
-				echo "</select><br />";
-		}
 
 		if($post->post_type=='page'){
 			if(!isset($wordbooker_settings['wordbooker_like_button_page'])) {$wordbooker_settings['wordbooker_like_button_page']=1;}
@@ -202,14 +193,45 @@ $arr = array(1=> __("Yes"),  2=> __("No") );
 		}
 	        echo "</select><br />";
 		}
+		else {
+
+			if(!isset($wordbooker_settings['wordbooker_like_button_post'])) {$wordbooker_settings['wordbooker_like_button_post']=1;}
+			if(!isset($wordbooker_settings['wordbooker_share_button_post'])) {$wordbooker_settings['wordbooker_share_button_post']=1;}
+			echo __('Show Facebook Like/Send for this Post').' : <select id="wordbooker_like_button_post" name="wordbooker_like_button_post"  >';
+			$arr = array(1=> __("Yes"),  2=> __("No") );
+				foreach ($arr as $i => $value) {
+					if ($i==$wordbooker_settings['wordbooker_like_button_post']){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
+				       else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
+				}
+				echo "</select><br />";
+		
+			echo __('Show Facebook Share for this Post').' : <select id="wordbooker_share_button_post" name="wordbooker_share_button_post"  >';
+			$arr = array(1=> __("Yes"),  2=> __("No") );
+				foreach ($arr as $i => $value) {
+					if ($i==$wordbooker_settings['wordbooker_share_button_post']){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
+				       else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
+				}
+				echo "</select><br />";
+		}
+
+
 		if ($wordbooker_global_settings['wordbooker_comment_handling']=="1"){
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_comment_get" '.$checked_flag[$wordbooker_settings["wordbooker_comment_get"]].' > '.__('Fetch comments from Facebook for this post').'<br />';}
 		if ($wordbooker_global_settings['wordbooker_comment_handling']=="2"){
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_use_facebook_comments" '.$checked_flag[$wordbooker_settings["wordbooker_use_facebook_comments"]].' > '.__('Enable Facebook Comments for this post').'<br />';}
-	} else {
-		echo "Wordbooker Blog level settings are in force";	
-		}
+	}  else {
+echo "<p>Wordbooker Blog level settings are in force<br /></p>";
 
+if ( isset($wordbooker_settings['wordbooker_allow_publish_select'])) { 
+echo '<input type="hidden" name="crabstick" value="stairwell" />';
+echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_publish_default" '.$checked_flag[$wordbooker_settings["wordbooker_publish_default"]].' > '.__('Publish This Post to Facebook').'<br />';
+#echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_publish_override" '.$checked_flag[$wordbooker_settings["wordbooker_publish_override"]].' >'.__('Force Re-Publish Post to Facebook on Edit (overrides republish window)').'<br />';
+} else { echo '<input type="hidden" name="wordbooker_publish_default" value="'.$wordbooker_settings["wordbooker_publish_default"].'" />';}
+}
+
+echo '<input type="hidden" name="wordbooker_publish_page_default" value="'.$wordbooker_settings["wordbooker_publish_page_default"].'" />';
+echo '<input type="hidden" name="wordbooker_publish_post_default" value="'.$wordbooker_settings["wordbooker_publish_post_default"].'" />';
+echo '<input type="hidden" name="wordbooker_post_edited" value="yes" />';
 }
 
 function wordbooker_tag_inner_custom_box() {
