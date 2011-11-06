@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.0.3
+Version: 2.0.4
 */
 
  /*
@@ -33,21 +33,20 @@ Version: 2.0.3
 
 
 @include("includes/premium.php");
-global $table_prefix, $wp_version,$wpdb,$db_prefix;
-
-# Consider uisng global $table_prefix,$db_prefix; This would allow us to drop down to one set of tables per DB 
+global $table_prefix, $wp_version,$wpdb,$db_prefix,$wbooker_user_id;
+$wbooker_user_id=0;
 
 $wordbooker_settings = wordbooker_options(); 
 if (! isset($wordbooker_settings['wordbooker_extract_length'])) $wordbooker_settings['wordbooker_extract_length']=256;
 
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
-define('WORDBOOKER_CODE_RELEASE','2.0.3 - Flight Feet and Root Hands ');
+define('WORDBOOKER_CODE_RELEASE','2.0.4 - Sunday ');
 
 # For Troubleshooting 
 define('ADVANCED_DEBUG',false);
 
-$facebook_config['debug'] = WORDBOOKER_TESTING && !$_POST['action'];
+#$facebook_config['debug'] = WORDBOOKER_TESTING && !$_POST['action'];
 #Wordbooker2 - Dev
 #define('WORDBOOKER_FB_APIKEY', '0138375357c1eb1257ed9970ec1a274c');
 #define('WORDBOOKER_FB_SECRET', '4310b484ec5236694cfa4b94166aca61');
@@ -72,14 +71,12 @@ define('WORDBOOKER_FB_OFFLINE_ACCESS',"offline_access");
 define('WORDBOOKER_FB_MANAGE_PAGES',"manage_pages");
 define('WORDBOOKER_FB_PHOTO_UPLOAD',"photo_upload");
 define('WORDBOOKER_FB_VIDEO_UPLOAD',"video_upload");
-define('WORDBOOKER_FB_MANAGE_PAGES',"manage_pages");
 define('WORDBOOKER_FB_READ_FRIENDS',"read_friendlists");
-
 define('WORDBOOKER_SETTINGS', 'wordbooker_settings');
 define('WORDBOOKER_OPTION_SCHEMAVERS', 'schema_vers');
-define('WORDBOOKER_SCHEMA_VERSION', '2.2');
+define('WORDBOOKER_SCHEMA_VERSION', '2.4');
 
-$new_wb_table_prefix=$table_prefix;
+$new_wb_table_prefix=$wpdb->base_prefix;
 if (isset ($db_prefix) ) { $new_wb_table_prefix=$db_prefix;}
 
 define('WORDBOOKER_ERRORLOGS', $new_wb_table_prefix . 'wordbooker_errorlogs');
@@ -117,26 +114,6 @@ if (function_exists('simplexml_load_string') ) {
 	define('WORDBOOKER_SIMPLEXML', 'is missing - this is a problem');
 }
 
-
-function wordbooker_generateSignature($params, $secret) {
-	ksort($params);
-	$base_string = '';
-	foreach($params as $key => $value) {
-		$base_string .= $key . '=' . $value;
-	}
-	$base_string .= $secret;
-	return md5($base_string);
-}
-
-
-function wordbooker_debug($message) {
-	if (WORDBOOKER_DEBUG) {
-		$fp = fopen('/tmp/wb.log', 'a');
-		$date = date('D M j, g:i:s a');
-		fwrite($fp, "$date: $message");
-		fclose($fp);
-	}
-}
 
 function wordbooker_load_apis() {
 	if (WORDBOOKER_JSON_DECODE == 'Wordbooker') {
@@ -246,8 +223,11 @@ function wordbooker_activate() {
 			  `error_msg` longtext NOT NULL,
 			  `post_id` bigint(20) NOT NULL,
 			  `blog_id` bigint(20) NOT NULL,
-			  KEY `timestamp_idx` (`timestamp`),
-			  KEY `blog_idx` (`blog_id`)
+			   `sequence_id` bigint(20) NOT NULL auto_increment,
+		           `diag_level` int(4) default NULL,
+		           PRIMARY KEY  (`sequence_id`),
+		           KEY `timestamp_idx` (`timestamp`),
+		           KEY `blog_idx` (`blog_id`)	
 			) DEFAULT CHARSET=utf8;
 		');
 	if ($result === false)
@@ -283,13 +263,13 @@ function wordbooker_activate() {
 
 	$result = $wpdb->query('
 		CREATE TABLE IF NOT EXISTS ' . WORDBOOKER_POSTCOMMENTS . ' (
-			  `fb_post_id` varchar(40) NOT NULL,
-			  `comment_timestamp` int(20) NOT NULL,
-			  `wp_post_id` int(11) NOT NULL,
-			  `blog_id` bigint(20) NOT NULL,
-			  `wp_comment_id` int(20) NOT NULL,
-			  `user_id`,bigint(20) NOT NULL.
-			  PRIMARY KEY  (`blog_id`,`wp_post_id`,`fb_post_id`,`wp_comment_id`)
+		  `fb_post_id` varchar(40) NOT NULL,
+		  `user_id` bigint(20) NOT NULL,
+		  `comment_timestamp` int(20) NOT NULL,
+		  `wp_post_id` int(11) NOT NULL,
+		  `blog_id` bigint(20) NOT NULL,
+		  `wp_comment_id` int(20) NOT NULL,
+  			PRIMARY KEY  (`blog_id`,`wp_post_id`,`fb_post_id`,`wp_comment_id`)
 			)  DEFAULT CHARSET=utf8;
 		');
 	if ($result === false)
@@ -358,9 +338,8 @@ function wordbooker_activate() {
 		echo "</div>\n";
 		#return;
 	}
-	wordbooker_set_option(WORDBOOKER_OPTION_SCHEMAVERS, 2.1);
+	wordbooker_set_option(WORDBOOKER_OPTION_SCHEMAVERS, 2.4);
 	$wordbooker_settings=wordbooker_options();
-	#var_dump($wordbooker_options);
 	#Setup the cron. We clear it first in case someone did a dirty de-install.
 	$dummy=wp_clear_scheduled_hook('wb_cron_job');
 	$dummy=wp_schedule_event(time(), 'hourly', 'wb_cron_job');
@@ -400,6 +379,21 @@ function wordbooker_upgrade() {
 		wordbooker_set_option('schema_vers', "2.2");
 	}
 
+	if ($wordbooker_settings['schema_vers']=='2.2') {
+		$result = $wpdb->query('
+		ALTER TABLE '. WORDBOOKER_ERRORLOGS. ' ADD `sequence_id` BIGINT( 20 ) NOT NULL AUTO_INCREMENT , ADD `diag_level` INT(4) NULL, ADD PRIMARY KEY ( `sequence_id` ) 
+		');
+	# All done, set the schemaversion to version 5. NOT the current version, as this allow us to string updates.
+		wordbooker_set_option('schema_vers', "2.3");
+	}
+
+	if ($wordbooker_settings['schema_vers']=='2.3') {
+		$result = $wpdb->query('
+		ALTER TABLE '. WORDBOOKER_ERRORLOGS. ' ADD `sequence_id` BIGINT( 20 ) NOT NULL AUTO_INCREMENT , ADD `diag_level` INT(4) NULL, ADD PRIMARY KEY ( `sequence_id` ) 
+		');
+	# All done, set the schemaversion to version 5. NOT the current version, as this allow us to string updates.
+		wordbooker_set_option('schema_vers', "2.4");
+	}
 
 	$dummy=wp_clear_scheduled_hook('wb_cron_job');
 	$dummy=wp_schedule_event(time(), 'hourly', 'wb_cron_job');
@@ -407,11 +401,15 @@ function wordbooker_upgrade() {
 	wp_cache_flush();
 }
 
-function wordbooker_delete_user($user_id) {
+function wordbooker_delete_user($user_id,$level) {
 	global $wpdb;
 	$errors = array();
-	foreach (array(WORDBOOKER_USERDATA,WORDBOOKER_ERRORLOGS,WORDBOOKER_USERSTATUS) as $tablename) {
+	$table_array[1]=array(WORDBOOKER_USERDATA);
+	$table_array[2]=array(WORDBOOKER_USERDATA,WORDBOOKER_USERSTATUS);
+	$table_array[3]=array(WORDBOOKER_USERDATA,WORDBOOKER_USERSTATUS,WORDBOOKER_FB_FRIENDS,WORDBOOKER_FB_FRIEND_LISTS);
+	foreach ($table_array[$level] as $tablename) {
 		$result = $wpdb->query('DELETE FROM ' . $tablename . ' WHERE user_ID = ' . $user_id . '');
+		#var_dump($result);
 	}
 	if ($errors) {
 		echo '<div id="message" class="updated fade">' . "\n";
@@ -427,7 +425,7 @@ function wordbooker_delete_user($user_id) {
  */
 function wordbooker_get_userdata($user_id) {
 	global $wpdb;
-	$sql='SELECT onetime_data,facebook_error,secret,session_key,user_ID,access_token,facebook_id,pages FROM ' . WORDBOOKER_USERDATA . ' WHERE user_ID = ' . $user_id ;
+	$sql='SELECT onetime_data,facebook_error,secret,session_key,user_ID,access_token,facebook_id,pages,name FROM ' . WORDBOOKER_USERDATA . ' WHERE user_ID = ' . $user_id ;
 	$rows = $wpdb->get_results($sql);
 	if ($rows) {
 		$rows[0]->onetime_data = unserialize($rows[0]->onetime_data);
@@ -497,7 +495,7 @@ function wordbooker_set_userdata_facebook_error($wbuser, $method, $error_code, $
 		'postid' => $post_id,
 		);
 	wordbooker_update_userdata($wbuser);
-	wordbooker_append_to_errorlogs($method, $error_code, $error_msg, $post_id);
+	wordbooker_append_to_errorlogs($method, $error_code, $error_msg, $post_id,$wbuser->user_ID);
 }
 
 function wordbooker_clear_userdata_facebook_error($wbuser) {
@@ -505,9 +503,18 @@ function wordbooker_clear_userdata_facebook_error($wbuser) {
 	return wordbooker_update_userdata($wbuser);
 }
 
+function wordbooker_remove_user(){
+	global $user_ID;
+	# Delete the user's meta
+	$wordbooker_user_settings_id="wordbookuser".$blog_id;
+	delete_usermeta( $user_ID, $wordbooker_user_settings_id);
+	# Then go and delete their data from the tables
+	wordbooker_delete_user($user_ID,3);
+}
+
 function wordbooker_delete_userdata() {
 	global $user_ID;
-	wordbooker_delete_user($user_ID);
+	wordbooker_delete_user($user_ID,2);
 }
 
 /******************************************************************************
@@ -515,8 +522,7 @@ function wordbooker_delete_userdata() {
  */
 
 function wordbooker_trim_postlogs() {
-	/* Forget that something has been posted to Facebook if it's been there
-	 * more than a year. We need to do this to stop posts getting deleted by accident if people ramp down the repost window */
+	# Forget that something has been posted to Facebook if it's been there  more than a year. 
 	global $wpdb;
 	$result = $wpdb->query('
 		DELETE FROM ' . WORDBOOKER_POSTLOGS . '
@@ -533,14 +539,14 @@ function wordbooker_postlogged($post_id,$tstamp=0) {
 	if (! isset($wordbooker_settings['wordbooker_republish_time_frame'])) $wordbooker_settings['wordbooker_republish_time_frame']='3';
 	$sql='SELECT '. $time ." - UNIX_TIMESTAMP(post_date) as time, post_date_gmt,post_date,post_modified, post_modified_gmt,post_status FROM $wpdb->posts WHERE ID = " . $post_id;
 	$rows = $wpdb->get_results($sql);
-	if ($tstamp==1) { return $rows[0]->time;}
+	
 	wordbooker_debugger("Post is this old (Seconds) : ",$rows[0]->time,$post_id) ;
-	wordbooker_debugger("Post date : ",$rows[0]->post_date,$post_id) ;
-	wordbooker_debugger("Post modified : ",$rows[0]->post_modified,$post_id) ;
-	wordbooker_debugger("Post status : ",$rows[0]->post_status,$post_id) ;
-	wordbooker_debugger("Post status flag : ",$wbo['wordbooker_new_post'],$post_id) ;
-	wordbooker_debugger("Scheduled Post: ",$wbo['wordbooker_scheduled_post'],$post_id) ;
-		
+	#wordbooker_debugger("Post date : ",$rows[0]->post_date,$post_id) ;
+	#wordbooker_debugger("Post modified : ",$rows[0]->post_modified,$post_id) ;
+	#wordbooker_debugger("Post status : ",$rows[0]->post_status,$post_id) ;
+	#wordbooker_debugger("Post status flag : ",$wbo['wordbooker_new_post'],$post_id) ;
+	#wordbooker_debugger("Scheduled Post: ",$wbo['wordbooker_scheduled_post'],$post_id) ;
+	if ($tstamp==1) { return $rows[0]->time;}	
 	if ($tstamp==1 && !isset($_POST['original_post_status']) && !isset($_POST['screen'])) {return 0;}
 	
 	# If the post isn't actually being published we give up - just in case
@@ -629,21 +635,19 @@ function wordbooker_clear_diagnosticlogs() {
 	global $user_ID, $wpdb,$blog_id;
 	$result = $wpdb->query('
 		DELETE FROM ' . WORDBOOKER_ERRORLOGS . '
-		WHERE  error_code <= -1 and blog_id ='.$blog_id);
+		WHERE blog_id ='.$blog_id);
 	if ($result === false) {
 		echo '<div id="message" class="updated fade">';
 		_e('Failed to clear Diagnostic logs.');
 		echo "</div>\n";
 	}
 }
-function wordbooker_append_to_errorlogs($method, $error_code, $error_msg,$post_id) {
+function wordbooker_append_to_errorlogs($method, $error_code, $error_msg,$post_id,$user_id) {
 	global $user_ID, $wpdb,$blog_id;
 	if ($post_id == null) {
 		$post_id = 0;
-		$user_id = $user_ID;
 	} else {
 		$post = get_post($post_id);
-		$user_id = $post->post_author;
 	}
 	$result = $wpdb->insert(WORDBOOKER_ERRORLOGS,
 		array('user_ID' => $user_id,
@@ -652,6 +656,7 @@ function wordbooker_append_to_errorlogs($method, $error_code, $error_msg,$post_i
 			'error_msg' => $error_msg,
 			'post_id' => $post_id,
 			'blog_id' => $blog_id,
+			'diag_level'=> 900
 			),
 		array('%d', '%s', '%d', '%s', '%d','%d')
 		);	 
@@ -664,21 +669,24 @@ function wordbooker_delete_from_errorlogs($post_id) {
 
 function wordbooker_render_errorlogs() {
 	global $user_ID, $wpdb,$blog_id;
-
-	$rows = $wpdb->get_results('SELECT * FROM ' . WORDBOOKER_ERRORLOGS . ' WHERE user_ID = ' . $user_ID . ' and error_code > -1  and blog_id='.$blog_id.' ORDER BY timestamp');
+	$diaglevel=wordbooker_get_option('wordbooker_advanced_diagnostics_level');
+	#var_dump($diaglevel);
+	#$sql='SELECT * FROM ' . WORDBOOKER_ERRORLOGS . ' WHERE user_ID = ' . $user_ID . '  and blog_id='.$blog_id.' and diag_level >'.$diaglevel.' order by sequence_id asc';
+	#var_dump($sql);
+	$rows = $wpdb->get_results('SELECT * FROM ' . WORDBOOKER_ERRORLOGS . ' WHERE user_ID = ' . $user_ID . '  and blog_id='.$blog_id.' and diag_level >'.$diaglevel.' order by post_id,sequence_id asc');
 	if ($rows) {
 ?>
-	<h3><?php _e('Errors'); ?></h3>
+	<h3><?php _e('Diagnostic Messages'); ?></h3>
 	<div class="wordbooker_errors">
 	<p>
 	</p>
 	<table class="wordbooker_errorlogs">
 		<tr>
-			<th>Timestamp</th>
 			<th>Post</th>
-			<th>Method</th>
+			<th>Time</th>
+			<th>Action</th>
+			<th>Message</th>
 			<th>Error Code</th>
-			<th>Error Message</th>
 		</tr>
 <?php
 	foreach ($rows as $row) {
@@ -687,14 +695,13 @@ function wordbooker_render_errorlogs() {
 			$hyperlinked_post = '<a href="'. get_permalink($row->post_id) . '">'. apply_filters('the_title',get_the_title($row->post_id)) . '</a>';
 		}
 		$hyperlinked_method= wordbooker_hyperlinked_method($row->method);
+		if ($row->error_code>1){ echo "<tr class='error'>";} else {echo "<tr class='diag'>";}
 ?>
-
-		<tr>
+			<td><?php if ($row->post_id>0) { echo $hyperlinked_post;} else {echo "-";} ?></td>
 			<td><?php echo $row->timestamp; ?></td>
-			<td><?php echo $hyperlinked_post; ?></td>
-			<td><?php echo $hyperlinked_method; ?></td>
-			<td><?php echo $row->error_code; ?></td>
-			<td><?php echo $row->error_msg; ?></td>
+			<td><?php echo $row->method; ?></td>
+			<td><?php echo stripslashes($row->error_msg); ?></td>
+			<td><?php if ($row->error_code>1) {echo $row->error_code;} else { echo "-";}  ?></td>
 		</tr>
 
 <?php
@@ -705,7 +712,7 @@ function wordbooker_render_errorlogs() {
 	<form action="<?php echo WORDBOOKER_SETTINGS_URL; ?>" method="post">
 		<input type="hidden" name="action" value="clear_errorlogs" />
 		<p class="submit" style="text-align: center;">
-		<input type="submit" value="<?php _e('Clear Errors'); ?>" />
+		<input type="submit" value="<?php _e('Clear Diagnostic Messages'); ?>" />
 		</p>
 	</form>
 	</div>
@@ -713,10 +720,10 @@ function wordbooker_render_errorlogs() {
 <?php
 	}
 }
-
+/*
 function wordbooker_render_diagnosticlogs() {
 	global $user_ID, $wpdb,$blog_id;
-	$rows = $wpdb->get_results('SELECT * FROM ' . WORDBOOKER_ERRORLOGS . ' WHERE error_code <= -1 and blog_id='.$blog_id.' order by error_code desc');
+	$rows = $wpdb->get_results('SELECT * FROM ' . WORDBOOKER_ERRORLOGS . ' WHERE  blog_id='.$blog_id.' order by sequence_id asc');
 	if ($rows) {
 ?>
 	<h3><?php _e('Diagnostic Messages'); ?></h3>
@@ -742,7 +749,7 @@ function wordbooker_render_diagnosticlogs() {
 ?>
 
 		<tr>
-			<td><?php echo $row->timestamp; ?></td>
+			<td><?php echo $row->timestamp; echo "   ".$row->sequence_id; ?></td>
 			<td><?php echo $hyperlinked_post; ?></td>
 			<td><?php echo $row->method; ?></td>
 			<td><?php echo $row->error_msg; ?></td>
@@ -764,26 +771,26 @@ function wordbooker_render_diagnosticlogs() {
 <?php
 	}
 }
-
+*/
 
 /******************************************************************************
  * Wordbooker setup and administration.
  */
 
 function wordbooker_admin_load() {
+
+	if (isset($POST['reset_user_config'])){
+		wordbooker_delete_userdata();
+	return;}
 	if (!$_POST['action'])
 		return;
 
 	switch ($_POST['action']) {
 
-	case 'one_time_code':
-		$facebook_error = null;
-		wordbooker_set_userdata( $onetime_data,$facebook_error, $secret, $session_key,$facebook_id);
-		wp_redirect(WORDBOOKER_SETTINGS_URL);
-		break;
 
 	case 'delete_userdata':
 		# Catch if they got here using the perm_save/cache refresh
+		
 		if ( ! isset ($_POST["perm_save"])) {
 			wordbooker_delete_userdata();
 		}
@@ -791,7 +798,7 @@ function wordbooker_admin_load() {
 		break;
 
 	case 'clear_errorlogs':
-		wordbooker_clear_errorlogs();
+		wordbooker_clear_diagnosticlogs();
 		wp_redirect(WORDBOOKER_SETTINGS_URL);
 		break;
 
@@ -833,7 +840,8 @@ function wordbooker_admin_head() {
 		padding: 0.5ex 1.5em;
 	}
 	table.wordbooker_errorlogs th { background-color: #999; }
-	table.wordbooker_errorlogs td { background-color: #f66; }
+	table.wordbooker_errorlogs tr.error td { background-color: #f66; }
+	table.wordbooker_errorlogs tr.diag td { background-color: #CCC; }
 	</style>
 <?php
 }
@@ -914,7 +922,7 @@ function get_check_session(){
 		catch (Exception $e) {
 		# We don't have a good session so
 		wordbooker_debugger("User Session invalid - clear down data "," ",0) ;
-		#wordbooker_delete_user($user_ID);
+		#wordbooker_delete_user($user_ID,1);
 		return;
 
 	}
@@ -991,7 +999,7 @@ function wordbooker_status($user_id)
 		</div>
 		<p>
 		<a href="<?php echo $result->url; ?>"><?php echo $result->name; ?></a> ( <?php echo $result->facebook_id; ?> )<br /><br />
-		<i><?php echo $result->status; ?></i><br />
+		<i><?php echo "<p>".$result->status; ?></i></p>
 		(<?php 
 			$current_offset=0;
 			$current_offset = get_option('gmt_offset');
@@ -1017,9 +1025,9 @@ global  $wpdb,$user_ID;
 #	if (isset($fbclient->secret)){
 		#var_dump($fb_info);
 		if ($fb_info->use_facebook==1) {
-			echo"<p>".__('Wordbooker appears to be configured and working just fine').".</p>";
+			echo"<p>".__('Wordbooker appears to be configured and working just fine');
 			wordbooker_check_permissions($wbuser,$user);	
-			echo "<p>".__("If you like, you can start over from the beginning (this does not delete your posting and comment history)").":</p>";
+			echo "</p><p>".__("If you like, you can start over from the beginning (this does not delete your posting and comment history)").":</p>";
 		} 
 		else 
 		{
@@ -1123,9 +1131,12 @@ function wordbooker_option_support() {
 
 	$info = array(	
 		'Wordbooker' => $plug_info['wordbooker/wordbooker.php']['Version'],
+		'Wordbooker ID'=>WORDBOOKER_FB_ID,
 		'Wordbooker Schema' => $wordbooker_settings['schema_vers'],
 		'WordPress' => $wp_version,
+		#'Table prefix' =>$wpdb->base_prefix,
 		 'PHP' => $phpvers,
+		 'PHP Memory Usage (MB)' => memory_get_usage(true)/1024/1024,
 		'JSON Encode' => WORDBOOKER_JSON_ENCODE,
 		'JSON Decode' => WORDBOOKER_JSON_DECODE,
 		'Curl Status' => $curlstatus,
@@ -1283,24 +1294,24 @@ function wordbooker_fbclient_publishaction($wbuser,$post_id)
 	if ( function_exists( 'get_the_post_thumbnail' ) ) {
 		# If the thumb only is set then pulled images is just matches
 		if (!isset($wordbooker_settings["wordbooker_meta_tag_thumb"])) {
-		if (! isset($wordbooker_post_options["wordbooker_thumb_only"]) ) {
-			wordbooker_debugger("setting image array to be both thumb and the post images "," ",$post->ID) ;
-		 	$pulled_images=@array_merge($matches[2],$matched[2],$yturls,$matches);
+			if (! isset($wordbooker_post_options["wordbooker_thumb_only"]) ) {
+				wordbooker_debugger("Setting image array to be both thumb and the post images "," ",$post->ID) ;
+			 	$pulled_images=@array_merge($matches[2],$matched[2],$yturls,$matches);
+			}
+			else {
+				wordbooker_debugger("Setting image array to be just thumb "," ",$post->ID) ;
+				$pulled_images[]=$matches[2];
+			} 
 		}
-		else {
-			wordbooker_debugger("setting image array to be just thumb "," ",$post->ID) ;
-			$pulled_images[]=$matches[2];
-		} 
-	}
 	}
 
-		if (isset($wordbooker_settings["wordbooker_meta_tag_thumb"]) && isset($wordbooker_post_options["wordbooker_thumb_only"]) ) {
-		wordbooker_debugger("setting image array to be just thumb from meta. "," ",$post->ID) ;
-		$pulled_images[]=$matches_ct[2];}
+	if (isset($wordbooker_settings["wordbooker_meta_tag_thumb"]) && isset($wordbooker_post_options["wordbooker_thumb_only"]) ) {
+	wordbooker_debugger("Setting image array to be just thumb from meta. "," ",$post->ID) ;
+	$pulled_images[]=$matches_ct[2];}
 
 	else {
-		wordbooker_debugger("setting image array to be post and thumb images. "," ",$post->ID) ;
-		if (is_array($matched[2])) {$pulled_images[]=$matched[2];}
+		wordbooker_debugger("Setting image array to be post and thumb images. "," ",$post->ID) ;
+		if (is_array($matched[2])) {$pulled_images[]=array_merge($matches,$matched[2]);}
 		if (is_array($matched[2]) && is_array($yturls)) {$pulled_images=array_merge($matches,$matched[2],$yturls);}
 	}
 
@@ -1317,11 +1328,7 @@ function wordbooker_fbclient_publishaction($wbuser,$post_id)
 					}
 					$imgsrc = $new_imgsrc;
 				}
-				$images[] = array(
-					'type' => 'image', 
-					'src' => $imgsrc,
-					'href' => $post_link_share,
-					);
+				$images[] =  $imgsrc;
 			}
 		}
 	}
@@ -1334,38 +1341,44 @@ function wordbooker_fbclient_publishaction($wbuser,$post_id)
 				$wpg_matches);
 			foreach ($wpg_matches[1] as $wpgtag) {
 				if ($wpgtag) {
-					$images[] = array(
-						'src' => $g2embeduri
-							. '?g2_view='
-							. 'core.DownloadItem'
-							. "&g2_itemId=$wpgtag",
-						'href' => $post_link_share,
-						);
+					$images[] = $g2embeduri.'?g2_view='.'core.DownloadItem'."&g2_itemId=$wpgtag";
 				}
 			}
 		}
 	}
 	$wordbooker_settings =wordbooker_options(); 
 	if (count($images)>0){
+		# Remove duplicates
+		$images=array_unique($images);
 		# Strip images from various plugins
-		$images=array_filter($images, "wordbooker_strip_images");
+		$images=wordbooker_strip_images($images);
 		# And limit it to 5 pictures to keep Facebook happy.
 		$images = array_slice($images, 0, 5);
-		foreach ($images as $key){
-			wordbooker_debugger("Post Images : ".$key['src'],'',$post->ID) ;
-		}
+
 	} else { 
 		if (isset($wordbooker_settings['wordbooker_use_this_image']))  {
 			$images[]=$wordbooker_settings['wb_wordbooker_default_image'];
 			wordbooker_debugger("No Post images found so using open graph default to keep Facebook happy ",'',$post->ID) ;
 			} 
 		else {
-			$images[]=get_bloginfo('wpurl').'wp-contents/plugins/wordbooker/includes/wordbooker_blank.jpg';
+			$x=get_bloginfo('wpurl').'/wp-content/plugins/wordbooker/includes/wordbooker_blank.jpg';
+			$images[]=$x;
 			wordbooker_debugger("No Post images found so loading blank to keep Facebook happy ",'',$post->ID) ;	
 			}
 		}
-
-	
+		#var_dump($images);
+		foreach ($images as $single) {
+ 			$images_array[]=array(
+					'type' => 'image', 
+					'src' => $single,
+					'href' => $post_link_share,
+					);
+		}
+		$images=$images_array;
+		#var_dump($images);
+			foreach ($images as $key){
+			wordbooker_debugger("Post Images : ".$key['src'],'',$post->ID) ;
+		}
 	// Set post_meta to be first image
 	update_post_meta($post->ID,'_wordbooker_thumb',$images[0]['src']);
 	wordbooker_debugger("Getting the Excerpt"," ",$post->ID) ;
@@ -1433,7 +1446,11 @@ function wordbooker_fbclient_publishaction($wbuser,$post_id)
 				'target'=>$wordbooker_post_options['wordbooker_secondary_target'], 
 				 'target_type'=>$wordbooker_post_options['wordbooker_secondary_type'],
 				 'target_active'=>$wordbooker_post_options['wordbooker_secondary_active']);;
-
+	global $doing_post;
+	$target_types = array('PW' => "",'FW' => __('Fan Wall'), 'GW'=>__('Group wall'));
+	if(isset($doing_post)) {wordbooker_debugger("Looks like we've already got a post going on","",$post_id,99) ; return;}
+	$doing_post="running";
+	$posting_type=array("1"=>"Wall Post","2"=>"Note","3"=>"Status Update");
 	foreach($posting_array as $posting_target) {
 		$access_token='dummy access token';
 		$wbuser->pages[]=array( 'id'=>'PW:'.$wbuser->facebook_id, 'name'=>"Personal Wall",'access_token'=>$wbuser->access_token);
@@ -1446,10 +1463,11 @@ function wordbooker_fbclient_publishaction($wbuser,$post_id)
 			}
 		}
  		if (isset($posting_target['target_active'])) {
-			wordbooker_debugger("Posting to ".$posting_target['target_id']." target ".$target_name,"",$post_id,99) ; 
+			$target_type=substr($posting_target['target'],0,2);
+			wordbooker_debugger("Posting to ".$target_types[$target_type]." ".$target_name." (".$posting_target['target_id'].") as a ".$posting_type[$posting_target['target_type']],"",$post_id,99) ; 
 			if ($access_token=='dummy access token') {$access_token=$wbuser->access_token;}
 			$target=substr($posting_target['target'],3);
-			$is_dummy=$wordbooker_post_options['wb_fake_publish'];
+			$is_dummy=$wordbooker_settings['wordbooker_fake_publish'];
 			switch($posting_target['target_type']) {
 				# Wall Post
 				case 1 : 
@@ -1465,19 +1483,23 @@ function wordbooker_fbclient_publishaction($wbuser,$post_id)
 				break ;
 			}
 
-		} else {wordbooker_debugger("Posting to ".$posting_target['target_id']." target ".$target_name." not active","",$post_id,99) ; }
+		} else {wordbooker_debugger("Posting to ".$posting_target['target_id']." target (".$target_name.") not active","",$post_id,99) ; }
 
-}
-}
-
-function wordbooker_strip_images($var)
-{
-	$strip_array= array ('addthis.com','gravatar.com','zemanta.com','wp-includes','plugins','favicon.ico','facebook.com','themes','mu-plugins','fbcdn.net');
-	foreach ($strip_array as $strip_domain) {
-	wordbooker_debugger("looking for ".$strip_domain." in ".$var['src']," ",$post->ID) ;
- 	  if (stripos($var['src'],$strip_domain)) {wordbooker_debugger("Found a match so dump the image",$var['src'],$post->ID,99) ; return;}
 	}
-	return $var;
+	unset($doing_post);
+}
+
+function wordbooker_strip_images($images)
+{
+	$newimages = array();
+	$strip_array= array ('addthis.com','gravatar.com','zemanta.com','wp-includes','plugins','favicon.ico','facebook.com','themes','mu-plugins','fbcdn.net');
+	foreach($images as $single){
+		foreach ($strip_array as $strip_domain) {
+			wordbooker_debugger("Looking for ".$strip_domain." in ".$single," ",$post->ID,200) ;
+ 		  	if (stripos($single,$strip_domain)) {wordbooker_debugger("Found a match so dump the image",$single,$post->ID,200) ;} else { if (!in_array($single,$newimages)){$newimages[]=$single;}}
+		}
+	}
+	return $newimages;
 }
 
 function wordbooker_short_url($post_id) {
@@ -1695,6 +1717,8 @@ function display_wordbooker_fb_comment() {
 	if(!is_single()){return;}
 	$wordbooker_settings = wordbooker_options(); 
 	$wordbooker_post_options= get_post_meta($post->ID, '_wordbooker_options', true);  
+	#var_dump($wordbooker_settings['wordbooker_comment_handling']);
+#	var_dump($wordbooker_post_options['wordbooker_use_facebook_comments']);
 	if ($wordbooker_settings['wordbooker_comment_handling']=="2" && isset($wordbooker_post_options['wordbooker_use_facebook_comments'])) {
 		$post_link = get_permalink($post->ID);
 		$checked_flag=array('on'=>'true','off'=>'false');
@@ -2041,18 +2065,22 @@ function wordbooker_check_permissions($wbuser,$user) {
 	$perm_miss=wordbooker_get_cache($user_ID,'auths_needed',1);
 	if ($perm_miss->auths_needed==0) { return;}
 	$perms_to_check= array(WORDBOOKER_FB_PUBLISH_STREAM,WORDBOOKER_FB_STATUS_UPDATE,WORDBOOKER_FB_READ_STREAM,WORDBOOKER_FB_CREATE_NOTE,WORDBOOKER_FB_PHOTO_UPLOAD,WORDBOOKER_FB_VIDEO_UPLOAD,WORDBOOKER_FB_MANAGE_PAGES,WORDBOOKER_FB_READ_FRIENDS);
-	$perm_messages= array( __('publish content to your Wall/Fan pages'), __('update your status'), __('read your News Feed and Wall'),__('create notes'),__('upload photos'),__('upload videos'),__('manage_pages'),__('read friend lists'));
-	$preamble= __("Wordbooker requires authorization to ");
+	$perm_messages= array( __('Publish content to your Wall/Fan pages'), __('Update your status'), __('Read your News Feed and Wall'),__('Create notes'),__('Upload photos'),__('Upload videos'),__('Manage_pages'),__('Read friend lists'));
+	$preamble= __("but requires authorization to ");
 	$postamble= __(" on Facebook. Click on the following link to grant permission");
-	echo "<br />";
 		$loginUrl2='https://www.facebook.com/dialog/oauth?client_id='.WORDBOOKER_FB_ID.'&redirect_uri=https://wordbooker.tty.org.uk/index2.html?br='.urlencode(get_bloginfo('wpurl')).'&scope='.implode(',',$perms_to_check).'&response_type=token';
 	if(is_array($perms_to_check)) {
 		foreach(array_keys($perms_to_check) as $key){
 			# Bit map check to put out the right text for the missing permissions.
 			if (pow(2,$key) & $perm_miss->auths_needed ) {
-			       echo '<p>'.$preamble.$perm_messages[$key].$postamble.'</p><div style="text-align: center;"><a href="'.$loginUrl2.'" > <img src="http://static.ak.facebook.com/images/devsite/facebook_login.gif"  alt="Facebook Login Button" /></a><br /></div>';
-			}
+				$midamble.=$perm_messages[$key].", ";
+				}
 		}
+			$midamble=rtrim($midamble,",");
+			$midamble=trim(preg_replace("/(.*?)((,|\s)*)$/m", "$1", $midamble));
+			$midamble=substr_replace($midamble, " and ", strrpos($midamble, ","), strlen(","));	
+			       echo " ".$preamble.$midamble.$postamble.'</p><div style="text-align: center;"><a href="'.$loginUrl2.'" > <img src="http://static.ak.facebook.com/images/devsite/facebook_login.gif"  alt="Facebook Login Button" /></a><br /></div>';
+			
 	}
 	echo "and then save your settings<br />";
 	echo '<form action="'.WORDBOOKER_SETTINGS_URL.'" method="post"> <input type="hidden" name="action" value="" />';
@@ -2273,6 +2301,17 @@ function wordbooker_process_post_data($newstatus, $oldstatus, $post) {
 	global $user_ID, $user_identity, $user_login, $wpdb, $blog_id;
 	# If this is an autosave then we give up and return as otherwise we lose user settings.
 	if ($_POST['action']=='autosave') { return;}
+	if ($_POST['action']=='editpost') { 
+				foreach (array_keys($_POST) as $key ) {
+				if (substr($key,0,8)=='wordbook') {
+					$wordbooker_sets[$key]=str_replace( array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),array('&','"','\'','<','>',"\t"),$_POST[$key]);
+				}
+			}
+	#var_dump($wordbooker_sets);
+	#var_dump($post->ID);
+	update_post_meta($post->ID, '_wordbooker_options', $wordbooker_sets); 
+	}
+if (!$newstatus=="publish") { return;}
 	# If this is a password protected post we give up
 	if ($post->post_password != '') {return;}
 	# Check for non public custom post types.
@@ -2372,9 +2411,9 @@ function wordbooker_publish($post_id) {
 	global $user_ID, $user_identity, $user_login, $wpdb, $blog_id,$wordbooker_settings;
 	$post = get_post($post_id);
 	# If its less than 10 seconds since we saw this post last we give up
-	#$ts=wordbooker_postlogged($post_id,1);
+	$ts=wordbooker_postlogged($post_id,1);
 	#var_dump($ts);
-#	if (isset($ts) && $ts<=60 && $ts>1) {wordbooker_debugger("Publish hook re-fire, ignoring ",$ts,$post_id,99) ; return;}
+	if (isset($ts) && $ts<=60 && $ts>1) {wordbooker_debugger("Publish hook re-fire, ignoring ",$ts,$post_id,99) ; return;}
 	# Clear down the error / diagnostic logs for this post.
 	#wordbooker_deletefrom_errorlogs($post_id);
 	if ((isset($user_ID) && $user_ID>0) &&  (!current_user_can(WORDBOOKER_MINIMUM_ADMIN_LEVEL))) { wordbooker_debugger("This user doesn't have enough rights"," ",$post_id,99) ; return; }
@@ -2476,29 +2515,22 @@ CODEBLOX;
 }
 
 
-function wordbooker_debugger($method,$error_msg,$post_id,$level=10) {
-	$diaglevel=wordbooker_get_option('wordbooker_advanced_diagnostics_level');
-	if (!isset($diaglevel)) {$diglevel=-100;}
-		# Check the level we are logging errors to and give up if needed.
-		if ($diaglevel > $level) {return;}
-		global $user_ID,$post_ID,$wpdb,$blog_id,$post;
+function wordbooker_debugger($method,$error_msg,$post_id,$level=9) {
+
+		global $user_ID,$post_ID,$wpdb,$blog_id,$post,$wbooker_user_id;
+		if (isset($post_id)){
 		$p=get_post($post_id);
 		#we dont want to record anything if its an draft of any kind
 		if (stristr($p->post_status,'draft')) {return;}
+}
 		$usid=1;
-		# Get the error_code last used - allows us to order in a subsecond timestamp
-		$result = $wpdb->get_results("select min(error_code) as ec from ". WORDBOOKER_ERRORLOGS);
-		$rowid=$result[0]->ec;
-		if (!isset($rowid)) {$rowid=-1;}
-		if ($rowid>=0) {$rowid=-1;}
-		$rowid=$rowid-1;
-		#if (post_id<=1) {$post_id=$post_ID;}
+		$row_id=1;
 		if (!isset($post_id)) {$post_id=$post_ID;}
 		if (!isset($post_id)) {$post_id=1;}
 		if (isset($user_ID)) {$usid=$user_ID;}
+		if ($usid==0) {$usid=$wbooker_user_id;}
 		if (!isset($usid)) {$usid=wordbooker_get_option('wordbooker_default_author');}
 		if (!isset($usid)) {$usid=1;}
-		$error_msg="( ".$error_msg." )";
 		$sql=	"INSERT INTO " . WORDBOOKER_ERRORLOGS . " (
 					user_id
 					, method
@@ -2506,13 +2538,15 @@ function wordbooker_debugger($method,$error_msg,$post_id,$level=10) {
 					, error_msg
 					, post_id
 					, blog_id
+					, diag_level
 				) VALUES (  
 					" . $usid . "
 					, '" . mysql_real_escape_string($method) . "'
-					, $rowid
+					, $row_id
 					, '" . mysql_real_escape_string($error_msg) . "'
 					, " . $post_id . "
 					, " . $blog_id ."
+					, " . $level ."
 				)";
 		$result = $wpdb->query($sql);
 }
@@ -2523,8 +2557,8 @@ function wordbooker_debugger($method,$error_msg,$post_id,$level=10) {
 
 /* Plugin maintenance. */
 register_activation_hook(__FILE__, 'wordbooker_activate');
-add_action('delete_user', 'wordbooker_delete_user');
-
+# When a user is deleted from the blog we should clear down everything they've done in Wordbooker.
+add_action('delete_user', 'wordbooker_remove_user');
 
 add_action ('init', 'wordbooker_init');
  
@@ -2546,6 +2580,39 @@ function wordbooker_get_avatar($avatar, $id_or_email, $size, $default, $alt){
     return $my_avatar;
 }
 
+function wordbooker_custom_cron_schedules($schedules){
+	$schedules['10mins'] = array(
+	'interval'   => 600,
+	'display'   => __('Every 10 Minutes'),
+	);
+
+	$schedules['15mins'] = array(
+	'interval'   => 900,
+	'display'   => __('Every 15 Minutes'),
+	);
+
+	$schedules['20mins'] = array(
+	'interval'   => 1200,
+	'display'   => __('Every 20 Minutes'),
+	);
+
+	$schedules['30mins'] = array(
+	'interval'   => 1800,
+	'display'   => __('Every 30 Minutes'),
+	);
+
+	$schedules['45mins'] = array(
+	'interval'   => 2700,
+	'display'   => __('Every 45 Minutes'),
+	);
+
+	$schedules['2hours'] = array(
+	'interval'   => 7200,
+	'display'   => __('Every 2 Hours'),
+	);
+
+	return array_merge($schedules);
+}
 	
 /* Post/page maintenance and publishing hooks. */
 $wordbooker_disabled=wordbooker_get_option('wordbooker_disabled');
@@ -2563,15 +2630,16 @@ if (!isset($wordbooker_disabled)){
 	#add_filter('get_avatar','wordbooker_get_avatar');
 	#add_action('comment_post', 'wordbooker_post_comment', 20);
 	#add_action('wp_set_comment_status', 'wordbooker_set_comment_status', 20, 2);
-	add_action('the_content', 'wordbooker_append_post');
+	add_filter('the_content', 'wordbooker_append_post');
 	add_filter('the_excerpt','wordbooker_append_post');
+	add_filter('cron_schedules','wordbooker_custom_cron_schedules');
 	add_shortcode('wb_fb_like', 'wordbooker_fb_like_inline');
 	add_shortcode('wb_fb_send', 'wordbooker_fb_send_inline');
 	add_shortcode('wb_fb_share', 'wordbooker_fb_share_inline');
 	add_shortcode('wb_fb_comment', 'wordbooker_fb_comment_inline');
 
 }
-
+#load_plugin_textdomain( 'wordbooker', false,  dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 # Includes - trying to keep my code base tidy.
 include("includes/wordbooker_options.php");
 # If they've disabled Wordbooker then we don't need to load any of these.

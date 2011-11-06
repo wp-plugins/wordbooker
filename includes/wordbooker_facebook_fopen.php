@@ -4,11 +4,11 @@
 Description: Facebook Interface functions - using Fopen related calls
 Author: Stephen Atty
 Author URI: http://canalplan.blogdns.com/steve
-Version: 2.0
+Version: 2.0.4
 */
 
 /*
- * Copyright 2009 Steve Atty (email : posty@tty.org.uk)
+ * Copyright 2011 Steve Atty (email : posty@tty.org.uk)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free

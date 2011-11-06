@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Posting Options 
 Extension URI: http://wordbooker.tty.org.uk
-Version: 2.0
+Version: 2.0.4
 Description: Posting Options for the WordBooker Plugin
 Author: Steve Atty
 */
@@ -49,6 +49,7 @@ function wordbooker_inner_custom_box() {
 		}
 	}
 	$x = get_post_meta($post->ID, '_wordbooker_options', true); 
+#	var_dump($x);
 	if(is_array($x)) {
 		foreach (array_keys($x) as $key ) {
 			if (substr($key,0,8)=='wordbook') {
@@ -59,6 +60,7 @@ function wordbooker_inner_custom_box() {
 	if(is_array($post_meta)) {
 		$wordbooker_settings=$post_meta;
 	}
+	#var_dump($wordbooker_settings);
 #var_dump($wordbooker_settings["wordbooker_post_edited"]);
 	$post_pub_prompt=__("Publish this post to Facebook");
 	if($post->post_type=='page'){
@@ -86,7 +88,6 @@ function wordbooker_inner_custom_box() {
 		$have_fan_pages=0;
 
 		# If the post has already been published then we uncheck the publish option 
-		
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_publish_default" '.$checked_flag[$wordbooker_settings["wordbooker_publish_default"]].' > '.$post_pub_prompt.'<br />';
 if (count($fanpages)>1){
 	echo '<p><label for="wb_primary_target">'.__('Post to the following Wall').' : </label>';
@@ -107,8 +108,7 @@ if (count($fanpages)>1){
        		 if ($i==$wordbooker_settings['wordbooker_primary_type']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
       		 else {echo '<option value="'.$i.'" >'.$arr[$i].'</option>';}
 	}
-	echo '</select>	&nbsp;<INPUT TYPE=CHECKBOX NAME="wordbooker_primary_active" '.$checked_flag[$wordbooker_settings["wordbooker_primary_active"]].'></p><p>';
-
+	echo '</select>	&nbsp;<INPUT TYPE=CHECKBOX NAME="wordbooker_primary_active" '.$checked_flag[$wordbooker_settings["wordbooker_primary_active"]].'></p>';
 
 	} else 
 
@@ -119,15 +119,13 @@ if (count($fanpages)>1){
 $arr = array(1=> __("As a Wall Post"),  2=> __("As a Note"), 3=> __("As a Status Update" )  );
 	echo '<select id="wordbooker_primary_type" name="wordbooker_primary_type"  >';
 	foreach ($arr as $i => $value) {
-       		 if ($i==$wordbookeruser_settings['wordbooker_primary_type']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
+       		 if ($i==$wordbooker_settings['wordbooker_primary_type']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
       		 else {echo '<option value="'.$i.'" >'.$arr[$i].'</option>';}
 	}
-	echo '&nbsp;<INPUT TYPE=CHECKBOX NAME="wordbooker_primary_active" '.$checked_flag[$wordbookeruser_settings["wordbooker_primary_active"]].'></p><p>';
+	echo '&nbsp;<INPUT TYPE=CHECKBOX NAME="wordbooker_primary_active" '.$checked_flag[$wordbooker_settings["wordbooker_primary_active"]].'></p><p>';
 	}
-		if (count($fanpages2) >0 ){
+		if ($fanpages2 ){
 			$have_fan_pages=1;
-
-
 		echo '<label for="wb_secondary_target">'.__('Post to the following Wall').' : </label>';
 		echo '<select id="wordbooker_secondary_target" name="wordbooker_secondary_target"  >';
 				$option="";
@@ -145,7 +143,7 @@ $arr = array(1=> __("As a Wall Post"),  2=> __("As a Note"), 3=> __("As a Status
 	       		 if ($i==$wordbooker_settings['wordbooker_secondary_type']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
 	      		 else {echo '<option value="'.$i.'" >'.$arr[$i].'</option>';}
 		}
-	echo "</select>";
+	echo "</select> ";
 		echo '&nbsp;<INPUT TYPE=CHECKBOX NAME="wordbooker_secondary_active" '.$checked_flag[$wordbooker_settings["wordbooker_secondary_active"]].'></p><P>';
 
 		}

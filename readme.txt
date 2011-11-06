@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
 Requires at least: 2.9
 Tested up to: 3.2.1
-Stable tag: 2.0.3
+Stable tag: 2.0.4
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for. The base release of Version 2 DOES NOT support comment handling - this is because V2 had to be pushed out to meet deadlines imposed by Facebook concerning application authorisation. Comment handling will be added in the first major 2.x release.
 
@@ -118,6 +118,27 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 == Changelog ==
 
+= Version 2.0.4 06/11/2011=
+- Added a Memory usage line to the support information.
+- Removed a duplicated constant definition
+- Fixed a typo in the fb_widget include.
+- Fixed a bug where Save Draft didn't save the Wordbooker options
+- Completely changed the Diagnostic/Error log handling.
+- Clarified some of the diagnostic messages in the cache refresh code
+- Fixed a glitch in the FB Status widget when FB style time formats were used.
+- Added L10n handling to the FB Status Widget
+- Completed L10n handling in the FB Like Widget
+- Added languages folder and first revision of the wordbooker pot file
+- Added function call to handle localisation
+- Recoded the image handling process to make it more reliable
+- Added a trim diagnostic log call to the batch cron job
+- Added a check for expired sessions in the cron code.
+- Added a ID line in the support information
+- Fixed a bug with the "TEST MODE" option
+- Fixed a problem relating to base table prefixes in some Networked blog installs.
+- Added an extra detail to the target drop down list to differentiate between pages and applications with the same name.
+
+
 = Version 2.0.3 23/10/2011=
 - Fixed a bug in the code that populates the og:content tag
 - Fixed a bug related to mbr string handling
@@ -130,7 +151,6 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 - Changed the level of a couple of diagnostic messages to make sure they always show.
 - Changed the logic for the primary and secondary targets so that secondary doesn't appear if you only have a personal wall and the drop down is removed from the primary.
 - Added option to use the default og:image tag as the default image for posts with no image.
-- Fixed an issue with mb_strimwidth throwing a warning .
 
 
 = Version 2.0.2 15/10/2011 =
