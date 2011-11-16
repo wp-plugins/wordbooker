@@ -69,7 +69,7 @@ function wordbooker_status_update($post_id,$access_token,$post_date,$target_id,$
 	}
 }
 
-function wordbooker_notes_post($post_id,$access_token,$post_title,$post_data,$target_id,$dummy,$target_name){
+function wordbooker_notes_post($post_id,$access_token,$post_title,$target_id,$dummy,$target_name){
 	if (isset($dummy)) { 	
 		wordbooker_debugger("Notes publish  to ".$target_name." Test Only",'No Post Made',$post_id) ;
 		return;
@@ -81,7 +81,7 @@ function wordbooker_notes_post($post_id,$access_token,$post_title,$post_data,$ta
 		'subject' =>$post_title
 	);
 	try {
-		$result = wordbooker_fb_note_publish($data,$target);
+		$result = wordbooker_fb_note_publish($data,$target_id);
 		wordbooker_store_post_result($post_id,$result->id);
 		wordbooker_debugger("Note Publish to ".$target_name." result : ",$result->id,$post_id) ;
 	} 	

@@ -133,11 +133,11 @@ function nicetime($date)
     // is it future date or past date
     if($now > $unix_date) {   
         $difference     = $now - $unix_date;
-        $tense         = __("ago");
+        $tense         = __("ago", 'wordbooker');
        
     } else {
         $difference     = $unix_date - $now;
-        $tense         = __("from now");
+        $tense         = __("from now", 'wordbooker');
     }
    
     for($j = 0; $difference >= $lengths[$j] && $j < count($lengths)-1; $j++) {

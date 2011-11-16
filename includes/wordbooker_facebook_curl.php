@@ -40,27 +40,27 @@ function wordbooker_fb_status_update($data,$target) {
         return($x);
 }
 
-function wordbooker_fb_note_publish($data,$wbuser){
-$url='https://graph.facebook.com/'.$target.'/notes';
+function wordbooker_fb_note_publish($data,$target){
+	$url='https://graph.facebook.com/'.$target.'/notes';
 	$x=wordbooker_make_curl_post_call($url,$data);
         return($x);
 }
 
 
 function wordbooker_fql_query($query,$access_token) {
-        $url = 'https://api.facebook.com/method/fql.query?access_token='.$access_token.'&query='.rawurlencode($query).'&format=JSON';
+        $url = 'https://api.facebook.com/method/fql.query?access_token='.$access_token.'&query='.rawurlencode($query).'&format=JSON-STRINGS';
 	$x=wordbooker_make_curl_call($url);
         return($x);
 }
 
 function wordbooker_me($access_token) {
-        $url = 'https://graph.facebook.com/me/accounts?access_token='.$access_token.'&format=JSON';
+        $url = 'https://graph.facebook.com/me/accounts?access_token='.$access_token.'&format=JSON-STRINGS';
 	$x=wordbooker_make_curl_call($url);
         return($x);
 }
 
 function wordbooker_get_fb_id($access_token) {
-        $url = 'https://graph.facebook.com/me?fields=id,name&access_token='.$access_token.'&format=JSON';
+        $url = 'https://graph.facebook.com/me?fields=id,name&access_token='.$access_token.'&format=JSON-STRINGS';
 		$x=wordbooker_make_curl_call($url);
         return($x);
 }
@@ -68,14 +68,14 @@ function wordbooker_get_fb_id($access_token) {
 
 function wordbooker_me_status($fb_id,$access_token) {
 	if (!isset($fb_id)){$fb_id='me';}
-        $url = 'https://graph.facebook.com/'.$fb_id.'?access_token='.$access_token.'&format=JSON';
+        $url = 'https://graph.facebook.com/'.$fb_id.'?access_token='.$access_token.'&format=JSON-STRINGS';
 	$x=wordbooker_make_curl_call($url);
         return($x);
 }
 
 function wordbooker_fb_pemissions($fb_id,$access_token) {
 	if (!isset($fb_id)){$fb_id='me';}
-        $url = 'https://graph.facebook.com/'.$fb_id.'/permissions?access_token='.$access_token.'&format=JSON';
+        $url = 'https://graph.facebook.com/'.$fb_id.'/permissions?access_token='.$access_token.'&format=JSON-STRINGS';
 	$x=wordbooker_make_curl_call($url);
         return($x);
 }
@@ -89,8 +89,10 @@ function wordbooker_make_curl_call($url) {
         $response = curl_exec($ch);
 	$err_no=curl_errno($ch);
         curl_close($ch);
-	$response=preg_replace('/"gid":(\d+)/', '"gid":"$1"', $response );
-	$x=json_decode( preg_replace('/"page_id":(\d+)/', '"page_id":"$1"', $response ) );
+	#var_dump($response);
+#	$response=preg_replace('/"gid":(\d+)/', '"gid":"$1"', $response );
+#	$x=json_decode( preg_replace('/"page_id":(\d+)/', '"page_id":"$1"', $response ) );
+	$x=json_decode( $response);
 	if (isset($x->message)) { 
 		throw new Exception ($x->message);
 	}

@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
 Requires at least: 2.9
 Tested up to: 3.2.1
-Stable tag: 2.0.4
+Stable tag: 2.0.5
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for. The base release of Version 2 DOES NOT support comment handling - this is because V2 had to be pushed out to meet deadlines imposed by Facebook concerning application authorisation. Comment handling will be added in the first major 2.x release.
 
@@ -98,11 +98,9 @@ If you're using the Share action link on your posts to Facebook it uses the META
 
 = How do I report problems or submit feature requests? =
 
-- Use the [Wordbooker Discussion Board](http://www.facebook.com/apps/application.php?v=app_2373072738&id=254577506873). Either start a new topic, or add to an existing topic.
+- Use the [Wordbooker Support Forums](http://wordbooker.tty.org.uk/forums/). Either start a new topic, or add to an existing topic.
 
-- Do *not* use the Review Wall for support or feature requests. People are unable to respond to Review Wall posts; you are less likely to get a response.
-
-Alternatively, Go to the Wordbooker Page on [GoogleCode](http://code.google.com/p/wordbooker/).
+- Alternatively, Go to the Wordbooker Page on [GoogleCode](http://code.google.com/p/wordbooker/).
 
 
 == KNOWN CONFLICTS ==
@@ -118,7 +116,24 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 == Changelog ==
 
-= Version 2.0.4 06/11/2011=
+
+= Version 2.0.5 15/11/2011 =
+- QTranslate processing was missing round one of the post content extracts
+- Added code to pull the "viewing" language from qtranslate and use that to change the language of the various FB Social widgets.
+- Fixed a bug where parameters were not being passed properly to the notes publishing call
+- Fix a bug where the Fan page drop down was always populated with the fan pages and groups of the first user in the wordbooker tables even if there was more than one row.
+- Pushed language identification into a function to make it easier to add support for other multi-language plugins later.
+- More language strings snagged and tagged
+- Language files for French and German added. Thanks to Sebastian Pertsch and Christian Denat
+- Changed the size of the wordbooker_blank image to resolve some issues with FB ignoring it.
+- Fixed a bug in the Like/Share button logic which meanr that under certain circumstances the code for buttons wasn't included when it should have been.
+- Put some checking in the cron code to handle Facebook API timing out during the refresh process and leaving things in a mess
+- Fixed a typo in the "Disable Short Urls" option.
+- Changed graph calls to use JSON_STRING parameter rather than just JSON (Undocumented Facebook API parameter).
+
+
+
+= Version 2.0.4 06/11/2011 =
 - Added a Memory usage line to the support information.
 - Removed a duplicated constant definition
 - Fixed a typo in the fb_widget include.
@@ -139,7 +154,7 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 - Added an extra detail to the target drop down list to differentiate between pages and applications with the same name.
 
 
-= Version 2.0.3 23/10/2011=
+= Version 2.0.3 23/10/2011 =
 - Fixed a bug in the code that populates the og:content tag
 - Fixed a bug related to mbr string handling
 - Changed calls from get_user_meta to get_usermeta which means plugin now works with 2.9 again
