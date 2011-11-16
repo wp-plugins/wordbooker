@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
 Requires at least: 2.9
 Tested up to: 3.2.1
-Stable tag: 2.0
+Stable tag: 2.0.5
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for. The base release of Version 2 DOES NOT support comment handling - this is because V2 had to be pushed out to meet deadlines imposed by Facebook concerning application authorisation. Comment handling will be added in the first major 2.x release.
 
@@ -98,11 +98,9 @@ If you're using the Share action link on your posts to Facebook it uses the META
 
 = How do I report problems or submit feature requests? =
 
-- Use the [Wordbooker Discussion Board](http://www.facebook.com/apps/application.php?v=app_2373072738&id=254577506873). Either start a new topic, or add to an existing topic.
+- Use the [Wordbooker Support Forums](http://wordbooker.tty.org.uk/forums/). Either start a new topic, or add to an existing topic.
 
-- Do *not* use the Review Wall for support or feature requests. People are unable to respond to Review Wall posts; you are less likely to get a response.
-
-Alternatively, Go to the Wordbooker Page on [GoogleCode](http://code.google.com/p/wordbooker/).
+- Alternatively, Go to the Wordbooker Page on [GoogleCode](http://code.google.com/p/wordbooker/).
 
 
 == KNOWN CONFLICTS ==
@@ -118,8 +116,91 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 == Changelog ==
 
+
+= Version 2.0.5 15/11/2011 =
+- QTranslate processing was missing round one of the post content extracts
+- Added code to pull the "viewing" language from qtranslate and use that to change the language of the various FB Social widgets.
+- Fixed a bug where parameters were not being passed properly to the notes publishing call
+- Fix a bug where the Fan page drop down was always populated with the fan pages and groups of the first user in the wordbooker tables even if there was more than one row.
+- Pushed language identification into a function to make it easier to add support for other multi-language plugins later.
+- More language strings snagged and tagged
+- Language files for French and German added. Thanks to Sebastian Pertsch and Christian Denat
+- Changed the size of the wordbooker_blank image to resolve some issues with FB ignoring it.
+- Fixed a bug in the Like/Share button logic which meanr that under certain circumstances the code for buttons wasn't included when it should have been.
+- Put some checking in the cron code to handle Facebook API timing out during the refresh process and leaving things in a mess
+- Fixed a typo in the "Disable Short Urls" option.
+- Changed graph calls to use JSON_STRING parameter rather than just JSON (Undocumented Facebook API parameter).
+
+
+
+= Version 2.0.4 06/11/2011 =
+- Added a Memory usage line to the support information.
+- Removed a duplicated constant definition
+- Fixed a typo in the fb_widget include.
+- Fixed a bug where Save Draft didn't save the Wordbooker options
+- Completely changed the Diagnostic/Error log handling.
+- Clarified some of the diagnostic messages in the cache refresh code
+- Fixed a glitch in the FB Status widget when FB style time formats were used.
+- Added L10n handling to the FB Status Widget
+- Completed L10n handling in the FB Like Widget
+- Added languages folder and first revision of the wordbooker pot file
+- Added function call to handle localisation
+- Recoded the image handling process to make it more reliable
+- Added a trim diagnostic log call to the batch cron job
+- Added a check for expired sessions in the cron code.
+- Added a ID line in the support information
+- Fixed a bug with the "TEST MODE" option
+- Fixed a problem relating to base table prefixes in some Networked blog installs.
+- Added an extra detail to the target drop down list to differentiate between pages and applications with the same name.
+
+
+= Version 2.0.3 23/10/2011 =
+- Fixed a bug in the code that populates the og:content tag
+- Fixed a bug related to mbr string handling
+- Changed calls from get_user_meta to get_usermeta which means plugin now works with 2.9 again
+- When posting to your personal wall the diagnostic messages showed no target name.
+- Logic for Remote publishing clients revised
+- Added option to disable short urls on FB posts
+- Added a post revision check to hopefully fix double posting issues
+- Recoded the "get logged in user" logic in the Cache Refresh to fix an obscure bug related to lost FB IDs
+- Changed the level of a couple of diagnostic messages to make sure they always show.
+- Changed the logic for the primary and secondary targets so that secondary doesn't appear if you only have a personal wall and the drop down is removed from the primary.
+- Added option to use the default og:image tag as the default image for posts with no image.
+
+
+= Version 2.0.2 15/10/2011 =
+- Fixed a bug with app-id/fb:admins which made comment moderation go wrong.
+- Fixed a bug in the target handling code where a variable was not being set correctly leading to confusing error message
+- Changed Curl calls to supress errors (for sites where curl is blocked/broken and craps the code out)
+- Changed FB comment code to supress comment boxes on anything but single post pages (as it seems to upset Facebook).
+- Fixed a bug concerning "Publish As" which meant it wasn't working properly.
+- Restored an option to allow Non Wordbooker users to chose if a post should be published or not.
+- Restored the option to supress like/share/send on Sticky Posts
+- Fixed a bug with the og: description tag not being populated.
+- Changed logic so og:tags are put out all the time unless you've checked the option to disable them all.
+- Fixed a bug where an array was parsed for data even if it didn't exist.
+- Fixed a bug where "post attribute" was missing.
+- Fixed a bug where when extract length was set to more than 400 it got reset to either 10 or 256
+- Added a check so that if a post has no images a blank is loaded to stop Facebook from scraping the page.
+- Changed logic so that Posting Options checks if a post is to a page and if not defaults to a post. This should provide a short term work round for custom post types.
+- Fixed a bug where the diagnostics reporting which target was active or not didn't show the right target.
+- Fixed a bug where the new publish options were being lost when you scheduled a post or saved a draft and then exited and edited the post later.
+- Fixed a bug where if you set the "Deactivate Wordbooker functionality" then it crashed out with a fatal error
+- 24 hour time formats on the FB Status Widget weren't set correctly
+- Added the X509 cert bundle for Curl installs without it properly installed.
+
+
+= Version 2.0.1 11/10/2011 =
+- Fixed a logic mistake concerning Share on Pages/Front pages
+- A field  was missing from the post storage routine
+- Fixed a bug where Like counts didn't work because the url was missing.
+- Put an extra option into the Curl Call which might fix issues with certificate bundles.
+- Fixed a bug with app-id/fb:admins which made comment moderation go wrong.
+
+
 = Verson 2.0.0 30/09/2011 =
 - Major new release - too many changes to document here
+
 
 = Version 1.9.5 17/07/2011 =
 - Minor changes to OG Tags to handle changes in the Facebook Share/Like button functionality

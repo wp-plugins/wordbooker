@@ -2,7 +2,7 @@
 /**
 Extension Name: Wordbooker Posting Functions
 Extension URI: http://wordbooker.tty.org.uk
-Version: 2.0
+Version: 2.0.4
 Description: Collection of functions concerning posting to the various parts of Facebook.
 Author: Steve Atty
 */
@@ -31,7 +31,7 @@ function wordbooker_wall_post($post_id,$access_token,$post_title,$post_data,$tar
 		return;
 	}
 	$post_data['access_token']=$access_token;
-
+	global $user_ID;
 try {
 		$result = wordbooker_fb_stream_pubish($post_data,$target_id);
 		wordbooker_store_post_result($post_id,$result->id );
@@ -40,21 +40,19 @@ try {
 	catch (Exception $e) {
 		$error_code = $e->getCode();
 		$error_msg = $e->getMessage();
-		wordbooker_append_to_errorlogs($method, $error_code, $error_msg,$post_id);
+		wordbooker_append_to_errorlogs($method, $error_code, $error_msg,$post_id,$user_ID);
 		wordbooker_debugger("Wall Post to ".$target_name." Failed : ",$error_msg,$post_id,99) ;
 	}
 }
 
-
 function wordbooker_status_update($post_id,$access_token,$post_date,$target_id,$dummy,$target_name) {
-	global $wordbooker_post_options;
+	global $wordbooker_post_options,$user_ID;
 	wordbooker_debugger("Setting status_text".$wordbooker_post_options['wordbooker_status_update_text']," ",$post_id) ; 
 	if (isset($dummy)) { 	
 		wordbooker_debugger("Status update to ".$target_name." Test Only",'No Post Made',$post_id) ;
 		return;
 	}
 		
-	
 	$status_text = parse_wordbooker_attributes(stripslashes($wordbooker_post_options['wordbooker_status_update_text']),$post_id,strtotime($post_date)); 
 	$status_text = wordbooker_post_excerpt($status_text,420); 		
 	$data=array( 'access_token'=>$access_token,'message' =>$status_text);
@@ -66,41 +64,41 @@ function wordbooker_status_update($post_id,$access_token,$post_date,$target_id,$
 	catch (Exception $e) {
 		$error_code = $e->getCode();
 		$error_msg = $e->getMessage();
-		wordbooker_append_to_errorlogs($method, $error_code, $error_msg,$post_id);
+		wordbooker_append_to_errorlogs($method, $error_code, $error_msg,$post_id,$user_ID);
 		wordbooker_debugger("Status Update  to ".$target_name." failed : ".$error_msg,$post_id,99) ;
 	}
 }
 
-function wordbooker_notes_post($post_id,$access_token,$post_title,$post_data,$target_id,$dummy,$target_name){
+function wordbooker_notes_post($post_id,$access_token,$post_title,$target_id,$dummy,$target_name){
 	if (isset($dummy)) { 	
 		wordbooker_debugger("Notes publish  to ".$target_name." Test Only",'No Post Made',$post_id) ;
 		return;
 	}
-	global $post;
+	global $post,$user_ID;
 	$data=array(
 		'access_token'=>$access_token,
 		'message' => preg_replace("/<script.*?>.*?<\/script>/xmsi","",apply_filters('the_content', $post->post_content)),
 		'subject' =>$post_title
 	);
 	try {
-		$result = wordbooker_fb_note_publish($data,$target);
+		$result = wordbooker_fb_note_publish($data,$target_id);
 		wordbooker_store_post_result($post_id,$result->id);
 		wordbooker_debugger("Note Publish to ".$target_name." result : ",$result->id,$post_id) ;
 	} 	
 	catch (Exception $e) {
 		$error_code = $e->getCode();
 		$error_msg = $e->getMessage();
-		wordbooker_append_to_errorlogs($method, $error_code, $error_msg,$post_id);
+		wordbooker_append_to_errorlogs($method, $error_code, $error_msg,$post_id,$user_ID);
 		wordbooker_debugger("Notes publish  to ".$target_name." fail : ".$error_msg,$error_code,$post_id,99) ;
 	}
 }
 
 
 function wordbooker_store_post_result($post_id,$fb_post_id) {
-	global $wpdb,$blog_id;
+	global $wpdb,$blog_id,$user_ID;
 	$tstamp=time();
 	$wordbooker_settings = wordbooker_options();
-	$sql=	' INSERT INTO ' . WORDBOOKER_POSTCOMMENTS . ' (fb_post_id,comment_timestamp,wp_post_id,blog_id) VALUES ("'.$fb_post_id.'",'.$tstamp.','.$post_id.','.$blog_id.')';
+	$sql=	' INSERT INTO ' . WORDBOOKER_POSTCOMMENTS . ' (fb_post_id,comment_timestamp,wp_post_id,blog_id,user_id) VALUES ("'.$fb_post_id.'",'.$tstamp.','.$post_id.','.$blog_id.','.$user_ID.')';
 	$result = $wpdb->query($sql);
 	wordbooker_insert_into_postlogs($post_id,$blog_id);
 	# Clear down the diagnostics for this post if the user has chosen so
