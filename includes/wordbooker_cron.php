@@ -11,7 +11,7 @@ Author: Steve Atty
 function wordbooker_cache_refresh ($user_id) {
 	global $blog_id,$wpdb,$table_prefix,$wordbooker_user_settings_id,$wbooker_user_id;
 	$wbooker_user_id=$user_id;
-#	$result = $wpdb->query(' DELETE FROM ' . WORDBOOKER_ERRORLOGS . ' WHERE   blog_id ='.$blog_id.' and (user_ID='.$user_id.' or user_ID=0 ) and post_id=0');
+	$result = $wpdb->query(' DELETE FROM ' . WORDBOOKER_ERRORLOGS . ' WHERE   blog_id ='.$blog_id.' and (user_ID='.$user_id.' or user_ID=0 ) and post_id<=0');
 	wordbooker_debugger("Cache Refresh Commence ",$user_id,0) ; 
 	$result = $wpdb->get_row("select facebook_id from ".WORDBOOKER_USERDATA." where user_ID=".$user_id);
 	$uid=$result->facebook_id;

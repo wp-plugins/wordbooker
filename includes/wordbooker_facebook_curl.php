@@ -60,7 +60,7 @@ function wordbooker_me($access_token) {
 }
 
 function wordbooker_get_fb_id($access_token) {
-        $url = 'https://graph.facebook.com/me?fields=id,name&access_token='.$access_token.'&format=JSON-STRINGS';
+        $url = 'https://graph.facebook.com/me?fields=id,name&access_token='.$access_token.'&format=JSON';
 		$x=wordbooker_make_curl_call($url);
         return($x);
 }
@@ -68,7 +68,7 @@ function wordbooker_get_fb_id($access_token) {
 
 function wordbooker_me_status($fb_id,$access_token) {
 	if (!isset($fb_id)){$fb_id='me';}
-        $url = 'https://graph.facebook.com/'.$fb_id.'?access_token='.$access_token.'&format=JSON-STRINGS';
+        $url = 'https://graph.facebook.com/'.$fb_id.'?access_token='.$access_token.'&format=JSON';
 	$x=wordbooker_make_curl_call($url);
         return($x);
 }
@@ -89,7 +89,7 @@ function wordbooker_make_curl_call($url) {
         $response = curl_exec($ch);
 	$err_no=curl_errno($ch);
         curl_close($ch);
-	#var_dump($response);
+	var_dump($response);
 #	$response=preg_replace('/"gid":(\d+)/', '"gid":"$1"', $response );
 #	$x=json_decode( preg_replace('/"page_id":(\d+)/', '"page_id":"$1"', $response ) );
 	$x=json_decode( $response);

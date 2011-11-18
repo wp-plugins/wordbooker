@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.0.6
+Version: 2.0.7
 */
 
  /*
@@ -1448,10 +1448,12 @@ function wordbooker_strip_images($images)
 	$newimages = array();
 	$strip_array= array ('addthis.com','gravatar.com','zemanta.com','wp-includes','plugins','favicon.ico','facebook.com','themes','mu-plugins','fbcdn.net');
 	foreach($images as $single){
+		$ext = substr(strrchr($single, '.'), 1);
+		if (strlen($ext) >2){
 		foreach ($strip_array as $strip_domain) {
 			wordbooker_debugger("Looking for ".$strip_domain." in ".$single," ",$post->ID,200) ;
  		  	if (stripos($single,$strip_domain)) {wordbooker_debugger("Found a match so dump the image",$single,$post->ID,200) ;} else { if (!in_array($single,$newimages)){$newimages[]=$single;}}
-		}
+		}} else {wordbooker_debugger("Image URL ".$single." not valid ",$post->ID,200) ;}
 	}
 	return $newimages;
 }
@@ -1911,7 +1913,7 @@ function display_wordbooker_fb_like() {
 		#var_dump($wordbooker_settings);
 		$like_code='<!-- Wordbooker created FB tags --> <fb:like layout="'.$wordbooker_settings['wordbooker_fblike_button'] .'" show_faces="'.$wordbooker_settings['wordbooker_fblike_faces'].'" action="'.$wordbooker_settings['wordbooker_fblike_action'].'" font="'.$wordbooker_settings['wordbooker_fblike_font'].'" colorscheme="'.$wordbooker_settings['wordbooker_fblike_colorscheme'].'"  href="'.$post_link.'" width="'.$wordbooker_settings["wordbooker_like_width"].'" ';
 if ($wordbooker_settings['wordbooker_fblike_send_combi']=='true' ) { $like_code.=' send="'.$wordbooker_settings['wordbooker_fblike_send'].'" ';}
-$like_code.='"></fb:like> ';}
+$like_code.='></fb:like> ';}
 		echo $like_code;
 	}
 }
@@ -1952,7 +1954,7 @@ function wordbooker_fb_like_inline() {
 		#var_dump($wordbooker_settings);
 		$like_code='<!-- Wordbooker created FB tags --> <fb:like layout="'.$wordbooker_settings['wordbooker_fblike_button'] .'" show_faces="'.$wordbooker_settings['wordbooker_fblike_faces'].'" action="'.$wordbooker_settings['wordbooker_fblike_action'].'" font="'.$wordbooker_settings['wordbooker_fblike_font'].'" colorscheme="'.$wordbooker_settings['wordbooker_fblike_colorscheme'].'"  href="'.$post_link.'" width="'.$wordbooker_settings["wordbooker_like_width"].'" ';
 if ($wordbooker_settings['wordbooker_fblike_send_combi']=='true' ) { $like_code.=' send="'.$wordbooker_settings['wordbooker_fblike_send'].'" ';}
-$like_code.='"></fb:like> ';}
+$like_code.='> </fb:like> ';}
 		return $like_code;
 	}
 }
@@ -2344,7 +2346,7 @@ if (!$newstatus=="publish") { return;}
 	$wb_params = get_post_meta($post->ID, '_wordbooker_options', true); 
 	if (! wordbooker_get_userdata($post->post_author)) { $wb_user_id=$wordbooker_settings["wordbooker_default_author"];}
 	if  ($wordbooker_settings["wordbooker_default_author"] == 0 ) {$wb_user_id=$post->post_author;} else {$wb_user_id=$wordbooker_settings["wordbooker_default_author"];}
-	if ( (stripos($_POST["_wp_http_referer"],'press-this')) || ( stripos($_POST["_wp_http_referer"],'index.php')) || (!isset($_POST['wordbooker_post_edited']) ) ) {
+	if ( (!is_array($wb_params)) &&((stripos($_POST["_wp_http_referer"],'press-this')) || ( stripos($_POST["_wp_http_referer"],'index.php')) || (!isset($_POST['wordbooker_post_edited']) )) ) {
 		wordbooker_debugger("Inside the press this / quick press / remote client block "," ",$post->ID) ;
 		# Get the default publish setting for the post type
 		if($post->post_type=='page'){
@@ -2429,9 +2431,9 @@ function wordbooker_publish($post_id) {
 	global $user_ID, $user_identity, $user_login, $wpdb, $blog_id,$wordbooker_settings;
 	$post = get_post($post_id);
 	# If its less than 10 seconds since we saw this post last we give up
-	$ts=wordbooker_postlogged($post_id,1);
+	#$ts=wordbooker_postlogged($post_id,1);
 	#var_dump($ts);
-	if (isset($ts) && $ts<=60 && $ts>1) {wordbooker_debugger("Publish hook re-fire, ignoring ",$ts,$post_id,99) ; return;}
+	#if (isset($ts) && $ts<=60 && $ts>1) {wordbooker_debugger("Publish hook re-fire, ignoring ",$ts,$post_id,99) ; return;}
 	# Clear down the error / diagnostic logs for this post.
 	#wordbooker_deletefrom_errorlogs($post_id);
 	if ((isset($user_ID) && $user_ID>0) &&  (!current_user_can(WORDBOOKER_MINIMUM_ADMIN_LEVEL))) { wordbooker_debugger("This user doesn't have enough rights"," ",$post_id,99) ; return; }
