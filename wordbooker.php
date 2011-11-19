@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.0.7
+Version: 2.0.8
 */
 
  /*
@@ -41,7 +41,7 @@ if (! isset($wordbooker_settings['wordbooker_extract_length'])) $wordbooker_sett
 
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
-define('WORDBOOKER_CODE_RELEASE','2.0.5 - The Secret Shrine of Icarus ');
+define('WORDBOOKER_CODE_RELEASE','2.0.8 - Mandragora');
 
 # For Troubleshooting 
 define('ADVANCED_DEBUG',false);
@@ -1079,13 +1079,14 @@ function wordbooker_option_support() {
 	   if ($x->name=="Facebook Platform") {$curlstatus=__("Curl is available and can access Facebook - All is OK",'wordbooker');}
   	 curl_close($ch);
 	}
-
+	$new_wb_table_prefix=$wpdb->base_prefix;
+	if (isset ($db_prefix) ) { $new_wb_table_prefix=$db_prefix;}
 	$info = array(	
 		'Wordbooker' => $plug_info['wordbooker/wordbooker.php']['Version'],
 		'Wordbooker ID'=>WORDBOOKER_FB_ID,
 		'Wordbooker Schema' => $wordbooker_settings['schema_vers'],
 		'WordPress' => $wp_version,
-		#'Table prefix' =>$wpdb->base_prefix,
+		'Table prefix' =>$new_wb_table_prefix,
 		 'PHP' => $phpvers,
 		 'PHP Memory Usage (MB)' => memory_get_usage(true)/1024/1024,
 		'JSON Encode' => WORDBOOKER_JSON_ENCODE,
@@ -1194,6 +1195,7 @@ function wordbooker_fbclient_facebook_finish($wbuser, $result, $method,$error_co
 function wordbooker_fbclient_publishaction($wbuser,$post_id) 
 {	
 	global $wordbooker_post_options,$wpdb;
+
 	$wordbooker_settings =wordbooker_options(); 
 	$post = get_post($post_id);
 	$post_link_share = get_permalink($post_id);
@@ -1400,10 +1402,7 @@ function wordbooker_fbclient_publishaction($wbuser,$post_id)
 				'target'=>$wordbooker_post_options['wordbooker_secondary_target'], 
 				 'target_type'=>$wordbooker_post_options['wordbooker_secondary_type'],
 				 'target_active'=>$wordbooker_post_options['wordbooker_secondary_active']);;
-	global $doing_post;
 	$target_types = array('PW' => "",'FW' => __('Fan Wall', 'wordbooker'), 'GW'=>__('Group wall', 'wordbooker'));
-	if(isset($doing_post)) {wordbooker_debugger("Looks like we've already got a post going on","",$post_id,99) ; return;}
-	$doing_post="running";
 	$posting_type=array("1"=>"Wall Post","2"=>"Note","3"=>"Status Update");
 	foreach($posting_array as $posting_target) {
 		$access_token='dummy access token';
@@ -1440,7 +1439,6 @@ function wordbooker_fbclient_publishaction($wbuser,$post_id)
 		} else {wordbooker_debugger("Posting to ".$posting_target['target_id']." target (".$target_name.") not active","",$post_id,99) ; }
 
 	}
-	unset($doing_post);
 }
 
 function wordbooker_strip_images($images)
@@ -2251,7 +2249,9 @@ function wordbooker_translate($text) {
 }
 
 function wordbooker_publish_action($post_id) {
-	global $user_ID, $user_identity, $user_login, $wpdb,$wordbooker_post_options,$blog_id;
+	global $user_ID, $user_identity, $user_login, $wpdb,$wordbooker_post_options,$blog_id,$doing_post;
+	if(isset($doing_post)) {wordbooker_debugger("Looks like we've already got a post going on so we can give up","",$post_id,99) ; return;}
+	$doing_post="running";
 	$x = get_post_meta($post_id, '_wordbooker_options', true); 
 		$post=get_post($post_id);
 	# Get the settings from the post_meta.
@@ -2292,6 +2292,7 @@ function wordbooker_publish_action($post_id) {
 
 	wordbooker_debugger("Calling wordbooker_fbclient_publishaction"," ",$post->ID) ;
 	wordbooker_fbclient_publishaction($wbuser, $post->ID);
+	unset($doing_post);
 	return 30;
 }
 /*

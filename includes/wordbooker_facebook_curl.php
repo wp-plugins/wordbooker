@@ -4,7 +4,7 @@
 Description:  Wordbooker Facebook Interface functions  - using Curl.
 Author: Stephen Atty
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.0.4
+Version: 2.0.8
 */
 
 /*
@@ -89,7 +89,7 @@ function wordbooker_make_curl_call($url) {
         $response = curl_exec($ch);
 	$err_no=curl_errno($ch);
         curl_close($ch);
-	var_dump($response);
+	#var_dump($response);
 #	$response=preg_replace('/"gid":(\d+)/', '"gid":"$1"', $response );
 #	$x=json_decode( preg_replace('/"page_id":(\d+)/', '"page_id":"$1"', $response ) );
 	$x=json_decode( $response);
