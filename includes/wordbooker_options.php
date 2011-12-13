@@ -722,7 +722,8 @@ $arr = array(1=> __("As a Wall Post", 'wordbooker'),  2=> __("As a Note", 'wordb
 		_e("The following people  have contributed language files to allow Wordbooker to be used in different languages : ", 'wordbooker'); 
 echo "<br /></p><div class='wordbooker_support'> <ul>";
 	echo "<li>".__("German",'wordbooker')." - <a href='http://www.xn--rockbr-fua.de'>Sebastian Pertsch</a></li>";	
-	echo "<li>".__("French",'wordbooker')." - <a href='http://www.kocoon-bien-etre.fr'>Christian Denat</a></li>";		
+	echo "<li>".__("French",'wordbooker')." - <a href='http://www.kocoon-bien-etre.fr'>Christian Denat</a></li>";	
+	echo "<li>".__("Russian",'wordbooker')." - <a href='http://wp-lessons.ru/'>Филипп Борисов</a></li>";	
 echo "</ul><br /></div><hr>";
 		wordbooker_option_support();
 	#	echo "</div>";

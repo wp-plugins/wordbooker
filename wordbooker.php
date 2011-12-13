@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.0.8
+Version: 2.0.9
 */
 
  /*
@@ -41,7 +41,7 @@ if (! isset($wordbooker_settings['wordbooker_extract_length'])) $wordbooker_sett
 
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
-define('WORDBOOKER_CODE_RELEASE','2.0.8 - Mandragora');
+define('WORDBOOKER_CODE_RELEASE','2.0.9 - Wake Up and Dance!');
 
 # For Troubleshooting 
 define('ADVANCED_DEBUG',false);
@@ -813,12 +813,8 @@ function wordbooker_option_notices() {
 	if (!function_exists('simplexml_load_string')) {
 		$errormsg .=   __('Your PHP install is missing <code>simplexml_load_string()</code> ','wordbooker')."<br />";
 	}
-
-	if (WORDBOOKER_WP_VERSION < 29) {
-		$errormsg .= sprintf(__('Wordbooker requires <a href="%s">WordPress</a>-2.9 or newer (you appear to be running version %s).', 'wordbooker'),'http://wordpress.org/download/', $wp_version)."<b /r>";
-	} else if (!($options = wordbooker_options()) ||
-			!($wbuser = wordbooker_get_userdata($user_ID)) ||
-			( !$wbuser->access_token)) {
+	$wbuser = wordbooker_get_userdata($user_ID);
+	if (strlen($wbuser->access_token)< 50 ) {
 		$errormsg .=__("Wordbooker needs to be set up", 'wordbooker')."<br />";
 	} else if ($wbuser->facebook_error) {
 		$method = $wbuser->facebook_error['method'];
@@ -846,6 +842,7 @@ function wordbooker_option_notices() {
 <?php
 	}
 }
+
 
 function get_check_session(){
 	global $facebook2,$user_ID;
@@ -1372,7 +1369,8 @@ function wordbooker_fbclient_publishaction($wbuser,$post_id)
 	  'link' => $post_data['post_link'],
 	  'message'=> $post_data['post_attribute'],
 	  'description' => $post_data['post_excerpt'],
-	  'media' => json_encode($images)
+	  'picture'=>$images[0]['src']
+	#  'media' => json_encode($images)
 	);
 	wordbooker_debugger("Post Titled : ",$post_data['post_title'],$post_id,99) ;
 	wordbooker_debugger("Post URL : ",$post_data['post_link'],$post_id,99) ;
