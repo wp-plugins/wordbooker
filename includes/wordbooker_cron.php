@@ -3,12 +3,12 @@
 /**
 Extension Name: Wordbooker Cron
 Extension URI: http://blogs.canalplan.org.uk/steve
-Version: 2.0.4
+Version: 2.1
 Description: Collection of processes that are often handled by wp_cron scheduled jobs
 Author: Steve Atty
 */
 
-function wordbooker_cache_refresh ($user_id) {
+function wordbooker_cache_refresh($user_id) {
 	global $blog_id,$wpdb,$table_prefix,$wordbooker_user_settings_id,$wbooker_user_id;
 	$wbooker_user_id=$user_id;
 	$result = $wpdb->query(' DELETE FROM ' . WORDBOOKER_ERRORLOGS . ' WHERE   blog_id ='.$blog_id.' and (user_ID='.$user_id.' or user_ID=0 ) and post_id<=1');
@@ -24,7 +24,7 @@ function wordbooker_cache_refresh ($user_id) {
 	if (strlen($uid)==0) {
 		wordbooker_debugger("No Cache record for user - getting Logged in user ",$uid,-1,9) ; 
 		try {
-			$x=wordbooker_get_fb_id($wbuser2->access_token);
+			$x=wordbooker_get_fb_id(null,$wbuser2->access_token);
 			$uid=$x->id;
 		}
 		catch (Exception $e) {
@@ -40,10 +40,6 @@ function wordbooker_cache_refresh ($user_id) {
 		wordbooker_debugger("Getting Permisions for : ",$uid,-1,9) ;
 		$ret=wordbooker_fb_pemissions($wbuser2->facebook_id,$wbuser2->access_token); 
 		# If we have an  $ret->error->message then we have a problem
-	#	wordbooker_debugger("Serialized object ",serialize($ret),-1,9) ;
-	#	wordbooker_debugger("Serialized object length ",strlen(serialize($ret)),-1,9) ;
-		#var_dump($ret->error);
-	#	wordbooker_debugger("Object Error ",$ret->error->message,-1,9) ;
 		if($ret->error->message)  {
 		wordbooker_append_to_errorlogs("Your Facebook Session is invalid", "99", $ret->error->message,'',$user_id);
 		wordbooker_delete_user($user_id,1);
@@ -51,7 +47,7 @@ function wordbooker_cache_refresh ($user_id) {
 		}
 		if(strlen(serialize($ret))<20) {wordbooker_debugger("Permissions fetch failed - skipping ",'',-1,9) ;} else {
 		$add_auths=0;
-		$permlist= array(WORDBOOKER_FB_PUBLISH_STREAM,WORDBOOKER_FB_STATUS_UPDATE,WORDBOOKER_FB_READ_STREAM,WORDBOOKER_FB_CREATE_NOTE,WORDBOOKER_FB_PHOTO_UPLOAD,WORDBOOKER_FB_VIDEO_UPLOAD,WORDBOOKER_FB_MANAGE_PAGES,WORDBOOKER_FB_READ_FRIENDS);
+		$permlist= array(WORDBOOKER_FB_PUBLISH_STREAM,'publish_actions',WORDBOOKER_FB_STATUS_UPDATE,WORDBOOKER_FB_READ_STREAM,WORDBOOKER_FB_CREATE_NOTE,WORDBOOKER_FB_PHOTO_UPLOAD,WORDBOOKER_FB_VIDEO_UPLOAD,WORDBOOKER_FB_MANAGE_PAGES,WORDBOOKER_FB_READ_FRIENDS);
 		$key=0;
 		foreach($permlist as $perm){
 		try {
@@ -86,28 +82,7 @@ function wordbooker_cache_refresh ($user_id) {
 		if ( isset ($wordbookuser_setting['wordbooker_status_id']) && $wordbookuser_setting['wordbooker_status_id']!=-100) {$suid=$wordbookuser_setting['wordbooker_status_id'];}
 		$x=explode(":",$suid);
 		$suid=$x[1];
-		wordbooker_debugger("Getting Status for : ",$suid,-1,9) ;
-/*
-		try {
-			$query="SELECT uid,time,message FROM status WHERE uid= $suid limit 1";
-			$fb_status_info=wordbooker_fql_query($query,$wbuser2->access_token);
-		}
-		catch (Exception $e) {
-			$error_msg = $e->getMessage();
-			wordbooker_debugger("Failed to get Status : ",$error_msg,-1,9);;
-		}
-*/
-/*
-		try {
-			$query="SELECT name, url, pic FROM profile WHERE id=$suid ";
-			$fb_profile_info = wordbooker_fql_query($query,$wbuser2->access_token);	
-			if(is_array($fb_profile_info)){$fb_profile_info= $fb_profile_info[0];}
-		} 
-		catch (Exception $e) {
-			$error_msg = $e->getMessage();
-			wordbooker_debugger("Failed to get user info : ",$error_msg,-1,9);
-		}
-*/
+
 		wordbooker_debugger("Getting Pages administered by : ",$uid,-1,9) ;			
 		try {
 			$query="SELECT name, page_url, page_id FROM page WHERE page_id IN (SELECT page_id FROM page_admin WHERE uid= $uid )";
@@ -207,19 +182,6 @@ function wordbooker_cache_refresh ($user_id) {
 		 }
 
 		
-		
-	#	try {
-	#		wordbooker_debugger("Checking if user is using wordbooker : ",$error_msg,-1,9);
-	#		$query="Select is_app_user FROM user where uid=$uid";
-	#		$fb_app_info = wordbooker_fql_query($query,$wbuser2->access_token);
-	#	} 
-	#	catch (Exception $e) 
-	#	{
-	#		$error_msg = $e->getMessage();
-	#		wordbooker_debugger("Failed to get app_user inf : ",$error_msg,-1,9);
-	#	}
-
-		
 		$all_pages_groups=@array_merge($all_pages,$all_groups);
 		$encoded_names=str_replace('\\','\\\\',serialize($all_pages_groups));
 /*
@@ -271,8 +233,6 @@ function wordbooker_cache_refresh ($user_id) {
 		$fb_status_info=wordbooker_status_feed($suid,$wbuser2->access_token);
 		foreach($fb_status_info->data as $fbstat) {
 			if(!is_null($fbstat->message)){
-		#	var_dump($fbstat->from->id);
-			#	echo "<br /><br />";
 				if ($suid==$fbstat->from->id) {
 	
 					$status_message=$fbstat->message;
@@ -281,12 +241,10 @@ function wordbooker_cache_refresh ($user_id) {
 				}
 			 }
 		}
-		$picture = 'https://graph.facebook.com/'.$suid.'/picture?type=large';
-		#var_dump($picture);
+		$picture = 'https://graph.facebook.com/'.$suid.'/picture?type=normal';
 		$fb_profile_info=wordbooker_get_fb_id($suid,$wbuser2->access_token);
 		wordbooker_debugger("Setting Status Name as  : ",mysql_real_escape_string($fb_profile_info->name),-1,9) ;
 		$sql="insert into ".WORDBOOKER_USERSTATUS." set name='".mysql_real_escape_string($fb_profile_info->name)."'";
-		#if(is_array($fb_status_info)) {$fb_status_info=$fb_status_info[0];}
 			if (isset($status_time)) {
 				if (stristr($status_message,"[[PV]]")) {
 					wordbooker_debugger("Found [[PV]] - not updating status"," ",-1,9);
@@ -318,7 +276,6 @@ function wordbooker_cache_refresh ($user_id) {
 			$sql.=", url='".mysql_real_escape_string($fb_profile_info->link)."'";
 			$sql.=", pic='".mysql_real_escape_string($picture)."'";
 		}
-	#	var_dump($sql);
 		$result = $wpdb->get_results($sql);
 		$real_user=wordbooker_get_fb_id($uid,$wbuser2->access_token);
 		wordbooker_debugger("Setting user name as  : ",mysql_real_escape_string($real_user->name),-1,9) ;
@@ -328,7 +285,6 @@ function wordbooker_cache_refresh ($user_id) {
 		$sql.=", pages= '".mysql_real_escape_string($encoded_names)."'";
 		$sql.=", use_facebook=1";
 		$sql.="  where user_ID=".$user_id." and blog_id=".$blog_id;
-		#var_dump($sql);
 		
 		$result = $wpdb->get_results($sql);
 	}

@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Posting Options 
 Extension URI: http://wordbooker.tty.org.uk
-Version: 2.0.4
+Version: 2.1
 Description: Posting Options for the WordBooker Plugin
 Author: Steve Atty
 */
@@ -60,8 +60,6 @@ function wordbooker_inner_custom_box() {
 	if(is_array($post_meta)) {
 		$wordbooker_settings=$post_meta;
 	}
-	#var_dump($wordbooker_settings);
-#var_dump($wordbooker_settings["wordbooker_post_edited"]);
 	$post_pub_prompt=__("Publish this post to Facebook", 'wordbooker');
 	if($post->post_type=='page'){
 		$publish=$wordbooker_settings["wordbooker_publish_page_default"];		
@@ -72,12 +70,16 @@ function wordbooker_inner_custom_box() {
 			$post_pub_prompt=__("Publish this post to Facebook", 'wordbooker');
 	}
 
-	#var_dump($post->post_status);
 	if($wordbooker_settings["wordbooker_post_edited"]!='yes') {$wordbooker_settings["wordbooker_publish_default"]=$publish;}
 	if ($post->post_status=="publish") {$wordbooker_settings["wordbooker_publish_default"]='';}
+	
+		if ( isset($wordbooker_settings['wordbooker_disabled'])) { echo "<div align='center'><b> ".__('WARNING : Wordbooker is DISABLED','wordbooker')."</b></div>";} else {
+	if ( isset($wordbooker_settings['wordbooker_fake_publish'])) { echo "<div align='center'><b> ".__('WARNING : Wordbooker is in TEST mode - NO Posts will be made to Facebook','wordbooker')."</b></div>";}}
+echo "<br />";
 	if (wordbooker_get_userdata($user_ID)) {
 
 		echo __("The following options override the defaults set on the options page", 'wordbooker')."<br /><br />";
+
 		$sql="select wpu.ID,wpu.display_name,facebook_id from $wpdb->users wpu,".WORDBOOKER_USERDATA." wud where wpu.ID=wud.user_id and wud.user_id=".$user_ID;
 		$wb_users = $wpdb->get_results($sql);
 		# Get the list of pages this user is an admin for
@@ -102,7 +104,7 @@ if (count($fanpages)>1){
 			}
 			echo $option;
 			echo '</select> &nbsp;';
-	$arr = array(1=> __("As a Wall Post", 'wordbooker'),  2=> __("As a Note", 'wordbooker'), 3=> __("As a Status Update" , 'wordbooker')  );
+	$arr = array(1=> __("As a Wall Post", 'wordbooker'),  2=> __("As a Note", 'wordbooker'), 3=> __("As a Status Update" , 'wordbooker'), 4=> __("As a Link" , 'wordbooker')   );
 	echo '<select id="wordbooker_primary_type" name="wordbooker_primary_type"  >';
 	foreach ($arr as $i => $value) {
        		 if ($i==$wordbooker_settings['wordbooker_primary_type']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
@@ -116,7 +118,7 @@ if (count($fanpages)>1){
 	echo '<p><label for="wb_primary_target">'.__('Post to my Personal Wall', 'wordbooker').' : </label> ';
 	echo '<input type="hidden" name="wordbooker_primary_target" value="PW:'.$wb_users[0]->facebook_id.'" />';
 
-$arr = array(1=> __("As a Wall Post", 'wordbooker'),  2=> __("As a Note", 'wordbooker'), 3=> __("As a Status Update" , 'wordbooker')  );
+$arr = array(1=> __("As a Wall Post", 'wordbooker'),  2=> __("As a Note", 'wordbooker'), 3=> __("As a Status Update" , 'wordbooker'),4=> __("As a Link" , 'wordbooker')   );
 	echo '<select id="wordbooker_primary_type" name="wordbooker_primary_type"  >';
 	foreach ($arr as $i => $value) {
        		 if ($i==$wordbooker_settings['wordbooker_primary_type']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
@@ -215,10 +217,9 @@ $arr = array(1=> __("Yes", 'wordbooker'),  2=> __("No", 'wordbooker') );
 		}
 
 
-		if ($wordbooker_global_settings['wordbooker_comment_handling']=="1"){
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_comment_get" '.$checked_flag[$wordbooker_settings["wordbooker_comment_get"]].' > '.__('Fetch comments from Facebook for this post', 'wordbooker').'<br />';}
-		if ($wordbooker_global_settings['wordbooker_comment_handling']=="2"){
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_use_facebook_comments" '.$checked_flag[$wordbooker_settings["wordbooker_use_facebook_comments"]].' > '.__('Enable Facebook Comments for this post', 'wordbooker').'<br />';}
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_comment_put" '.$checked_flag[$wordbooker_settings["wordbooker_comment_put"]].' > '.__('Push Comments from this post to Facebook', 'wordbooker').'<br />';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_comment_get" '.$checked_flag[$wordbooker_settings["wordbooker_comment_get"]].' > '.__('Pull Comments from Facebook for this post', 'wordbooker').'<br />';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_use_facebook_comments" '.$checked_flag[$wordbooker_settings["wordbooker_use_facebook_comments"]].' > '.__('Enable Facebook Comments for this post', 'wordbooker').'<br />';
 	}  else {
 echo "<p>".__('Wordbooker Blog level settings are in force','wordbooker')."<br /></p>";
 

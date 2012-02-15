@@ -3,7 +3,7 @@
 /**
 Extension Name: Wordbooker Options 
 Extension URI: http://wordbooker.tty.org.uk
-Version: 2.0.4
+Version: 2.1
 Description: Advanced Options for the WordBooker Plugin
 Author: Steve Atty
 */
@@ -14,7 +14,11 @@ function wordbooker_option_init(){
 }
 
 function worbooker_validate_options($options) {
+	global $user_ID;
 	# Do they want to reset? If so we reset the options and let WordPress do the business for us!
+	if (isset( $_POST["mcp"] )) {
+	 wordbooker_poll_comments($user_ID);
+	}
 	if (isset( $_POST["RSD"] ))  {
 		$options["wordbooker_default_author"]=0;
 		$options["wordbooker_republish_time_frame"]=10;
@@ -32,6 +36,9 @@ function worbooker_validate_options($options) {
 		$options["wordbooker_search_this_header"]=null;
 		$options["wordbooker_comment_approve"]=null;
 		$options["wordbooker_comment_push"]=null;
+		$options["wordbooker_comment_pull"]=null;
+		$options["wordbooker_comment_put"]=null;
+		$options["wordbooker_comment_get"]=null;
 		$options["wordbooker_comment_poll"]=null;
 		$options["wordbooker_publish_no_user"]=null;
 		$options["wordbooker_advanced_diagnostics"]=null;
@@ -73,6 +80,16 @@ function wordbooker_option_manager() {
 	echo '<div class="wrap">';
 	echo '<h2>'.WORDBOOKER_APPLICATION_NAME." ".__('Options Page','wordbooker').' </h2>';
 	if ( isset ($_POST["reset_user_config"])) {wordbooker_delete_userdata(); }
+	$wordbooker_settings=wordbooker_options();
+	if ( isset($wordbooker_settings['wordbooker_disabled'])) { echo "<div align='center'><b> ".__('WARNING : Wordbooker is DISABLED','wordbooker')."</b></div>";} else {
+	if ( isset($wordbooker_settings['wordbooker_fake_publish'])) { echo "<div align='center'><b> ".__('WARNING : Wordbooker is in TEST mode - NO Posts will be made to Facebook','wordbooker')."</b></div>";}}
+	if ($wordbooker_settings['wordbooker_comment_cron']!=wp_get_schedule('wb_comment_job')) {
+	$dummy=wp_clear_scheduled_hook('wb_comment_job');
+	$sql="Delete from ".WORDBOOKER_POSTCOMMENTS." where in_out='stat'";
+	$wpdb->query($sql);
+	if ( ($wordbooker_settings['wordbooker_comment_cron']=='Never') || ($wordbooker_settings['wordbooker_comment_cron']=='Manual')){} else {
+	$dummy=wp_schedule_event(time(), $wordbooker_settings['wordbooker_comment_cron'], 'wb_comment_job');}
+	} 
 	//Set some defaults:
 	# If the closedboxes are not set then lets set them up - General Options open, all the rest closed
 	$wordbooker_settings=wordbooker_options();
@@ -159,10 +176,10 @@ function wordbooker_option_manager() {
 function wordbooker_blog_level_options() {
 		global $ol_flash, $wordbooker_settings, $_POST, $wp_rewrite,$user_ID,$wpdb, $blog_id,$wordbooker_user_settings_id,$wordbooker_hook;
 
-		add_meta_box('wb_opt1', 'General Posting Options',  'wordbooker_blog_posting_options', $wordbooker_hook, 'normal', 'core');
-		add_meta_box('wb_opt2', 'Facebook Like and Share Options',  'wordbooker_blog_facebook_options', $wordbooker_hook, 'normal', 'core');
-		add_meta_box('wb_opt3', 'Comment Handling Options',  'wordbooker_blog_comment_options', $wordbooker_hook, 'normal', 'core');
-		add_meta_box('wb_opt4', 'Advanced Options',  'wordbooker_blog_advanced_options', $wordbooker_hook, 'normal', 'core');
+		add_meta_box('wb_opt1', __('General Posting Options','wordbooker'),  'wordbooker_blog_posting_options', $wordbooker_hook, 'normal', 'core');
+		add_meta_box('wb_opt2', __('Facebook Like and Share Options','wordbooker'),   'wordbooker_blog_facebook_options', $wordbooker_hook, 'normal', 'core');
+		add_meta_box('wb_opt3', __('Comment Handling Options', 'wordbooker'),  'wordbooker_blog_comment_options', $wordbooker_hook, 'normal', 'core');
+		add_meta_box('wb_opt4', __('Advanced Options','wordbooker'),   'wordbooker_blog_advanced_options', $wordbooker_hook, 'normal', 'core');
 
 		echo'<p><hr><h3>';
 		_e('Blog Level Settings', 'wordbooker');
@@ -364,14 +381,19 @@ function wordbooker_blog_facebook_options() {
 		echo '<label for="wb_facebook_like">&nbsp;'.__("Don't show Facebook Share button on Sticky Posts", 'wordbooker'). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_no_share_stick]" '.$checked_flag[$wordbooker_settings["wordbooker_no_share_stick"]].' ><br />';
 		echo "<hr><br />";
-		echo '<label for="wb_facebook_like">'.__("Include a Facebook Read button in blog", 'wordbooker'). ' : </label>';
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_read_button]" '.$checked_flag[$wordbooker_settings["wordbooker_read_button"]].' ><br />';
+		echo '<label for="wb_facebook_gravatars">'.__("Do not replace Gravtars with Facebook Photos", 'wordbooker'). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_no_facebook_gravatars]" '.$checked_flag[$wordbooker_settings["wordbooker_no_facebook_gravatars"]].' ><br />';
 
-		echo '<label for="wb_fbread_location">&nbsp;'.__('Facebook Read - Display Button ', 'wordbooker').' :</label> <select id="wordbooker_fblike_location" name="wordbooker_settings[wordbooker_fbread_location]"  >';
+		echo "<hr><br />";
+		echo '<label for="wb_facebook_time">'.__("Use Frictionless sharing / Timeline instead of Share", 'wordbooker'). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_time_button]" '.$checked_flag[$wordbooker_settings["wordbooker_time_button"]].' ><br />';
+/*
+		echo '<label for="wb_fbread_location">&nbsp;'.__('Facebook Read - Display Button ', 'wordbooker').' :</label> <select id="wordbooker_fbread_location" name="wordbooker_settings[wordbooker_fbread_location]"  >';
 		foreach ($fblike_location as $i => $value) {
 			if ($i==$wordbooker_settings['wordbooker_fbread_location']){ print '<option selected="yes" value="'.$i.'" >'.$fblike_location[$i].'</option>';}
 		       else {print '<option value="'.$i.'" >'.$fblike_location[$i].'</option>';}}
 		echo "</select><br />";
+*/
 
 
 }
@@ -381,15 +403,45 @@ function wordbooker_blog_comment_options() {
 		$checked_flag=array('on'=>'checked','off'=>'');
 		$fbcomment_colorscheme=array('dark'=>'Dark','light'=>'Light');
 
-		echo '<label for="wb_comment_handling">'.__("Comment handling", 'wordbooker'). ' : </label> <select id="wordbooker_comment_handling" name="wordbooker_settings[wordbooker_comment_handling]" > ';
+		echo "<b>".__('Wordpress Comment handling Options','wordbooker')."</b><br />";
+		$scheds1['Never'] = array('interval'   => 999999999,'display'   => __('Never ', 'wordbooker'),);
+		$scheds1['Manual'] = array('interval'   => 999999999,'display'   => __('Manual Polling ', 'wordbooker'),);
+		$scheds2=wp_get_schedules();
+		$scheds=array_merge($scheds1,$scheds2);
 
-		$arr = array(1=> __("Use Wordpress Comments and Wordbooker comment handling", 'wordbooker'), 2=> __("Use Facebook Comments", 'wordbooker'));
-                foreach ($arr as $i => $value) {
-                        if ($i==$wordbooker_settings['wordbooker_comment_handling']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
-                       else {echo '<option value="'.$i.'" >'.$arr[$i].'</option>';}
+		echo '<label for="wb_comment_cron">'.__('Process Comments  ', 'wordbooker').' :</label> <select id="wordbooker_comment_cron" name="wordbooker_settings[wordbooker_comment_cron]"  >';
+		foreach(array_keys($scheds) as $ss) {
+			if ($ss==$wordbooker_settings['wordbooker_comment_cron']){ print '<option selected="yes" value="'.$ss.'" >'.$scheds[$ss]['display'].'&nbsp;</option>';}
+		       else {print '<option value="'.$ss.'" >'.$scheds[$ss]['display'].'&nbsp;</option>';}}
+		echo "</select> ";
+		if ($wordbooker_settings['wordbooker_comment_cron']!='Never'){echo" &nbsp;&nbsp;(".__("Next Scheduled fetch is in", 'wordbooker').' : '.date('H:i',(wp_next_scheduled('wb_comment_job') - time ())).')';}
+		echo '<br /><label for="wb_publish_comment_handling">'.__("Enable Comment processing", 'wordbooker'). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_comment_handling]" '.$checked_flag[$wordbooker_settings["wordbooker_comment_handling"]].' /><br />';
+		echo '<label for="wb_import_comment">&nbsp;&nbsp;'.__("Disable Comment Importing", 'wordbooker'). ': </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_comment_pul]" '.$checked_flag[$wordbooker_settings["wordbooker_comment_pull"]]. '/> <br />';
+		echo '<label for="wb_import_comment">&nbsp;&nbsp;'.__("Disable Comment Exporting", 'wordbooker'). ': </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_comment_push]" '.$checked_flag[$wordbooker_settings["wordbooker_comment_push"]]. '/> <br />';
+		if (!isset($wordbooker_settings["wordbooker_comment_attribute"])) {
+		$wordbooker_settings["wordbooker_comment_attribute"]=__("[Comment imported from blog]",'wordbooker');
 		}
-                echo "</select><br />";
-		if ($wordbooker_settings['wordbooker_comment_handling']=='2'){
+		echo '<label for="wb_cooment_attribute">'.__('Comment Tag', 'wordbooker').' : </label>';
+		echo '<INPUT NAME="wordbooker_settings[wordbooker_comment_attribute]" size=60 maxlength=240 value="'.stripslashes($wordbooker_settings["wordbooker_comment_attribute"]).'"><br />';
+		if(strlen($wordbooker_settings['wordbooker_comment_post_format'])<2) {$wordbooker_settings['wordbooker_comment_post_format']="%tag%";}
+		echo '<p class="DataForm"><label for="wb_cooment_post_format">'.__('Facebook Comment Structure', 'wordbooker').' : </label>';
+echo "<TEXTAREA NAME='wordbooker_settings[wordbooker_comment_post_format]' ROWS=8 COLS=60>".stripslashes($wordbooker_settings["wordbooker_comment_post_format"])."</TEXTAREA><br /></p>" ;
+		echo '<label for="wb_comment_email">'.__("Assign this email address to comments", 'wordbooker'). ' :</label>';
+		echo' <INPUT NAME="wordbooker_settings[wordbooker_comment_email]" size=60 maxlength=60 value="'.stripslashes($wordbooker_settings["wordbooker_comment_email"]).'"> <br />';
+		echo '<label for="wb_import_comment">'.__("Import Comments from Facebook for new Wordbooker Posts", 'wordbooker'). ': </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_comment_get]" '.$checked_flag[$wordbooker_settings["wordbooker_comment_get"]]. '/> <br />';
+		echo '<label for="wb_publish_comment_push">'.__("Push Comments up to Facebook for new posts", 'wordbooker'). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_comment_put]" '.$checked_flag[$wordbooker_settings["wordbooker_comment_put"]].' /> <br />  ';
+		echo '<label for="wb_publish_comment_approve">'.__("Auto Approve imported comments", 'wordbooker'). ' :</label> ';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_comment_approve]" '.$checked_flag[$wordbooker_settings["wordbooker_comment_approve"]].' /><br />';
+		if ($wordbooker_settings['wordbooker_comment_cron']!='Never') {
+		echo '<br /><input type="submit" value="'.__("Run Comment Handling Now", 'wordbooker').'" name="mcp" class="button-primary"  />';
+		}
+
+		echo "<hr><br /><b>".__('Facebook Comment Box Options','wordbooker')."</b><br /><br />";
 		echo '<label for="wb_use_fb_comments">'.__("Enable Facebook Comment handling  ", 'wordbooker'). ' : </label> ';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_use_fb_comments]" '.$checked_flag[$wordbooker_settings["wordbooker_use_fb_comments"]].' /> <br />';
 		$fb_comment_location=array('bottom'=>__('Created in line below post','wordbooker'),'coded'=>__('Defined by theme template','wordbooker'),'tagged'=>__('Defined by Tag in post','wordbooker'));
@@ -430,35 +482,19 @@ function wordbooker_blog_comment_options() {
 
 		echo '<label for="wordbooker_use_facebook_comments">'.__('Facebook comment handling should be enabled on new posts', 'wordbooker').' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_use_facebook_comments]" '.$checked_flag[$wordbooker_settings["wordbooker_use_facebook_comments"]].'><br />';
-} 
-		if ($wordbooker_settings['wordbooker_comment_handling']=='1'){
-
-		echo '<label for="wb_import_comment">'.__("Import Comments from Facebook for new Wordbooker Posts", 'wordbooker'). ': </label>';
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_comment_get]" '.$checked_flag[$wordbooker_settings["wordbooker_comment_get"]]. '/> <br />';
-		echo '<label for="wb_publish_comment_push">'.__("Push Comments up to Facebook for new posts", 'wordbooker'). ' : </label>';
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_comment_push]" '.$checked_flag[$wordbooker_settings["wordbooker_comment_push"]].' /> <br />  ';
-
-		echo '<label for="wb_publish_comment_handling">'.__("Enable Comment processing", 'wordbooker'). ' : </label>';
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_comment_handling]" '.$checked_flag[$wordbooker_settings["wordbooker_comment_handling"]].' /> ( '.__("Next Scheduled fetch is in", 'wordbooker').' : '.date('i',(wp_next_scheduled('wb_cron_job') - time ())).' minute(s) )<br />';
-
-		echo '<label for="wb_publish_comment_approve">'.__("Auto Approve imported comments", 'wordbooker'). ' :</label> ';
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_comment_approve]" '.$checked_flag[$wordbooker_settings["wordbooker_comment_approve"]].' /><br />';
-
-if(ADVANCED_DEBUG) {
-		echo '<label for="wb_comment_poll">'.__("Force Poll for Comments when visiting this screen", 'wordbooker'). ' : </label>';
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_comment_poll]" '.$checked_flag[$wordbooker_settings["wordbooker_comment_poll"]].' /> <br />';
-}
-		echo '<label for="wb_comment_email">'.__("Assign this email address to comments", 'wordbooker'). ' :</label>';
-		echo' <INPUT NAME="wordbooker_settings[wordbooker_comment_email]" size=60 maxlength=60 value="'.stripslashes($wordbooker_settings["wordbooker_comment_email"]).'"> <br />';
-
-		}
 		
 }
 
 
 function wordbooker_blog_advanced_options() {
-		global $ol_flash, $wordbooker_settings, $_POST, $wp_rewrite,$user_ID,$wpdb, $blog_id,$wordbooker_user_settings_id;
+		global $ol_flash, $wordbooker_settings, $_POST, $wp_rewrite,$user_ID,$wpdb, $blog_id,$wordbooker_user_settings_id,$table_prefix;
 		$checked_flag=array('on'=>'checked','off'=>'');
+		$admin_users=get_users(array('role'=>'administrator'));;
+		echo '<label for="wordbooker_diagnostic admin">'.__('User who should get Admin level diagnostics', 'wordbooker').' :</label> <select id="wordbooker_diagnostic_admin" name="wordbooker_settings[wordbooker_diagnostic_admin]"  >';
+		foreach ($admin_users as $adminuser) {
+			if ($adminuser->ID==$wordbooker_settings['wordbooker_diagnostic_admin']){ print '<option selected="yes" value="'.$adminuser->ID.'" >'.$adminuser->display_name.' ( '.$adminuser->user_login.' ) </option>';}
+		       else {print '<option value="'.$adminuser->ID.'" >'.$adminuser->display_name.' ( '.$adminuser->user_login.' ) </option>';}}
+		echo "</select><br />";
 		if (!isset($wordbooker_settings['wordbooker_advanced_diagnostics_level'])) {$wordbooker_settings['wordbooker_advanced_diagnostics_level']=10;}
 		$arr = array(0=> __("Show Everything and I mean everything",'wordbooker'),10=> __("Show everything but Cache Diagnostics",'wordbooker'),20=> "50",40=> "100",60=> "120",80=> "150",90=> __("Show result of major actions",'wordbooker'),99 => __("Don't show anything apart from Fatal errors",'wordbooker'),999 => __("Disabled (Show nothing at all)",'wordbooker'));
 		echo '<p><label for="wb_advanced_diagnostics_level">'.__("Post Diagnostics display level", 'wordbooker'). ' : </label><select id="wordbooker_advanced_diagnostics_level" name="wordbooker_settings[wordbooker_advanced_diagnostics_level]"  >';
@@ -475,10 +511,12 @@ function wordbooker_blog_advanced_options() {
 		echo '<label for="wb_wordbooker_fb_rec_act">'.__("Include FB Recent activity on Wordbooker Options page", 'wordbooker'). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_fb_rec_act]" '.$checked_flag[$wordbooker_settings["wordbooker_fb_rec_act"]].' ></P><p>';
 
-	
 		echo '<label for="wb_facebook_iframe">'.__("Use Iframes instead of FBXML to render FB features", 'wordbooker'). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_iframe]" '.$checked_flag[$wordbooker_settings["wordbooker_iframe"]].' ></P><p>';
 
+		echo '<label for="wordbooker_use_url_not_slug">'.__("Use Site URL not Blog Description in Wall Posts", 'wordbooker'). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_use_url_not_slug]" '.$checked_flag[$wordbooker_settings["wordbooker_use_url_not_slug"]].' ></P><p>';
+	
 		echo '<label for="wb_meta_tag_scan">'.__("Check the following Custom Post Meta tags for images", 'wordbooker'). ' :</label>';
 		echo' <INPUT NAME="wordbooker_settings[wordbooker_meta_tag_scan]" size=60 maxlength=129 value="'.stripslashes($wordbooker_settings["wordbooker_meta_tag_scan"]).'"/></P><p> ';
 
@@ -506,8 +544,7 @@ function wordbooker_blog_advanced_options() {
 		
 }
 function wordbooker_user_level_options(){
-		global $ol_flash, $wordbooker_settings, $_POST, $wp_rewrite,$user_ID,$wpdb, $blog_id,$wordbooker_user_settings_id,$user_ID,$wordbooker_hook;
-		#$wordbooker_user_settings_id="wordbookuser".$blog_id;
+		global $ol_flash, $wordbooker_settings, $_POST, $wp_rewrite,$user_ID,$wpdb, $blog_id,$wordbooker_user_settings_id,$user_ID,$wordbooker_hook;id;
 		# USER LEVEL OPTIONS
 		$checked_flag=array('on'=>'checked','off'=>'');
 		$wordbookeruser_settings=get_usermeta($user_ID,$wordbooker_user_settings_id);
@@ -569,7 +606,7 @@ function wordbooker_user_level_options(){
 			}
 			echo $option;
 			echo '</select> &nbsp;';
-	$arr = array(1=> __("As a Wall Post", 'wordbooker'),  2=> __("As a Note", 'wordbooker'), 3=> __("As a Status Update" , 'wordbooker')  );
+		$arr = array(1=> __("As a Wall Post", 'wordbooker'),  2=> __("As a Note", 'wordbooker'), 3=> __("As a Status Update" , 'wordbooker'), 4=> __("As a Link" , 'wordbooker')   );
 	echo '<select id="wordbooker_primary_type" name="wordbooker_primary_type"  >';
 	foreach ($arr as $i => $value) {
        		 if ($i==$wordbookeruser_settings['wordbooker_primary_type']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
@@ -583,7 +620,6 @@ function wordbooker_user_level_options(){
 	echo '<p><label for="wb_primary_target">'.__('Post to my Personal Wall', 'wordbooker').' : </label> ';
 	echo '<input type="hidden" name="wordbooker_primary_target" value="PW:'.$wb_users[0]->facebook_id.'" />';
 
-$arr = array(1=> __("As a Wall Post", 'wordbooker'),  2=> __("As a Note", 'wordbooker'), 3=> __("As a Status Update" , 'wordbooker')  );
 	echo '<select id="wordbooker_primary_type" name="wordbooker_primary_type"  >';
 	foreach ($arr as $i => $value) {
        		 if ($i==$wordbookeruser_settings['wordbooker_primary_type']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
@@ -663,8 +699,6 @@ $arr = array(1=> __("As a Wall Post", 'wordbooker'),  2=> __("As a Note", 'wordb
 		echo '<label for="wb_status_id">'.__('Show Status for', 'wordbooker').' : </label> <select name="wordbooker_status_id" ><option selected="yes" value=-100>'.__('My Own Profile', 'wordbooker').'&nbsp;&nbsp;</option>';
 		$option="";
 		if ($have_fan_pages==1) {	
-			#var_dump($wordbookeruser_settings);
-			#var_dump($fanpages);
 			foreach ($fanpages as $fan_page) {
 				if(substr($fan_page[id],0,2)!="GW"){
 				if ($fan_page[id]==$wordbookeruser_settings["wordbooker_status_id"] ) {$option .= '<option selected="yes" value='.$fan_page[id].'>';} else { $option .= '<option value='.$fan_page[id].'>';}
@@ -688,7 +722,6 @@ $arr = array(1=> __("As a Wall Post", 'wordbooker'),  2=> __("As a Note", 'wordb
 		wordbooker_blog_level_options();
 		wordbooker_user_level_options();
 		wordbooker_render_errorlogs();
-		#wordbooker_render_diagnosticlogs();
 		wordbooker_status($user_ID);
 		wordbooker_option_status($wbuser);
 
@@ -719,14 +752,13 @@ $arr = array(1=> __("As a Wall Post", 'wordbooker'),  2=> __("As a Note", 'wordb
 		wordbooker_contributed(1);
 
 		echo '<br /><p>';
-		_e("The following people  have contributed language files to allow Wordbooker to be used in different languages : ", 'wordbooker'); 
+		_e("The following people have contributed language files to allow Wordbooker to be used in different languages : ", 'wordbooker'); 
 echo "<br /></p><div class='wordbooker_support'> <ul>";
 	echo "<li>".__("German",'wordbooker')." - <a href='http://www.xn--rockbr-fua.de'>Sebastian Pertsch</a></li>";	
 	echo "<li>".__("French",'wordbooker')." - <a href='http://www.kocoon-bien-etre.fr'>Christian Denat</a></li>";	
-	echo "<li>".__("Russian",'wordbooker')." - <a href='http://wp-lessons.ru/'>Филипп Борисов</a></li>";	
+	echo "<li>".__("Russian",'wordbooker')." - <a href='http://wp-lessons.ru/'>Филипп Борисов</a></li>";			
 echo "</ul><br /></div><hr>";
 		wordbooker_option_support();
-	#	echo "</div>";
 ?>
 	<script type="text/javascript">
 		//<![CDATA[
@@ -759,7 +791,6 @@ function wordbooker_admin_menu() {
 	wp_enqueue_script('common');
 	wp_enqueue_script('wp-lists');
 	wp_enqueue_script('postbox');
-	#wp_enqueue_script('post');
 	$wordbooker_hook = add_options_page(WORDBOOKER_APPLICATION_NAME.' Option Manager', WORDBOOKER_APPLICATION_NAME,WORDBOOKER_MINIMUM_ADMIN_LEVEL, WORDBOOKER_SETTINGS_PAGENAME,'wordbooker_option_manager');
 	add_action("load-$wordbooker_hook", 'wordbooker_admin_load');
 	add_action("admin_head-$wordbooker_hook", 'wordbooker_admin_head');
@@ -769,7 +800,6 @@ function wordbooker_admin_menu() {
 add_action('admin_init', 'wordbooker_option_init' );
 add_action('admin_menu', 'wordbooker_admin_menu');
 
-#require_once('includes/meta-boxes.php');
 
 
 include("wordbooker_posting_options.php");

@@ -3,16 +3,16 @@
 Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
 Requires at least: 2.9
-Tested up to: 3.3
-Stable tag: 2.0.9
+Tested up to: 3.3.1
+Stable tag: 2.1.0
 
-This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for. The base release of Version 2 DOES NOT support comment handling - this is because V2 had to be pushed out to meet deadlines imposed by Facebook concerning application authorisation. Comment handling will be added in the first major 2.1 release.
+This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for. 
 
 == Description ==
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall / Fan Page Wall / Group Wall. You can Post as an Extract, A Status Update or even as a Note. 
 
-NOTE : You MUST have the PHP Curl module enabled and configured in such a way that it can connect to the Facebook Servers. If you do not have curl OR if your hosting company block curl access to externals sites you cannot use this plugin.
+NOTE : You MUST have the PHP Curl module enabled and configured in such a way that it can connect to the Facebook Servers on a secure HTTP connection. If you do not have curl OR if your hosting company block curl access to externals sites you cannot use this plugin.
 
 
 == IMPORTANT ==  
@@ -22,7 +22,7 @@ Wordbooker 2.0 is a completely new implementation of most of the original Wordbo
 
 == Upgrading Wordbooker from Version 1.x ==
 
-If you are upgrading from version 1.x then DO NOT deactivate the plugin before you upgrade as this will remove all the settings and remove the tables which means you will loose all your posting/comment history. To upgrade Wordbooker to Version 2 you should download the latest version of the plugin, delete the wordbooker folder on the server and then then upload the wordbooker folder into your wp-plugins folder. Once you've done that you need to go into the Plugins menu and DE-ACTIVATE and the RE-ACTIVATE Wordbooker. People running Networked Blogs can do a Network Activation at this point. PLEASE NOTE:  Version 2 does not, at the moment import information about posts made in Version 1.x but I am planning to add it as an option in a future release.
+If you are upgrading from version 1.x then DO NOT deactivate the plugin before you upgrade as this will remove all the settings and remove the tables which means you will loose all your posting/comment history. To upgrade Wordbooker to Version 2 you should download the latest version of the plugin, delete the wordbooker folder on the server and then then upload the wordbooker folder into your wp-plugins folder. Once you've done that you need to go into the Plugins menu and DE-ACTIVATE and the RE-ACTIVATE Wordbooker. People running Networked Blogs can do a Network Activation at this point. PLEASE NOTE:  Version 2 does not, at the moment import information about posts made in Version 1.x but I am looking to add it as an option in a future release if there is a demand for it.
 
 
 == Installation ==
@@ -116,13 +116,30 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 == Changelog ==
 
+= Version 2.1.0 15/02/2012 = 
+- Added comment handling - too many individual changes to comment
+- Added a function to delete Wordbooker data when a post is deleted.
+- Fixed a long standing bug relating to the og:image tag when posts have no image
+- Fixed a long standing bug relating to the og:locale tag - this is now populated with the Wordpress Language value.
+- Removed lots of old obsolete commented out debug code.
+- Fixed a bug in the logic that identifies malformed image urls.
+- Added option to use blog url or blog tag line under the post title in wall posts
+- Added New Post Type - "Share" to the list of available post types.
+- Fixed a bug with post settings being lost when posts were scheduled
+- Fixed a bug where scheduled post diagnostics got recorded against the wrong user.
+- Added an option to allow the user id that "admin" diagnostic messages should be recorded against
+- Added code to remove wordbooker_channel.php - a file that was added but never used because FB never proved its worth.
+- Added a feature to allow Facebook User images to replace Gravatars where a FB URL is detected.
+- Added PHP Memory limit line to the support information block
+- Added Curl SSL Timeout lines to try to make Wordbooker more reslient to lousy Facebook API performance
+
+
 = Version 2.0.9 12/12/2011 =
 - Finally fixed (I hope) the blank image problem for posts with no obvious image.
 - Fixed a bug relating to scraping when og tag production is turned off.
 - Added Russian Language files (Thanks Филипп Борисов for the hard work)
 - Recoded the cron job to reduce FQL load.
 - Checked for compatability with Wordpress 3.3
-
 
 = Version 2.0.8 19/11/2011 =
 - Commented out a debug statement that got left behind.

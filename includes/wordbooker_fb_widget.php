@@ -4,7 +4,7 @@
 Description: Facebook Fan Box Widget. Needs Wordbook installing to work.
 Author: Stephen Atty
 Author URI: http://canalplan.blogdns.com/steve
-Version: 2.0.4
+Version: 2.1
 */
 
 /*
@@ -81,6 +81,7 @@ class FacebookWidget extends WP_Widget {
 		else {
 		echo '<fb:like-box href="'.$url.'" width="'.$width.'" height="'.$height.'"  colorscheme="'.$scheme.'" show_faces="'.$faces.'" border_color="#'.$border_colour.'" stream="'.$stream.'" header="'.$header.'"></fb:like-box>';
 		}	
+	#	echo '<br /><div class="fb-add-to-timeline" data-show-faces="true" data-mode="button"></div>';
 		echo $after_widget;
 	}
 	
@@ -195,15 +196,12 @@ class FacebookWidget extends WP_Widget {
 	}
 }
 
-
 function fbwordbooker_widgets(){
 	register_widget('FacebookWidget');
 }
 
 /* register widget when loading the WP core */
 add_action('widgets_init', 'fbwordbooker_widgets');
-#$plugin_dir = basename(dirname(__FILE__));
-#load_plugin_textdomain( 'wordbooker', false,  dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
 }
 
