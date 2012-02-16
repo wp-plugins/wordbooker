@@ -116,6 +116,12 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 == Changelog ==
 
+= Version 2.1.3 16/02/2012 = 
+- Rebuild for SVN after WP restored the plugin and messed things up
+
+= Version 2.1.2 16/02/2012 = 
+- Lost in SVN after WP restored the plugin and messed things up
+
 = Version 2.1.1 16/02/2012 =
 - Removed the Thanks section to keep Wordpress mavens happy
 - Recoded the strip_images function to hopefully get rid of the phantom url problem (urls with no image on the end of them).
