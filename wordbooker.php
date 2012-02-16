@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.0
+Version: 2.1.1
 */
 
  /*
@@ -38,7 +38,7 @@ if (! isset($wordbooker_settings['wordbooker_extract_length'])) $wordbooker_sett
 
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
-define('WORDBOOKER_CODE_RELEASE','2.1 - Chasing Sheep is best left to Shepherds');
+define('WORDBOOKER_CODE_RELEASE','2.1.1 - Fish Beach');
 
 # For Troubleshooting 
 define('ADVANCED_DEBUG',false);
@@ -791,7 +791,6 @@ function wordbooker_admin_load() {
 
 	switch ($_POST['action']) {
 
-
 	case 'delete_userdata':
 		# Catch if they got here using the perm_save/cache refresh
 		
@@ -810,7 +809,6 @@ function wordbooker_admin_load() {
 		wordbooker_clear_diagnosticlogs();
 		wp_redirect(WORDBOOKER_SETTINGS_URL);
 		break;
-
 
 	case 'no_facebook':
 		wordbooker_set_userdata(false, null, null, null,null,null);
@@ -1492,10 +1490,11 @@ function wordbooker_strip_images($images)
 {
 	global $post;
 	$newimages = array();
+	$image_types= array ('jpg','jpeg','gif','png','tif','bmp');
 	$strip_array= array ('addthis.com','gravatar.com','zemanta.com','wp-includes','plugins','favicon.ico','facebook.com','themes','mu-plugins','fbcdn.net');
 	foreach($images as $single){
-		$ext = substr($single,strripos($single, '.'));
-		if (strlen($ext) >1 && strlen($ext) < 5){
+		$file_extension = strtolower(substr($single , strrpos($single , '.') +1)); 
+		if (in_array($file_extension,$image_types)){
 		foreach ($strip_array as $strip_domain) {
 			wordbooker_debugger("Looking for ".$strip_domain." in ".$single," ",$post->ID,200) ;
  		  	if (stripos($single,$strip_domain)) {wordbooker_debugger("Found a match so dump the image",$single,$post->ID,200) ;} else { if (!in_array($single,$newimages)){$newimages[]=$single;}}

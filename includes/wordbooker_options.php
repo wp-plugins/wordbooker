@@ -734,9 +734,9 @@ function wordbooker_user_level_options(){
 		echo "<br /><br />";
 	}
 	else {
-	if (defined('WORDBOOKER_PREMIUM')) { _e("You're using the Premium options in Wordbooker. You really should contribute something to the support and development of this plugin.  Please provide your FB Id number and your website when making payment so your details can be added to the 'thanks' list", 'wordbooker');
+	if (defined('WORDBOOKER_PREMIUM')) { _e("You're using the Premium options in Wordbooker. You really should contribute something to the support and development of this plugin.  Please provide your FB Id number and your website when making payment so your details can be added to the 'thanks' list on the web site", 'wordbooker');
 } else {
-		_e("If you've found this extension useful then please feel free to donate to its support and future development. Please provide your FB Id number and your website when making payment so your details can be added to the 'thanks' list", 'wordbooker'); }}
+		_e("If you've found this extension useful then please feel free to donate to its support and future development. Please provide your FB Id number and your website when making payment so your details can be added to the 'Thanks' page on the Website", 'wordbooker'); }}
 	  ?><br /><br />
 		<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
 		<input type="hidden" name="cmd" value="_s-xclick">
@@ -745,19 +745,7 @@ function wordbooker_user_level_options(){
 		<img alt="" border="0" src="https://www.paypal.com/en_GB/i/scr/pixel.gif" width="1" height="1">
 		</form><br /><br /><hr><h3>
 		<?php
-		_e("Thanks", 'wordbooker');
-		echo "</h3>";
-		_e("The following people and blogs have contributed to the ongoing development of this plugin : ", 'wordbooker'); 
-		
-		wordbooker_contributed(1);
 
-		echo '<br /><p>';
-		_e("The following people have contributed language files to allow Wordbooker to be used in different languages : ", 'wordbooker'); 
-echo "<br /></p><div class='wordbooker_support'> <ul>";
-	echo "<li>".__("German",'wordbooker')." - <a href='http://www.xn--rockbr-fua.de'>Sebastian Pertsch</a></li>";	
-	echo "<li>".__("French",'wordbooker')." - <a href='http://www.kocoon-bien-etre.fr'>Christian Denat</a></li>";	
-	echo "<li>".__("Russian",'wordbooker')." - <a href='http://wp-lessons.ru/'>Филипп Борисов</a></li>";			
-echo "</ul><br /></div><hr>";
 		wordbooker_option_support();
 ?>
 	<script type="text/javascript">
