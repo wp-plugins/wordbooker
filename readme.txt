@@ -3,8 +3,8 @@
 Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
 Requires at least: 2.9
-Tested up to: 3.2.1
-Stable tag: 2.1.1
+Tested up to: 3.3.1
+Stable tag: 2.1.5
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for. 
 
@@ -52,9 +52,7 @@ For more details on the various features please read the additional Features.txt
 
 It is certainly similar, but not the same:
 
-- Facebook Notes imports and caches your blog posts (e.g., it subscribes to your blog's RSS feed).
-
-Wordbooker uses the Facebook API to actively update your Facebook Wall just as if you had posted an update yourself on facebook.com. It also means that you can make changes to your blog postings *after* initially publishing them.
+- Facebook Notes imports and caches your entire blog post - Wordbooker uses the Facebook API to actively update your Facebook Wall just as if you had posted an update yourself on facebook.com. It also means that you can make changes to your blog postings *after* initially publishing them.
 
 - With Wordbooker, your blog postings will have their own space in your Facebook Wall - just as if you'd written directly on to the wall yourself.
 
@@ -66,7 +64,7 @@ Wordbooker uses the Facebook API to actively update your Facebook Wall just as i
 You may need to add the following to the HMTL tag in your theme : xmlns:fb="http://www.facebook.com/2008/fbml".
 So it looks something like :  <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:fb="http://www.facebook.com/2008/fbml">
 
-
+ 
 = Why aren't my blog posts showing up in Facebook? =
 
 - Wordbooker will not publish password-protected posts.
@@ -77,7 +75,7 @@ So it looks something like :  <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v
 
 = My WordPress database doesn't use the default 'wp_' table prefix. Will this plugin still work? =
 
-Yes, and its also WPMU compliant.
+Yes, and its also WPMU/ WP Networked Blogs mode compliant.
 
 
 
@@ -100,7 +98,7 @@ If you're using the Share action link on your posts to Facebook it uses the META
 
 - Use the [Wordbooker Support Forums](http://wordbooker.tty.org.uk/forums/). Either start a new topic, or add to an existing topic.
 
-- Alternatively, Go to the Wordbooker Page on [GoogleCode](http://code.google.com/p/wordbooker/).
+- Alternatively, for major feature requests go to the Wordbooker Page on [GoogleCode](http://code.google.com/p/wordbooker/).
 
 
 == KNOWN CONFLICTS ==
@@ -115,6 +113,29 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 2. Wordbooker Options : Overrides when posting
 
 == Changelog ==
+
+= Version 2.1.5 21/02/2012 =
+- Coded round the fact that get_users is a WP>3.0 function. So users on WP<3.1 dont get the option to chose the admin user for diagnostic messages
+- Added extra diagnostic for comments that have already ben pulled from Facebook
+- Reviewed and ratified all the diagnostic message levels.
+- Fixed an obscure bug where the FB Comments block didn't show if you turned off Wordbooker's FB Like and Share buttons.
+- Change image handling code so that filenames with single quotes in them don't blow things up. As Wordpress uses " " round image URLs this should be OK.
+- Fixed a typo in the user guide - all the short tags had [[ ]] rather than [ ]
+- Disabled the frictionless sharing option as it was doing some very odd things - like even though I was using an APP access token it was filling MY timeline up.
+- Removed a duplicated xmlns tag.
+
+
+= Version 2.1.4 16/02/2012 = 
+- Rebuild for SVN after WP restored the plugin and messed things up
+
+
+= Version 2.1.3 16/02/2012 = 
+- Rebuild for SVN after WP restored the plugin and messed things up
+
+
+= Version 2.1.2 16/02/2012 = 
+- Lost in SVN after WP restored the plugin and messed things up
+
 
 = Version 2.1.1 16/02/2012 =
 - Removed the Thanks section to keep Wordpress mavens happy
