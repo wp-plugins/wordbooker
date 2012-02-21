@@ -152,40 +152,44 @@ function wordbooker_get_comments_from_facebook($user_id) {
 					$wp_post_rows = $wpdb->get_results($sql);
 					wordbooker_debugger("Blogs posts to send comment to : ".$sql,count($wp_post_rows),-2,98);
 					foreach ($wp_post_rows as $wp_post_row) {
-					$wordbooker_post_options = get_post_meta($wp_post_row->wp_post_id, '_wordbooker_options', true);
-					if (!isset($wordbooker_post_options['wordbooker_comment_get'])) {
-						wordbooker_debugger("Incoming comments disabled for WP post ".$wp_post_row->wp_post_id,' ',-2,9);
-						wordbooker_debugger("Incoming comments disabled for WP post ".$wp_post_row->wp_post_id,' ',-3,9);	
-						continue ;
-					}
-					$data = array(
-						'comment_post_ID' => $wp_post_row->wp_post_id,
-						'comment_author' => $single_comment->from->name,
-						'comment_author_email' => $commemail,
-						'comment_author_url' => 'https://www.facebook.com/'.$single_comment->from->id,
-						'comment_content' =>$single_comment->message,
-						'comment_author_IP' => '127.0.0.1',
-						'comment_date' => $atime,
-						'comment_date_gmt' => $time,
-						'comment_parent'=> 0,
-						'user_id' => 0,
-					   	'comment_agent' => 'Wordbooker plugin '.WORDBOOKER_CODE_RELEASE,
-						'comment_approved' => $comment_approve,
-					);
-					$data = apply_filters('preprocess_comment', $data); 
-					$data['comment_parent'] = isset($data['comment_parent']) ? absint($data['comment_parent']) : 0;
-					$parent_status = ( 0 < $data['comment_parent'] ) ? wp_get_comment_status($data['comment_parent']) : '';
-					$data['comment_parent'] = ( 'approved' == $parent_status || 'unapproved' == $parent_status ) ? $data['comment_parent'] : 0;
-					$newComment= wp_insert_comment($data);
-					update_comment_meta($newComment, "fb_uid", $single_comment->from->id);
-					wordbooker_debugger("Inserted comment from ".$single_comment->from->name." into ".$wp_post_row->wp_post_id,"",-2,9);
-					wordbooker_debugger("Inserted comment from ".$single_comment->from->name." into ".$wp_post_row->wp_post_id,"",-3,9);
-					$sql="Insert into ".WORDBOOKER_POSTCOMMENTS." (fb_post_id,user_id,comment_timestamp,wp_post_id,blog_id,wp_comment_id,fb_comment_id,in_out) values ('".$fb_comment->fb_post_id."',".$user_id.",".strtotime($single_comment->created_time).",".$wp_post_row->wp_post_id.",".$blog_id.",".$newComment.",'".$single_comment->id."','in' )";
-					$wpdb->query($sql);
-					$processed_posts=$processed_posts+1;
+						$wordbooker_post_options = get_post_meta($wp_post_row->wp_post_id, '_wordbooker_options', true);
+						if (!isset($wordbooker_post_options['wordbooker_comment_get'])) {
+							wordbooker_debugger("Incoming comments disabled for WP post ".$wp_post_row->wp_post_id,' ',-2,9);
+							wordbooker_debugger("Incoming comments disabled for WP post ".$wp_post_row->wp_post_id,' ',-3,9);	
+							continue ;
+						}
+						$data = array(
+							'comment_post_ID' => $wp_post_row->wp_post_id,
+							'comment_author' => $single_comment->from->name,
+							'comment_author_email' => $commemail,
+							'comment_author_url' => 'https://www.facebook.com/'.$single_comment->from->id,
+							'comment_content' =>$single_comment->message,
+							'comment_author_IP' => '127.0.0.1',
+							'comment_date' => $atime,
+							'comment_date_gmt' => $time,
+							'comment_parent'=> 0,
+							'user_id' => 0,
+						   	'comment_agent' => 'Wordbooker plugin '.WORDBOOKER_CODE_RELEASE,
+							'comment_approved' => $comment_approve,
+						);
+						$data = apply_filters('preprocess_comment', $data); 
+						$data['comment_parent'] = isset($data['comment_parent']) ? absint($data['comment_parent']) : 0;
+						$parent_status = ( 0 < $data['comment_parent'] ) ? wp_get_comment_status($data['comment_parent']) : '';
+						$data['comment_parent'] = ( 'approved' == $parent_status || 'unapproved' == $parent_status ) ? $data['comment_parent'] : 0;
+						$newComment= wp_insert_comment($data);
+						update_comment_meta($newComment, "fb_uid", $single_comment->from->id);
+						wordbooker_debugger("Inserted comment from ".$single_comment->from->name." into ".$wp_post_row->wp_post_id,"",-2,9);
+						wordbooker_debugger("Inserted comment from ".$single_comment->from->name." into ".$wp_post_row->wp_post_id,"",-3,9);
+						$sql="Insert into ".WORDBOOKER_POSTCOMMENTS." (fb_post_id,user_id,comment_timestamp,wp_post_id,blog_id,wp_comment_id,fb_comment_id,in_out) values ('".$fb_comment->fb_post_id."',".$user_id.",".strtotime($single_comment->created_time).",".$wp_post_row->wp_post_id.",".$blog_id.",".$newComment.",'".$single_comment->id."','in' )";
+						$wpdb->query($sql);
+						$processed_posts=$processed_posts+1;
 					}
 					wordbooker_debugger("Finished comment inserts for FB post ".$fb_comment->fb_post_id,"",-2,9);
 					wordbooker_debugger("Finished comment inserts for FB post ".$fb_comment->fb_post_id,"",-3,9);
+				}
+			   else {
+					wordbooker_debugger("Found existing comment for FB post ".$fb_comment->fb_post_id,"from : ".$single_comment->from->name,-2,9);
+					wordbooker_debugger("Found existing comment for FB post ".$fb_comment->fb_post_id,"from : ".$single_comment->from->name,-3,9);	
 				}
 			}
 		}
