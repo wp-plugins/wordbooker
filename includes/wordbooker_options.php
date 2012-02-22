@@ -731,14 +731,9 @@ function wordbooker_user_level_options(){
  	_e("Donate", 'wordbooker');
 		echo "</h3>";
 
-		if (wordbooker_contributed (0) ){
-		_e("Thank you for contributing towards the support and development of this extension.", 'wordbooker');
-		echo "<br /><br />";
-	}
-	else {
 	if (defined('WORDBOOKER_PREMIUM')) { _e("You're using the Premium options in Wordbooker. You really should contribute something to the support and development of this plugin.  Please provide your FB Id number and your website when making payment so your details can be added to the 'thanks' list on the web site", 'wordbooker');
-} else {
-		_e("If you've found this extension useful then please feel free to donate to its support and future development. Please provide your FB Id number and your website when making payment so your details can be added to the 'Thanks' page on the Website", 'wordbooker'); }}
+} 		
+	_e("If you've found this extension useful then please feel free to donate to its support and future development. Please provide your FB Id number and your website when making payment so your details can be added to the 'Thanks' page on the Website", 'wordbooker'); 
 	  ?><br /><br />
 		<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
 		<input type="hidden" name="cmd" value="_s-xclick">

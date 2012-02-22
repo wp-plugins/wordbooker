@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.5
+Version: 2.1.6
 */
 
  /*
@@ -1583,6 +1583,7 @@ function wordbooker_footer($blah)
 		return;
 	}
 	$wplang=wordbooker_get_language();
+/*
 $efb_script = <<< EOGS
  <div id="fb-root"></div>
      <script type="text/javascript">
@@ -1606,6 +1607,33 @@ $efb_script.= <<< EOGS
       }());
     </script>
 EOGS;
+
+*/
+
+$efb_script = <<< EOGS
+ <div id="fb-root"></div>
+     <script type="text/javascript">
+      window.fbAsyncInit = function() {
+	FB.init({
+	 appId  : '254577506873',
+	  status : true, // check login status
+	  cookie : true, // enable cookies to allow the server to access the session
+	  xfbml  : true,  // parse XFBML
+	  oauth:true
+	});
+      };
+
+    (function(d){
+      var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
+      js = d.createElement('script'); js.id = id; js.async = true;
+EOGS;
+$efb_script.= "e.src = document.location.protocol + '//connect.facebook.net/".$wplang."/all.js';";
+$efb_script.= <<< EOGS
+      d.getElementsByTagName('head')[0].appendChild(js);
+    }(document));
+  </script>
+EOGS;
+	
 	
 	$wordbooker_settings = wordbooker_options(); 
 	if  (isset($wordbooker_settings['wordbooker_like_button_show']) || isset($wordbooker_settings['wordbooker_like_share_too'] ) || isset($wordbooker_settings['wordbooker_use_fb_comments'])) 
@@ -1618,22 +1646,23 @@ EOGS;
 #	echo '\n<script type="text/javascript " defer="defer" > setTimeout("wordbooker_read()",3000); </script> \n';
 	echo "\n<!-- Wordbooker code revision : ".WORDBOOKER_CODE_RELEASE." -->\n";
 	if ( is_single() ) {
-		if (isset($wordbooker_settings['wordbooker_time_button'])) {
-			$stuff=array('type'=>'client_cred','client_id'=>WORDBOOKER_FB_ID,'client_secret'=>WORDBOOKER_FB_SECRET);
-			$access_token=wordbooker_make_curl_call('https://graph.facebook.com/oauth/access_token',$stuff);
+		#if (isset($wordbooker_settings['wordbooker_time_button'])) {
+			#echo '<fb:add-to-timeline></fb:add-to-timeline>  <fb:activity actions="wordbooker:write" app_id="111687885534181"></fb:activity>';
+			#$stuff=array('type'=>'client_cred','client_id'=>WORDBOOKER_FB_ID,'client_secret'=>WORDBOOKER_FB_SECRET);
+			#$access_token=wordbooker_make_curl_call('https://graph.facebook.com/oauth/access_token',$stuff);
 		#	$frictionless=array('article' => get_permalink(),'access_token'=>'AAAAAO0YAejkBAE3gGR2KjCr6WhUO1ZBNyXHP6vaQoQLbwvlDyKDK0BIMZBb6mVyk2ZAbvPEXyrZCLNd6Bb8TA0HJCKGkotUZD');#
-			$frictionless=array('article' => get_permalink(),'access_token'=>$access_token);
-			var_dump($frictionless);
-			try {
+			#$frictionless=array('article' => get_permalink(),'access_token'=>$access_token);
+			#var_dump($frictionless);
+			#try {
 			#$x=wordbooker_make_curl_post_call('https://graph.facebook.com/me/news.reads',$frictionless);
 			#$x=wordbooker_make_curl_post_call('https://graph.facebook.com/me/wordbooker:wordbooker_read',$frictionless);
-			var_dump($x);
-			}	
-			catch  (Exception $e) {
-					$error_msg = $e->getMessage();
-					var_dump($error_msg);
-			}
-		}
+			#var_dump($x);
+		#	}	
+		#	catch  (Exception $e) {
+		#			$error_msg = $e->getMessage();
+		#			var_dump($error_msg);
+		#	}
+		#}
 	}
 return $blah;
 }
