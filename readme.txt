@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
 Requires at least: 2.9
 Tested up to: 3.3.1
-Stable tag: 2.1.6
+Stable tag: 2.1.7
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for. 
 
@@ -113,6 +113,9 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 2. Wordbooker Options : Overrides when posting
 
 == Changelog ==
+
+= Version 2.1.7 23/02/2012 =
+- Fix a typo in the FB javascript code which only seems to affect Safari.
 
 = Version 2.1.6 22/02/2012 =
 - Total embarassment : I somehow rolled a version with a function call in it that shouldn't have been there!

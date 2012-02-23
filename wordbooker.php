@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.6
+Version: 2.1.7
 */
 
  /*
@@ -38,7 +38,7 @@ if (! isset($wordbooker_settings['wordbooker_extract_length'])) $wordbooker_sett
 
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
-define('WORDBOOKER_CODE_RELEASE',"2.1.5 - Caliban's Pit");
+define('WORDBOOKER_CODE_RELEASE',"2.1.7 - Crematorium Conspiracy");
 
 # For Troubleshooting 
 define('ADVANCED_DEBUG',false);
@@ -1607,8 +1607,8 @@ $efb_script.= <<< EOGS
       }());
     </script>
 EOGS;
-
 */
+
 
 $efb_script = <<< EOGS
  <div id="fb-root"></div>
@@ -1627,7 +1627,7 @@ $efb_script = <<< EOGS
       var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
       js = d.createElement('script'); js.id = id; js.async = true;
 EOGS;
-$efb_script.= "e.src = document.location.protocol + '//connect.facebook.net/".$wplang."/all.js';";
+$efb_script.= "d.src = document.location.protocol + '//connect.facebook.net/".$wplang."/all.js';";
 $efb_script.= <<< EOGS
       d.getElementsByTagName('head')[0].appendChild(js);
     }(document));
