@@ -27,7 +27,7 @@ Author: Steve Atty
 
 function wordbooker_wall_post($post_id,$access_token,$post_title,$post_data,$target_id,$dummy,$target_name){
 	if (isset($dummy)) { 	
-		wordbooker_debugger("Wall Post to ".$target_name." Test Only",'No Post Made',$post_id) ;
+		wordbooker_debugger("Wall Post to ".$target_name." Test Only",'No Post Made',$post_id,90) ;
 		return;
 	}
 	$post_data['access_token']=$access_token;
@@ -35,7 +35,7 @@ function wordbooker_wall_post($post_id,$access_token,$post_title,$post_data,$tar
 try {
 		$result = wordbooker_fb_stream_pubish($post_data,$target_id);
 		wordbooker_store_post_result($post_id,$result->id );
-		wordbooker_debugger("Wall Post to ".$target_name." Succeeded - result : ",$result->id,$post_id) ;
+		wordbooker_debugger("Wall Post to ".$target_name." Succeeded - result : ",$result->id,$post_id,90) ;
 	    }
 	catch (Exception $e) {
 		$error_code = $e->getCode();
@@ -47,7 +47,7 @@ try {
 
 function wordbooker_link_post($post_id,$access_token,$post_title,$post_data,$target_id,$dummy,$target_name){
 	if (isset($dummy)) { 	
-		wordbooker_debugger("Link Post to ".$target_name." Test Only",'No Post Made',$post_id) ;
+		wordbooker_debugger("Link Post to ".$target_name." Test Only",'No Post Made',$post_id,90) ;
 		return;
 	}
 	$post_data2['message']=$post_data['message'];
@@ -57,7 +57,7 @@ function wordbooker_link_post($post_id,$access_token,$post_title,$post_data,$tar
 try {
 		$result = wordbooker_fb_link_publish($post_data2,$target_id);
 		wordbooker_store_post_result($post_id,$result->id );
-		wordbooker_debugger("Link Post to ".$target_name." Succeeded - result : ",$result->id,$post_id) ;
+		wordbooker_debugger("Link Post to ".$target_name." Succeeded - result : ",$result->id,$post_id,90) ;
 	    }
 	catch (Exception $e) {
 		$error_code = $e->getCode();
@@ -70,7 +70,7 @@ function wordbooker_status_update($post_id,$access_token,$post_date,$target_id,$
 	global $wordbooker_post_options,$user_ID;
 	wordbooker_debugger("Setting status_text".$wordbooker_post_options['wordbooker_status_update_text']," ",$post_id) ; 
 	if (isset($dummy)) { 	
-		wordbooker_debugger("Status update to ".$target_name." Test Only",'No Post Made',$post_id) ;
+		wordbooker_debugger("Status update to ".$target_name." Test Only",'No Post Made',$post_id,90) ;
 		return;
 	}
 		
@@ -80,7 +80,7 @@ function wordbooker_status_update($post_id,$access_token,$post_date,$target_id,$
 	try {
 		$result = wordbooker_fb_status_update($data,$target_id);
 		wordbooker_store_post_result($post_id,$result->id );
-		wordbooker_debugger("Status update  to ".$target_name." suceeded result : ",$result->id,$post_id) ;
+		wordbooker_debugger("Status update  to ".$target_name." suceeded result : ",$result->id,$post_id,90) ;
 	    }
 	catch (Exception $e) {
 		$error_code = $e->getCode();
@@ -92,7 +92,7 @@ function wordbooker_status_update($post_id,$access_token,$post_date,$target_id,$
 
 function wordbooker_notes_post($post_id,$access_token,$post_title,$target_id,$dummy,$target_name){
 	if (isset($dummy)) { 	
-		wordbooker_debugger("Notes publish  to ".$target_name." Test Only",'No Post Made',$post_id) ;
+		wordbooker_debugger("Notes publish  to ".$target_name." Test Only",'No Post Made',$post_id,90) ;
 		return;
 	}
 	global $post,$user_ID;
@@ -104,7 +104,7 @@ function wordbooker_notes_post($post_id,$access_token,$post_title,$target_id,$du
 	try {
 		$result = wordbooker_fb_note_publish($data,$target_id);
 		wordbooker_store_post_result($post_id,$result->id);
-		wordbooker_debugger("Note Publish to ".$target_name." result : ",$result->id,$post_id) ;
+		wordbooker_debugger("Note Publish to ".$target_name." result : ",$result->id,$post_id,90) ;
 	} 	
 	catch (Exception $e) {
 		$error_code = $e->getCode();
