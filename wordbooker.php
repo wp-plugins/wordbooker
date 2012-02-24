@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.7
+Version: 2.1.8
 */
 
  /*
@@ -38,7 +38,7 @@ if (! isset($wordbooker_settings['wordbooker_extract_length'])) $wordbooker_sett
 
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
-define('WORDBOOKER_CODE_RELEASE',"2.1.7 - Crematorium Conspiracy");
+define('WORDBOOKER_CODE_RELEASE',"2.1.8 - Call me Eugene");
 
 # For Troubleshooting 
 define('ADVANCED_DEBUG',false);
@@ -73,7 +73,7 @@ define('WORDBOOKER_FB_VIDEO_UPLOAD',"video_upload");
 define('WORDBOOKER_FB_READ_FRIENDS',"read_friendlists");
 define('WORDBOOKER_SETTINGS', 'wordbooker_settings');
 define('WORDBOOKER_OPTION_SCHEMAVERS', 'schema_vers');
-define('WORDBOOKER_SCHEMA_VERSION', '3');
+define('WORDBOOKER_SCHEMA_VERSION', '4');
 
 $new_wb_table_prefix=$wpdb->base_prefix;
 if (isset ($db_prefix) ) { $new_wb_table_prefix=$db_prefix;}
@@ -430,7 +430,7 @@ function wordbooker_upgrade() {
 		wordbooker_set_option('schema_vers', "2.6");
 	}
 
-	if ($wordbooker_settings['schema_vers']!='3') {
+	if ($wordbooker_settings['schema_vers']=='3') {
 		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_POSTCOMMENTS. ' DROP PRIMARY KEY , DROP INDEX fb_comment_id, ADD PRIMARY KEY ( `blog_id` , `wp_post_id` , `fb_post_id` , `wp_comment_id` ) ');
 		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_POSTCOMMENTS. ' ADD `user_id` BIGINT( 20 ) NOT NULL  ');
 		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_ERRORLOGS. ' ADD `sequence_id` BIGINT( 20 ) NOT NULL AUTO_INCREMENT , ADD `diag_level` INT(4) NULL, ADD PRIMARY KEY ( `sequence_id` ) ');
@@ -445,6 +445,23 @@ function wordbooker_upgrade() {
 		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_ERRORLOGS. ' ADD `diag_level` INT(4) NULL ');
 		wordbooker_set_option('schema_vers', "3");
 	}	
+
+	if ($wordbooker_settings['schema_vers']!='4') {
+		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_POSTCOMMENTS. ' DROP PRIMARY KEY ');
+		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_POSTCOMMENTS. ' DROP INDEX fb_comment_id,');
+		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_POSTCOMMENTS. ' ADD PRIMARY KEY ( `blog_id` , `wp_post_id` , `fb_post_id` , `wp_comment_id` ) ');
+		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_POSTCOMMENTS. ' ADD `user_id` BIGINT( 20 ) NOT NULL  ');
+		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_ERRORLOGS. '  ADD `sequence_id` BIGINT( 20 ) NOT NULL AUTO_INCREMENT ');
+		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_ERRORLOGS. '  ADD PRIMARY KEY ( `sequence_id` ) ');
+		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_POSTCOMMENTS. '   ADD `fb_comment_id` VARCHAR( 40 ) NULL ');	
+		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_POSTCOMMENTS. '  DROP PRIMARY KEY ');
+		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_POSTCOMMENTS. '  ADD INDEX `main_index` ( `blog_id` , `wp_post_id` , `fb_post_id` , `wp_comment_id` ) ');
+		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_POSTCOMMENTS. '  ADD `in_out` VARCHAR( 20 ) NULL ');	
+		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_POSTCOMMENTS. '  ADD INDEX `in_out_idx` ( `in_out` ) ');
+		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_POSTCOMMENTS. '  ADD INDEX `fb_comment_id_idx` (`fb_comment_id`) '); 
+		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_ERRORLOGS. ' ADD `diag_level` INT(4) NULL ');
+		wordbooker_set_option('schema_vers', "4");
+	}
 	$dummy=wp_clear_scheduled_hook('wb_cron_job');
 	$dummy=wp_schedule_event(time(), 'hourly', 'wb_cron_job');
 	#wordbooker_set_option('schema_vers', WORDBOOKER_SCHEMA_VERSION );
@@ -1583,7 +1600,7 @@ function wordbooker_footer($blah)
 		return;
 	}
 	$wplang=wordbooker_get_language();
-/*
+
 $efb_script = <<< EOGS
  <div id="fb-root"></div>
      <script type="text/javascript">
@@ -1607,34 +1624,6 @@ $efb_script.= <<< EOGS
       }());
     </script>
 EOGS;
-*/
-
-
-$efb_script = <<< EOGS
- <div id="fb-root"></div>
-     <script type="text/javascript">
-      window.fbAsyncInit = function() {
-	FB.init({
-	 appId  : '254577506873',
-	  status : true, // check login status
-	  cookie : true, // enable cookies to allow the server to access the session
-	  xfbml  : true,  // parse XFBML
-	  oauth:true
-	});
-      };
-
-    (function(d){
-      var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
-      js = d.createElement('script'); js.id = id; js.async = true;
-EOGS;
-$efb_script.= "d.src = document.location.protocol + '//connect.facebook.net/".$wplang."/all.js';";
-$efb_script.= <<< EOGS
-      d.getElementsByTagName('head')[0].appendChild(js);
-    }(document));
-  </script>
-EOGS;
-	
-	
 	$wordbooker_settings = wordbooker_options(); 
 	if  (isset($wordbooker_settings['wordbooker_like_button_show']) || isset($wordbooker_settings['wordbooker_like_share_too'] ) || isset($wordbooker_settings['wordbooker_use_fb_comments'])) 
 		{
@@ -1645,25 +1634,6 @@ EOGS;
 	}
 #	echo '\n<script type="text/javascript " defer="defer" > setTimeout("wordbooker_read()",3000); </script> \n';
 	echo "\n<!-- Wordbooker code revision : ".WORDBOOKER_CODE_RELEASE." -->\n";
-	if ( is_single() ) {
-		#if (isset($wordbooker_settings['wordbooker_time_button'])) {
-			#echo '<fb:add-to-timeline></fb:add-to-timeline>  <fb:activity actions="wordbooker:write" app_id="111687885534181"></fb:activity>';
-			#$stuff=array('type'=>'client_cred','client_id'=>WORDBOOKER_FB_ID,'client_secret'=>WORDBOOKER_FB_SECRET);
-			#$access_token=wordbooker_make_curl_call('https://graph.facebook.com/oauth/access_token',$stuff);
-		#	$frictionless=array('article' => get_permalink(),'access_token'=>'AAAAAO0YAejkBAE3gGR2KjCr6WhUO1ZBNyXHP6vaQoQLbwvlDyKDK0BIMZBb6mVyk2ZAbvPEXyrZCLNd6Bb8TA0HJCKGkotUZD');#
-			#$frictionless=array('article' => get_permalink(),'access_token'=>$access_token);
-			#var_dump($frictionless);
-			#try {
-			#$x=wordbooker_make_curl_post_call('https://graph.facebook.com/me/news.reads',$frictionless);
-			#$x=wordbooker_make_curl_post_call('https://graph.facebook.com/me/wordbooker:wordbooker_read',$frictionless);
-			#var_dump($x);
-		#	}	
-		#	catch  (Exception $e) {
-		#			$error_msg = $e->getMessage();
-		#			var_dump($error_msg);
-		#	}
-		#}
-	}
 return $blah;
 }
 
@@ -2147,8 +2117,8 @@ function wordbooker_check_permissions($wbuser,$user) {
 	global $user_ID;
 	$perm_miss=wordbooker_get_cache($user_ID,'auths_needed',1);
 	if ($perm_miss->auths_needed==0) { return;}
-	$perms_to_check= array(WORDBOOKER_FB_PUBLISH_STREAM,'publish_actions',WORDBOOKER_FB_STATUS_UPDATE,WORDBOOKER_FB_READ_STREAM,WORDBOOKER_FB_CREATE_NOTE,WORDBOOKER_FB_PHOTO_UPLOAD,WORDBOOKER_FB_VIDEO_UPLOAD,WORDBOOKER_FB_MANAGE_PAGES,WORDBOOKER_FB_READ_FRIENDS);
-	$perm_messages= array( __('Publish content to your Wall/Fan pages', 'wordbooker'), __('Publish Actions to your Timeline','wordbooker'),__('Update your status', 'wordbooker'), __('Read your News Feed and Wall', 'wordbooker'),__('Create notes', 'wordbooker'),__('Upload photos', 'wordbooker'),__('Upload videos', 'wordbooker'),__('Manage_pages', 'wordbooker'),__('Read friend lists', 'wordbooker'));
+	$perms_to_check= array(WORDBOOKER_FB_PUBLISH_STREAM,WORDBOOKER_FB_STATUS_UPDATE,WORDBOOKER_FB_READ_STREAM,WORDBOOKER_FB_CREATE_NOTE,WORDBOOKER_FB_PHOTO_UPLOAD,WORDBOOKER_FB_VIDEO_UPLOAD,WORDBOOKER_FB_MANAGE_PAGES,WORDBOOKER_FB_READ_FRIENDS);
+	$perm_messages= array( __('Publish content to your Wall/Fan pages', 'wordbooker'),__('Update your status', 'wordbooker'), __('Read your News Feed and Wall', 'wordbooker'),__('Create notes', 'wordbooker'),__('Upload photos', 'wordbooker'),__('Upload videos', 'wordbooker'),__('Manage_pages', 'wordbooker'),__('Read friend lists', 'wordbooker'));
 	$preamble= __("but requires authorization to ", 'wordbooker');
 	$postamble= __(" on Facebook. Click on the following link to grant permission", 'wordbooker');
 		$loginUrl2='https://www.facebook.com/dialog/oauth?client_id='.WORDBOOKER_FB_ID.'&redirect_uri=https://wordbooker.tty.org.uk/index2.html?br='.urlencode(get_bloginfo('wpurl').'&fbid='.WORDBOOKER_FB_ID).'&scope='.implode(',',$perms_to_check).'&response_type=token';
