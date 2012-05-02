@@ -72,7 +72,7 @@ function wordbooker_post_comments_to_facebook($user_id) {
 		wordbooker_debugger("Outgoing comment disabled for WP post ".$row->wp_post_id,$row->fb_post_id,-3,9);	
 		continue ;
 	}
-	$sql="select comment_ID from ".$wpdb->comments." where comment_post_id=".$row->wp_post_id." and comment_approved=1 and comment_id not in (select wp_comment_id from ".WORDBOOKER_POSTCOMMENTS." where  wp_post_id=".$row->wp_post_id." and fb_post_id='".$row->fb_post_id."' and user_id=".$user_id.") and comment_post_id in (select ID from ".$wpdb->posts." WHERE comment_status='open')";
+	$sql="select comment_ID from ".$wpdb->comments." where comment_post_id=".$row->wp_post_id." and comment_approved=1 and comment_id not in (select wp_comment_id from ".WORDBOOKER_POSTCOMMENTS." where  wp_post_id=".$row->wp_post_id." and fb_post_id='".$row->fb_post_id."' and user_id=".$user_id." and comment_post_id in (select ID from ".$wpdb->posts." WHERE comment_status='open'))";
 	if ($close_comments==1) { $sql.="and comment_post_id in (select ID from ".$wpdb->posts." WHERE post_date > DATE_SUB( CURDATE( ) , INTERVAL ".$close_days_old." 
 DAY ))";}
 		$results = $wpdb->get_results($sql);

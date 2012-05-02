@@ -231,6 +231,7 @@ function wordbooker_cache_refresh($user_id) {
 		}
 */
 		$fb_status_info=wordbooker_status_feed($suid,$wbuser2->access_token);
+		#var_dump($fb_status_info);
 		foreach($fb_status_info->data as $fbstat) {
 			if(!is_null($fbstat->message)){
 				if ($suid==$fbstat->from->id) {
@@ -245,16 +246,19 @@ function wordbooker_cache_refresh($user_id) {
 		$fb_profile_info=wordbooker_get_fb_id($suid,$wbuser2->access_token);
 		wordbooker_debugger("Setting Status Name as  : ",mysql_real_escape_string($fb_profile_info->name),-1,9) ;
 		$sql="insert into ".WORDBOOKER_USERSTATUS." set name='".mysql_real_escape_string($fb_profile_info->name)."'";
-			if (isset($status_time)) {
-				if (stristr($status_message,"[[PV]]")) {
-					wordbooker_debugger("Found [[PV]] - not updating status"," ",-1,9);
-				} 
-				else {
-					wordbooker_debugger("Setting status as  : ",mysql_real_escape_string($status_message),-1,9) ;
-					$sql.=", status='".mysql_real_escape_string($status_message)."'";
-					$sql.=", updated=".mysql_real_escape_string(strtotime($status_time));
-				}
-		} else {wordbooker_debugger("Failed to get Status information from FB"," ",-1,9); }
+		if (isset($status_time)) {
+			if (stristr($status_message,"[[PV]]")) {
+				wordbooker_debugger("Found [[PV]] - not updating status"," ",-1,9);
+			} 
+			else {
+				wordbooker_debugger("Setting status as  : ",mysql_real_escape_string($status_message),-1,9) ;
+				$sql.=", status='".mysql_real_escape_string($status_message)."'";
+				$sql.=", updated=".mysql_real_escape_string(strtotime($status_time));
+			}
+		}
+		else {
+			wordbooker_debugger("Failed to get Status information from FB"," ",-1,9); 
+		}
 
 		wordbooker_debugger("Setting Status URL as  : ",mysql_real_escape_string($fb_profile_info->link),-1,9) ;
 		$sql.=", url='".mysql_real_escape_string($fb_profile_info->link)."'";

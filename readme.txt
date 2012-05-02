@@ -1,17 +1,19 @@
 === Wordbooker ===
 
 Contributors: SteveAtty
-Tags: facebook, minifeed, newsfeed, crosspost, WPMU, Facebook Share, Facebook Like, social media
+Tags: facebook, news feed, wall, fan page wall, group wall, crosspost, Facebook Send, Facebook Like, social media, open graph.
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=8XNJMQCYDJT6U&lc=GB&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Requires at least: 2.9
 Tested up to: 3.3.1
-Stable tag: 2.1.8
+Stable tag: 2.1.9
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for. 
 
 == Description ==
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall / Fan Page Wall / Group Wall. You can Post as an Extract, A Status Update or even as a Note. 
+
+Wordbooker populates all the Open Graph tags needed to integrate your blog post with Facebook's Social Graph.
 
 NOTE : You MUST have the PHP Curl module enabled and configured in such a way that it can connect to the Facebook Servers on a secure HTTP connection. If you do not have curl OR if your hosting company block curl access to externals sites you cannot use this plugin.
 
@@ -114,6 +116,24 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 2. Wordbooker Options : Overrides when posting
 
 == Changelog ==
+
+= Version 2.1.9 02/05/2012 =
+- Fixed a bug where posts made via Postie didn't pick up the right user ID. This might affect quite a few things.
+- Added a schema cross check utility.
+- Added a Disabled FB API initialization option to stop clashes with other FB related plugins
+- Added code so that simple facebook connect will pick up the locale variable from Wordbooker
+- Removed Facebook Share as the functionality is depreciated
+- Added an align Left/Right for Like/Send
+- Removed some parameters and tweaked others to make the fb like iframes more W3C compliant.
+- Added some code to try to work out why token swapping isn't always working.
+- Put a check for missing access tokens before calling the publish functions - should speed things up and reduce the number of errors being bounced back from Facebook.
+- Changed the code so that blog urls are set rather than just letting Facebook work it out.
+- Added code to pull images from post attachments as well as parsing the post
+- Added code so that og tags for image and content which are static values and not parsed at post view are parsed when the post is saved, even if its not published. This means that they can be changed.
+- Added some checks to make sure that primary and secondary target types are set even if the user fails to set them.
+- Added some very large values to the extract length to allow people to post long posts on their wall without using Facebook Notes.
+- Changed the og schema insertion code to try to resolve W3C compliance issues.
+
 
 = Version 2.1.8 23/02/2012 =
 - Roll back the FB javascript to an earlier version which doesn't seem to have the problems that the current code does.
