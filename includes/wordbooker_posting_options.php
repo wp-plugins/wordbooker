@@ -38,6 +38,7 @@ function wordbooker_inner_custom_box() {
 	# If the user is set to logged in user then get the current user, otherwise pick up the settings for the user selected.
 	if  ($wordbooker_settings["wordbooker_default_author"] == 0 ) {$wb_user_id=$user_ID;} else {$wb_user_id=$wordbooker_settings["wordbooker_default_author"];}
 	$wordbooker_user_settings_id="wordbookuser".$blog_id;
+	
 	# We need to do some more checking here. If the user does not have an entry in the wordbooker user table then we should get the user options for the user set as the default user.
 	$wordbookuser=get_usermeta($wb_user_id,$wordbooker_user_settings_id);
 	# If we have user settings then lets go through and override the blog level defaults.
@@ -60,6 +61,8 @@ function wordbooker_inner_custom_box() {
 	if(is_array($post_meta)) {
 		$wordbooker_settings=$post_meta;
 	}
+	if( !isset($wordbooker_settings['wordbooker_primary_type'])) {$wordbooker_settings['wordbooker_primary_type']=1;}
+	if( !isset($wordbooker_settings['wordbooker_secondary_type'])) {$wordbooker_settings['wordbooker_secondary_type']=1;}
 	$post_pub_prompt=__("Publish this post to Facebook", 'wordbooker');
 	if($post->post_type=='page'){
 		$publish=$wordbooker_settings["wordbooker_publish_page_default"];		
@@ -88,7 +91,7 @@ echo "<br />";
 		$fanpages2=$fanpages;
 		$fanpages[]=array( 'id'=>'PW:'.$wb_users[0]->facebook_id, 'name'=>__("Personal Wall",'wordbooker'));
 		$have_fan_pages=0;
-
+		$arr = array(1=> __("As a Wall Post", 'wordbooker'),  2=> __("As a Note", 'wordbooker'), 3=> __("As a Status Update" , 'wordbooker'), 4=> __("As a Link" , 'wordbooker')   );
 		# If the post has already been published then we uncheck the publish option 
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_publish_default" '.$checked_flag[$wordbooker_settings["wordbooker_publish_default"]].' > '.$post_pub_prompt.'<br />';
 if (count($fanpages)>1){
@@ -104,7 +107,6 @@ if (count($fanpages)>1){
 			}
 			echo $option;
 			echo '</select> &nbsp;';
-	$arr = array(1=> __("As a Wall Post", 'wordbooker'),  2=> __("As a Note", 'wordbooker'), 3=> __("As a Status Update" , 'wordbooker'), 4=> __("As a Link" , 'wordbooker')   );
 	echo '<select id="wordbooker_primary_type" name="wordbooker_primary_type"  >';
 	foreach ($arr as $i => $value) {
        		 if ($i==$wordbooker_settings['wordbooker_primary_type']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
@@ -117,8 +119,6 @@ if (count($fanpages)>1){
 	{
 	echo '<p><label for="wb_primary_target">'.__('Post to my Personal Wall', 'wordbooker').' : </label> ';
 	echo '<input type="hidden" name="wordbooker_primary_target" value="PW:'.$wb_users[0]->facebook_id.'" />';
-
-$arr = array(1=> __("As a Wall Post", 'wordbooker'),  2=> __("As a Note", 'wordbooker'), 3=> __("As a Status Update" , 'wordbooker'),4=> __("As a Link" , 'wordbooker')   );
 	echo '<select id="wordbooker_primary_type" name="wordbooker_primary_type"  >';
 	foreach ($arr as $i => $value) {
        		 if ($i==$wordbooker_settings['wordbooker_primary_type']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
@@ -151,7 +151,7 @@ $arr = array(1=> __("As a Wall Post", 'wordbooker'),  2=> __("As a Note", 'wordb
 		}
 
 		echo __('Length of Extract', 'wordbooker').' : <select id="wordbooker_extract_length" name="wordbooker_extract_length"  >';
-	        $arr = array(10=> "10",20=> "20",50=> "50",100=> "100",120=> "120",150=> "150",175=> "175",200=> "200",  250=> "250", 256=>__("256 (Default) ", 'wordbooker'), 270=>"270", 300=>"300", 350 => "350",400 => "400",500 => "500",600 => "600",700 => "700",800 => "800",900 => "900");
+	        $arr = array(10=> "10",20=> "20",50=> "50",100=> "100",120=> "120",150=> "150",175=> "175",200=> "200",  250=> "250", 256=>__("256 (Default) ", 'wordbooker'), 270=>"270", 300=>"300", 350 => "350",400 => "400",500 => "500",600 => "600",700 => "700",800 => "800",900 => "900",1000 => "1000",2000 => "2000",4000 => "4000",8000 => "8000");
 	        foreach ($arr as $i => $value) {
 	                if ($i==$wordbooker_settings['wordbooker_extract_length']){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
 	               else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
@@ -186,7 +186,7 @@ $arr = array(1=> __("As a Wall Post", 'wordbooker'),  2=> __("As a Note", 'wordb
 				       else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
 				}
 	        	echo "</select><br />";
-		
+/*		
 echo __('Show Facebook Share for this Page', 'wordbooker').' : <select id="wordbooker_share_button_page" name="wordbooker_share_button_page"  >';
 $arr = array(1=> __("Yes", 'wordbooker'),  2=> __("No", 'wordbooker') );
 	        foreach ($arr as $i => $value) {
@@ -194,6 +194,7 @@ $arr = array(1=> __("Yes", 'wordbooker'),  2=> __("No", 'wordbooker') );
 	               else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
 		}
 	        echo "</select><br />";
+*/
 		}
 		else {
 
@@ -206,7 +207,7 @@ $arr = array(1=> __("Yes", 'wordbooker'),  2=> __("No", 'wordbooker') );
 				       else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
 				}
 				echo "</select><br />";
-		
+/*		
 			echo __('Show Facebook Share for this Post', 'wordbooker').' : <select id="wordbooker_share_button_post" name="wordbooker_share_button_post"  >';
 			$arr = array(1=> __("Yes", 'wordbooker'),  2=> __("No", 'wordbooker') );
 				foreach ($arr as $i => $value) {
@@ -214,6 +215,7 @@ $arr = array(1=> __("Yes", 'wordbooker'),  2=> __("No", 'wordbooker') );
 				       else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
 				}
 				echo "</select><br />";
+*/
 		}
 
 
