@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.9
+Version: 2.1.10
 */
 
  /*
@@ -38,7 +38,7 @@ if (! isset($wordbooker_settings['wordbooker_extract_length'])) $wordbooker_sett
 
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
-define('WORDBOOKER_CODE_RELEASE',"2.1.9 - Now Your Ships are Burned");
+define('WORDBOOKER_CODE_RELEASE',"2.1.10 - Far Beyond The Sun");
 
 # For Troubleshooting 
 define('ADVANCED_DEBUG',false);
@@ -733,6 +733,7 @@ function wordbooker_delete_from_errorlogs($post_id) {
 }
 
 function wordbooker_render_errorlogs() {
+	wordbooker_renew_access_token();
 	global $user_ID, $wpdb,$blog_id;
 	$diaglevel=wordbooker_get_option('wordbooker_advanced_diagnostics_level');
 	#echo "!!!!".$user_ID;
@@ -916,7 +917,7 @@ function wordbooker_option_notices() {
 	}
 }
 
-function wordbooker_renew_access_token ($userid=null) {
+function wordbooker_renew_access_token($userid=null) {
 	global $wpdb,$user_ID,$wbooker_user_id;
 	if(is_null($userid)){$userid=$user_ID;}
 	$wbooker_user_id=$userid;
@@ -925,24 +926,27 @@ function wordbooker_renew_access_token ($userid=null) {
 	$today=date('z');
 	foreach($result as $user_row){
 		if ($user_row->updated==$today) {
-		wordbooker_debugger("Access token already updated today"," ",-1,99) ; 
-		} else {
-		try {
-			$ret_code=wordbooker_get_access_token(unserialize($user_row->access_token));
-		} 	
-		catch (Exception $e) {
-			$error_code = $e->getCode();
-			$error_msg = $e->getMessage();
-			wordbooker_debugger("Access token refresh failed   ".$error_msg,$error_code,$post_id,-1,99) ;
-		}
-		$x=split('&',$ret_code);
-		$x=split('=',$x[0]);
-		$access_token=$x[1];
-		$sql= "Update " . WORDBOOKER_USERDATA . " set access_token = '" . serialize($access_token) . "', updated=".$today." where user_id=".$userid;
-		$result = $wpdb->query($sql);
-		wordbooker_debugger("Access token was ",unserialize($user_row->access_token),-1,99) ;
-		wordbooker_debugger("Access token is now ",$access_token,-1,99) ;
-		wordbooker_debugger("Access token updated"," ",-1,99) ;
+			wordbooker_debugger("Access token already updated today"," ",-1,99) ; 
+			} else {
+			try {
+				$ret_code=wordbooker_get_access_token(unserialize($user_row->access_token));
+			} 	
+			catch (Exception $e) {
+				$error_code = $e->getCode();
+				$error_msg = $e->getMessage();
+				wordbooker_debugger("Access token refresh failed   ".$error_msg,$error_code,-1,99) ;
+			}	
+		#	var_dump($user_ID);
+			$x=split('&',$ret_code);
+			$x=split('=',$x[0]);
+			$access_token=$x[1];
+			if (strlen($access_token) > 15) {
+				$sql= "Update " . WORDBOOKER_USERDATA . " set access_token = '" . serialize($access_token) . "', updated=".$today." where user_id=".$userid;
+				$result = $wpdb->query($sql);
+				wordbooker_debugger("Access token was ",unserialize($user_row->access_token),-1,99) ;
+				wordbooker_debugger("Access token is now ",$access_token,-1,99) ;
+				wordbooker_debugger("Access token updated"," ",-1,99) ;
+			}
 		}
 	}
 }
@@ -999,7 +1003,7 @@ function wordbooker_option_setup($wbuser) {
 	<div class="wordbooker_setup">
 <?php
 	$access_token=get_check_session();
-	$loginUrl2='https://www.facebook.com/dialog/oauth?client_id='.WORDBOOKER_FB_ID.'&redirect_uri=https://wordbooker.tty.org.uk/index2.html?br='.urlencode(get_bloginfo('wpurl').'&fbid='.WORDBOOKER_FB_ID).'&scope=publish_actions,publish_stream,offline_access,user_status,read_stream,email,user_groups,manage_pages,read_friendlists&response_type=token';
+	$loginUrl2='https://www.facebook.com/dialog/oauth?client_id='.WORDBOOKER_FB_ID.'&redirect_uri=https://wordbooker.tty.org.uk/index2.html?br='.urlencode(get_bloginfo('wpurl').'&fbid='.WORDBOOKER_FB_ID).'&scope=publish_actions,publish_stream,user_status,read_stream,email,user_groups,manage_pages,read_friendlists&response_type=token';
 
 	if ( is_null($access_token) ) {
 	wordbooker_debugger("No session found - lets login and authorise "," ",0,99) ;
@@ -1065,7 +1069,6 @@ function wordbooker_option_status($wbuser) {
 	echo '&nbsp;&nbsp;<input type="submit" name="perm_save" class="button-primary" value="'. __('Refresh Status', 'wordbooker').'" /></p>';
 	echo '</form> </div>';
 
-	wordbooker_renew_access_token();
     $description=__("Recent Facebook Activity for this site", 'wordbooker');
 
     $iframe='<iframe src="http://www.facebook.com/plugins/activity.php?site='.get_bloginfo('url').'&amp;width=600&amp;height=400&amp;header=true&amp;colorscheme=light&amp;font&amp;border_color&amp;recommendations=true" style="border:none; overflow:hidden; width:600px; height:400px"></iframe>';
@@ -1622,7 +1625,7 @@ function wordbooker_strip_images($images)
 {
 	global $post;
 	$newimages = array();
-	$image_types= array ('jpg','jpeg','gif','png','tif','bmp');
+	$image_types= array ('jpg','jpeg','gif','png','tif','bmp','jpe');
 	$strip_array= array ('addthis.com','gravatar.com','zemanta.com','wp-includes','plugins','favicon.ico','facebook.com','themes','mu-plugins','fbcdn.net');
 	foreach($images as $single){
 		$file_extension = trim(strtolower(substr($single , strrpos($single , '.') +1))); 
