@@ -117,7 +117,7 @@ function wordbooker_get_comments_from_facebook($user_id) {
 	return 0; }
 	$wordbooker_settings=get_option('wordbooker_settings'); 
 	$comment_approve=0;
-	if (isset($wordbooker_settings['wordbook_comment_approve'])) {$comment_approve=1;}
+	if (isset($wordbooker_settings['wordbooker_comment_approve'])) {$comment_approve=1;}
 	$sql='Select distinct fb_post_id from '.WORDBOOKER_POSTCOMMENTS.' where fb_comment_id is null and user_id='.$user_id.' and blog_id='.$blog_id. " and in_out is null ";
 	$rows = $wpdb->get_results($sql);
 	wordbooker_debugger("Blog posts with FB Posts against them : ".$sql,count($rows),-2,98);

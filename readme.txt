@@ -4,8 +4,8 @@ Contributors: SteveAtty
 Tags: facebook, news feed, wall, fan page wall, group wall, crosspost, Facebook Send, Facebook Like, social media, open graph.
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=8XNJMQCYDJT6U&lc=GB&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Requires at least: 2.9
-Tested up to: 3.3.1
-Stable tag: 2.1.10
+Tested up to: 3.3.2
+Stable tag: 2.1.11
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for. 
 
@@ -116,6 +116,15 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 2. Wordbooker Options : Overrides when posting
 
 == Changelog ==
+
+= Version 2.1.11 06/05/2012 =
+- Added some more diagnostics to the token exchange code to try to work out what is going on when its too short
+- Put in a patch so that if the token update fails it uses the existing token - this is a dirty fix but gives me time to work on a proper fix.
+- Put some null post_ID checking in to get round Wordpress returning ALL assets in a blog when you pass a null ID to it which blew up blogs when you went to add a post.
+- Changed some HTTP references to HTTPS to hopefully stop warnings when running blogs on HTTPS front ends.
+- Fixed a typo in the auto approve comment variable check. Thanks to Stefan Jacobi
+- Tidied up the schema cross check code and moved it into its own function. Part of longer term plan to strip a lot of the "non core" code out of the main wordbooker file.
+
 
 = Version 2.1.10 04/05/2012 =
 - Recoded the token renewal code to handle Facebook returning null values 
