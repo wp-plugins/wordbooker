@@ -67,15 +67,18 @@ function wordbooker_me_status($fb_id,$access_token) {
 }
 
 function wordbooker_get_access_token($access_token) {
- 	$url='https://graph.facebook.com/oauth/access_token?client_id='.WORDBOOKER_FB_ID.'&client_secret='.WORDBOOKER_FB_SECRET.'&grant_type=fb_exchange_token&fb_exchange_token='.$access_token.'&format=JSON-STRINGS';
+ 	$url='https://graph.facebook.com/oauth/access_token?client_id='.WORDBOOKER_FB_ID.'&client_secret='.WORDBOOKER_FB_SECRET.'&grant_type=fb_exchange_token&fb_exchange_token='.$access_token;
+	#var_dump($url);
 	$x=wordbooker_make_curl_call($url);
+	#var_dump($x);
 	return($x);
 }
 
 function wordbooker_status_feed($fb_id,$access_token) {
 	if (!isset($fb_id)){$fb_id='me';}
-        $url = 'https://graph.facebook.com/'.$fb_id.'/feed/?access_token='.$access_token.'&format=JSON';
+        $url = 'https://graph.facebook.com/'.$fb_id.'/feed/?access_token='.$access_token.'&format=JSON&limit=20';
 	$x=wordbooker_make_curl_call($url);
+	#var_dump($x);
         return($x);
 }
 function wordbooker_fb_pemissions($fb_id,$access_token) {
