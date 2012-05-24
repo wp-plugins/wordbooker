@@ -123,7 +123,7 @@ function wordbooker_store_post_result($post_id,$fb_post_id,$wpuserid) {
 	$result = $wpdb->query($sql);
 	wordbooker_insert_into_postlogs($post_id,$blog_id);
 	# Clear down the diagnostics for this post if the user has chosen so
-	if (isset($wordbooker_settings['wb_wordbooker_diag_clear'])){
+	if (isset($wordbooker_settings['wordbooker_clear_diagnostic'])){
 	$result = $wpdb->query(' DELETE FROM ' . WORDBOOKER_ERRORLOGS . ' WHERE   blog_id ='.$blog_id.' and post_id='.$post_id.' and (error_message not like "(%_%)" and method not like "% - result")'); }
 	# Now Change the publish flag for this post to mark it as published.
 	$wb_params=get_post_meta($post_id, '_wordbooker_options', true); 

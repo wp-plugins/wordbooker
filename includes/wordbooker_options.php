@@ -517,9 +517,17 @@ function wordbooker_blog_advanced_options() {
                 echo "</select><br /></P><p>";
 		echo '<label for="wb_wordbooker_diag_clear">'.__("Clear detailed diagnostics on successful post", 'wordbooker'). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_clear_diagnostics]" '.$checked_flag[$wordbooker_settings["wordbooker_clear_diagnostics"]].' ></P><p>';
+		echo '<label for="wb_wordbooker_token_log">'.__("Log Access token swapping actions", 'wordbooker'). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_token_log]" '.$checked_flag[$wordbooker_settings["wordbooker_token_log"]].' ></P><p>';
+
+		echo '<label for="wb_wordbooker_comment_log">'.__("Log Separate Admin and User entries for Comment logging", 'wordbooker'). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_comment_log]" '.$checked_flag[$wordbooker_settings["wordbooker_comment_log"]].' ></P><p>';
+
+		echo '<label for="wb_wordbooker_override_author">'.__("Override Post Author Options and use Current logged in user", 'wordbooker'). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_override_author]" '.$checked_flag[$wordbooker_settings["wordbooker_override_author"]].' ></P><p>';
+
 		echo '<label for="wb_wordbooker_disable_shorties">'.__("Disable the use of short URLs in links posted to Facebook", 'wordbooker'). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_disable_shorties]" '.$checked_flag[$wordbooker_settings["wordbooker_disable_shorties"]].' ></P><p>';
-
 		echo '<label for="wb_wordbooker_fb_rec_act">'.__("Include FB Recent activity on Wordbooker Options page", 'wordbooker'). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_fb_rec_act]" '.$checked_flag[$wordbooker_settings["wordbooker_fb_rec_act"]].' ></P><p>';
 
@@ -672,7 +680,7 @@ function wordbooker_user_level_options(){
 		}
 		if (!isset($wordbookeruser_settings['wordbooker_extract_length'])) {$wordbookeruser_settings['wordbooker_extract_length'] =$wordbooker_settings['wordbooker_extract_length'];}
 		echo '<label for="wb_extract_length">'.__('Length of Extract', 'wordbooker').' : </label><select id="wordbooker_extract_length" name="wordbooker_extract_length"  >';
-	        $arr = array(10=> "10",20=> "20",50=> "50",100=> "100",120=> "120",150=> "150",175=> "175",200=> "200",  250=> "250", 256=>__("256 (Default) ", 'wordbooker'), 270=>"270", 300=>"300", 350 => "350",400 => "400",500 => "500",600 => "600",700 => "700",800 => "800",900 => "900");
+	        $arr = array(10=> "10",20=> "20",50=> "50",100=> "100",120=> "120",150=> "150",175=> "175",200=> "200",  250=> "250", 256=>__("256 (Default) ", 'wordbooker'), 270=>"270", 300=>"300", 350 => "350",400 => "400",500 => "500",600 => "600",700 => "700",800 => "800",900 => "900",1000 => "1000",2000 => "2000",4000 => "4000",8000 => "8000");
                 foreach ($arr as $i => $value) {
                         if ($i==$wordbookeruser_settings['wordbooker_extract_length']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
                        else {echo '<option value="'.$i.'" >'.$arr[$i].'</option>';}

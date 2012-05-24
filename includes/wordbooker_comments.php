@@ -39,8 +39,8 @@ function wordbooker_poll_comments($userid=0) {
 	else {wordbooker_debugger("Outgoing comment handling disabled "," ",-2,9) ; }
 	wordbooker_debugger("Completed comment processing for ".$comment_row->name," In : ".$incoming." - Out : ".$outgoing,-2,9) ; 
 	wordbooker_debugger("Completed your comment processing "," In : ".$incoming." - Out : ".$outgoing,-3,9) ; 
-	$sql="insert into ".WORDBOOKER_POSTCOMMENTS." (user_id,blog_id,comment_timestamp,fb_post_id,wp_post_id,in_out) values (".$userid.",".$blog_id.",'".$processed_time."','".$incoming."','".$outgoing."','stat')";
-	$wpdb->query($sql);
+#	$sql="insert into ".WORDBOOKER_POSTCOMMENTS." (user_id,blog_id,comment_timestamp,fb_post_id,wp_post_id,in_out) values (".$userid.",".$blog_id.",'".$processed_time."','".$incoming."','".$outgoing."','stat')";
+#	$wpdb->query($sql);
 	}	
 	wordbooker_debugger("Comment handling completed "," ",-2,9) ; 
 }
@@ -141,7 +141,10 @@ function wordbooker_get_comments_from_facebook($user_id) {
 			foreach($all_comments->data as $single_comment) {
 				# Now check that we don't already have this comment in the table as it means we've processed it before (or sent it to FB)
 				$sql="Select fb_comment_id from ".WORDBOOKER_POSTCOMMENTS." where fb_comment_id='".$single_comment->id."'";
-				if(!$wpdb->query($sql)) {
+				$commq=$wpdb->query($sql);
+			#	wordbooker_debugger("running  ".$sql," Returns ".$commq,-2,8);
+			#	wordbooker_debugger("running  ".$sql," Returns ".$commq,-3,8);
+				if(!$commq) {
 					wordbooker_debugger("Found new comment for FB post ".$fb_comment->fb_post_id,"from : ".$single_comment->from->name,-2,9);
 					wordbooker_debugger("Found new comment for FB post ".$fb_comment->fb_post_id,"from : ".$single_comment->from->name,-3,9);
 					$commemail=$wordbooker_settings['wordbooker_comment_email'];
@@ -178,10 +181,13 @@ function wordbooker_get_comments_from_facebook($user_id) {
 						$data['comment_parent'] = ( 'approved' == $parent_status || 'unapproved' == $parent_status ) ? $data['comment_parent'] : 0;
 						$newComment= wp_insert_comment($data);
 						update_comment_meta($newComment, "fb_uid", $single_comment->from->id);
-						wordbooker_debugger("Inserted comment from ".$single_comment->from->name." into ".$wp_post_row->wp_post_id,"",-2,9);
-						wordbooker_debugger("Inserted comment from ".$single_comment->from->name." into ".$wp_post_row->wp_post_id,"",-3,9);
+						update_comment_meta($newComment, “akismet_result”, true);
+						#wordbooker_debugger("Inserted comment from ".$single_comment->from->name." into ".$wp_post_row->wp_post_id,"",-2,9);
+						wordbooker_debugger("Inserted comment from ".$single_comment->from->name." into ".$wp_post_row->wp_post_id." as ".$newComment,"",-3,9);
 						$sql="Insert into ".WORDBOOKER_POSTCOMMENTS." (fb_post_id,user_id,comment_timestamp,wp_post_id,blog_id,wp_comment_id,fb_comment_id,in_out) values ('".$fb_comment->fb_post_id."',".$user_id.",".strtotime($single_comment->created_time).",".$wp_post_row->wp_post_id.",".$blog_id.",".$newComment.",'".$single_comment->id."','in' )";
-						$wpdb->query($sql);
+						$commq2=$wpdb->query($sql);
+					#	wordbooker_debugger("Updating Comments table - running  ".$sql," Returns ".$commq2,-2,9);
+					#	wordbooker_debugger("Updating Comments table - running  ".$sql," Returns ".$commq2,-3,9);
 						$processed_posts=$processed_posts+1;
 					}
 					wordbooker_debugger("Finished comment inserts for FB post ".$fb_comment->fb_post_id,"",-2,9);

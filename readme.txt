@@ -4,8 +4,8 @@ Contributors: SteveAtty
 Tags: facebook, news feed, wall, fan page wall, group wall, crosspost, Facebook Send, Facebook Like, social media, open graph.
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=8XNJMQCYDJT6U&lc=GB&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Requires at least: 2.9
-Tested up to: 3.3.2
-Stable tag: 2.1.11
+Tested up to: 3.4
+Stable tag: 2.1.12
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for. 
 
@@ -99,7 +99,7 @@ If you're using the Share action link on your posts to Facebook it uses the META
 
 = How do I report problems or submit feature requests? =
 
-- Use the [Wordbooker Support Forums](http://wordbooker.tty.org.uk/forums/). Either start a new topic, or add to an existing topic.
+- Use the [Wordbooker Support Forums](http://wordbooker.tty.org.uk/forums/). Either start a new topic, or add to an existing topic. Please don't post any issue you have onto an existing thread unless you are experiencing the same problem.
 
 - Alternatively, for major feature requests go to the Wordbooker Page on [GoogleCode](http://code.google.com/p/wordbooker/).
 
@@ -117,6 +117,30 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 == Changelog ==
 
+= Version 2.1.12 24/05/2012 =
+- Fixed up another http reference that was upsetting secure Wordpress installs
+- Recoded the Access swapping code which handles json_decode differences when handling bare strings
+- Added the extended extra length values to the User Level Options.
+- Added akismet_result meta to allow FB comments to bypass Akismet checking - Thanks to Stefan Jacobi (Again!)
+- Recoded the Opions filling code in the Quick Edit block as it wasn't working - now uses the same logic as the block on the Edit/Add post page.
+- Added sequence check to Schema Cross check code.
+- Changed some of the diagnostic post levels to make things look better.
+- Added some more debugs to the comment handling process - to try to work out why some people have problems
+- Added an option to allow users to select if access token swapping should be logged.
+- Added an option to allow users to select if separate admin/user comment handling messages should be logged.
+- Changed width of several FB related columns to handle unexpectedly long strings being returned from Facebook.
+- Recoded the Login button so that it can use customised text for different languages.
+- Added option to allow the current logged in user to override the publish options set by the original post author
+- Added latest CA Certs file from the Facebook PHP SDK
+- Fixed a typo in the "Delete on success" logic
+- Added an ltrim to remove leading @ signs off the Name field to work round FB Bug : https://developers.facebook.com/bugs/404203109611190
+- Recoded access swapping process to remove application information.
+- Recoded the fql query calls to fix an apparent change in FB call structures.
+- Added better diagnostics to thumbnail/custom image postmeta tags.
+- Fixed a bug where images in scheduled posts were not processed.
+
+
+
 = Version 2.1.11 06/05/2012 =
 - Added some more diagnostics to the token exchange code to try to work out what is going on when its too short
 - Put in a patch so that if the token update fails it uses the existing token - this is a dirty fix but gives me time to work on a proper fix.
@@ -124,6 +148,7 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 - Changed some HTTP references to HTTPS to hopefully stop warnings when running blogs on HTTPS front ends.
 - Fixed a typo in the auto approve comment variable check. Thanks to Stefan Jacobi
 - Tidied up the schema cross check code and moved it into its own function. Part of longer term plan to strip a lot of the "non core" code out of the main wordbooker file.
+ 
 
 
 = Version 2.1.10 04/05/2012 =

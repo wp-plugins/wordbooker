@@ -50,7 +50,6 @@ function wordbooker_inner_custom_box() {
 		}
 	}
 	$x = get_post_meta($post->ID, '_wordbooker_options', true); 
-#	var_dump($x);
 	if(is_array($x)) {
 		foreach (array_keys($x) as $key ) {
 			if (substr($key,0,8)=='wordbook') {
@@ -61,6 +60,7 @@ function wordbooker_inner_custom_box() {
 	if(is_array($post_meta)) {
 		$wordbooker_settings=$post_meta;
 	}
+	#var_dump($user_ID);
 	if( !isset($wordbooker_settings['wordbooker_primary_type'])) {$wordbooker_settings['wordbooker_primary_type']=1;}
 	if( !isset($wordbooker_settings['wordbooker_secondary_type'])) {$wordbooker_settings['wordbooker_secondary_type']=1;}
 	$post_pub_prompt=__("Publish this post to Facebook", 'wordbooker');
@@ -173,8 +173,11 @@ if (count($fanpages)>1){
 		}
 
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_use_excerpt" '.$checked_flag[$wordbooker_settings["wordbooker_use_excerpt"]].' > Use Wordpress Excerpt for Wall Post <br />';
-		echo 'Facebook Post Attribute line: <INPUT NAME="wordbooker_attribute" size=80 maxlength=240 value="'.stripslashes($wordbooker_settings["wordbooker_attribute"]).'"><br />';	
+		echo 'Facebook Post Attribute line: <INPUT NAME="wordbooker_attribute" size=60 maxlength=240 value="'.stripslashes($wordbooker_settings["wordbooker_attribute"]).'"><br />';	
 		echo __('Facebook Status Update text', 'wordbooker').' : <INPUT NAME="wordbooker_status_update_text" size=60 maxlength=240 value="'.stripslashes($wordbooker_settings["wordbooker_status_update_text"]).'"><br />';
+
+		echo '<label for="wb_wordbooker_override_author">'.__("Override Post Author Options and use Current logged in user", 'wordbooker'). ' : </label>';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_override_author" '.$checked_flag[$wordbooker_settings["wordbooker_override_author"]].' ></P><p>';
 
 		if($post->post_type=='page'){
 			if(!isset($wordbooker_settings['wordbooker_like_button_page'])) {$wordbooker_settings['wordbooker_like_button_page']=1;}

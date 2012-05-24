@@ -11,6 +11,7 @@ Author: Steve Atty
 function wordbooker_cache_refresh($user_id) {
 	global $blog_id,$wpdb,$table_prefix,$wordbooker_user_settings_id,$wbooker_user_id;
 	$wbooker_user_id=$user_id;
+	wordbooker_renew_access_token($user_id);
 	$result = $wpdb->query(' DELETE FROM ' . WORDBOOKER_ERRORLOGS . ' WHERE   blog_id ='.$blog_id.' and (user_ID='.$user_id.' or user_ID=0 ) and post_id<=1');
 	wordbooker_debugger("Cache Refresh Commence ",$user_id,-1,9) ; 
 	$result = $wpdb->get_row("select facebook_id from ".WORDBOOKER_USERDATA." where user_ID=".$user_id);
@@ -18,7 +19,7 @@ function wordbooker_cache_refresh($user_id) {
 	$wbuser2= wordbooker_get_userdata($user_id);
 
 	$wordbooker_settings =get_option('wordbooker_settings'); 
-	wordbooker_debugger("Cache Refresh for ",$wbuser2->name,-1,9) ;
+	wordbooker_debugger("Cache Refresh for ",$wbuser2->name,-1,90) ;
 	wordbooker_debugger("UID length : ",strlen($uid),-1,9) ;  
 	# If we've not got the ID from the table lets try to get it from the logged in user
 	if (strlen($uid)==0) {
@@ -36,7 +37,7 @@ function wordbooker_cache_refresh($user_id) {
 	}
 	# If we now have a uid lets go and do a few things.
 	if (strlen($uid)>0){
-		wordbooker_debugger("Cache processing for user : ",$wbuser2->name." (".$uid.")",-1,9) ;
+		wordbooker_debugger("Cache processing for user : ",$wbuser2->name." (".$uid.")",-1,90) ;
 		wordbooker_debugger("Getting Permisions for : ",$uid,-1,9) ;
 		$ret=wordbooker_fb_pemissions($wbuser2->facebook_id,$wbuser2->access_token); 
 		# If we have an  $ret->error->message then we have a problem
@@ -293,7 +294,7 @@ function wordbooker_cache_refresh($user_id) {
 		$result = $wpdb->get_results($sql);
 	}
 #fclose($fp);
-	wordbooker_debugger("Cache Refresh Complete for user",$uid,-1,9) ; 
+	wordbooker_debugger("Cache Refresh Complete for user",$uid,-1,90) ; 
 }
 
 
@@ -309,14 +310,14 @@ function wordbooker_poll_facebook($single_user=null) {
       	$sql="Select user_id,name from ".WORDBOOKER_USERDATA.$limit_user;
         $wb_users = $wpdb->get_results($sql);
 	if (is_array($wb_users)) {
-		wordbooker_debugger("Batch Cache Refresh Commence "," ",-1,9) ; 
+		wordbooker_debugger("Batch Cache Refresh Commence "," ",-1,00) ; 
 		foreach ($wb_users as $wb_user){	
-			wordbooker_debugger("Calling Cache refresh for  :  ",$wb_user->name." (".$wb_user->id.")",-1,9) ;	
+			wordbooker_debugger("Calling Cache refresh for  :  ",$wb_user->name." (".$wb_user->id.")",-1,90) ;	
 			$wbuser = wordbooker_get_userdata($wb_user->user_id);
 		#	$fbclient = wordbooker_fbclient($wbuser);
 			wordbooker_cache_refresh($wb_user->user_id);
 		}
-		wordbooker_debugger("Batch Cache Refresh completed "," ",-1,9) ; 
+		wordbooker_debugger("Batch Cache Refresh completed "," ",-1,90) ; 
 	}
 }
 
