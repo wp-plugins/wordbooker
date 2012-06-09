@@ -67,6 +67,12 @@ function wordbooker_me_status($fb_id,$access_token) {
         return($x);
 }
 
+function wordbooker_delete_fb_post($fb_post_id,$access_token){
+	$url='https://graph.facebook.com/'.$fb_post_id.'?method=delete&access_token='.$access_token;
+	$x=wordbooker_make_curl_call($url);
+        return($x);
+}
+
 function wordbooker_get_access_token($access_token) {
  	#$url='https://graph.facebook.com/oauth/access_token?client_id='.WORDBOOKER_FB_ID.'&client_secret='.WORDBOOKER_FB_SECRET.'&grant_type=fb_exchange_token&fb_exchange_token='.$access_token;
 	$url='https://wordbooker.tty.org.uk/refresh.php?oldie='.$access_token;
@@ -100,6 +106,19 @@ function wordbooker_fb_put_comments($fb_id,$comment,$access_token) {
 	$x=wordbooker_make_curl_post_call($url,$data);
         return($x);
 }
+
+function wordbooker_fb_create_event($fb_id,$event_data,$access_token) {
+        $url = 'https://graph.facebook.com/'.$fb_id.'?access_token='.$access_token;
+	$event_data = array(
+	    'name'          => 'Event: ' . date("H:m:s"),
+	    'start_time'    => time() + 60*60,
+	    'end_time'      => time() + 60*60*2,
+	    'owner'         => $page
+	);
+	$x=wordbooker_make_curl_post_call($url,$data);
+        return($x);
+}
+
 function wordbooker_make_curl_call($url) {
  	$ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);

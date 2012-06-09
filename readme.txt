@@ -5,7 +5,7 @@ Tags: facebook, news feed, wall, fan page wall, group wall, crosspost, Facebook 
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=8XNJMQCYDJT6U&lc=GB&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Requires at least: 2.9
 Tested up to: 3.4
-Stable tag: 2.1.12
+Stable tag: 2.1.13
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for. 
 
@@ -41,12 +41,13 @@ If you are upgrading from version 1.x then DO NOT deactivate the plugin before y
 
 For more details on the various features please read the additional Features.txt file or check the [wordbooker](http://blogs.canalplan.org.uk/steve/category/wordbooker/) category on my blog which will contain information on the current and planned features list.
 
-- Works with a complementary [Facebook application](http://www.facebook.com/apps/application.php?id=254577506873) to update your Facebook Wall and friends' News Feeds about your blog and page postings.
+- Works with a complementary [Facebook application](http://www.facebook.com/apps/application.php?id=254577506873) to update your Facebook Wall and friends' News Feeds about your blog and page postings. Does NOT require you to register your own Facebook Application.
 - Supports multi-author blogs: each blog author notifies only their own friends of their blog/page posts.
 - Features a sidebar widget to display your current Facebook Status and picture. Multiple widgets can be supported in one single blog.
 - Features a sidebar widget to display a "Fan"/Like box for any of your pages. Multiple widgets can be supported in one single blog.
-- Features a Facebook Like Button which can be customised as to where it appears in your blog.
+- Features a Facebook Like/Send Button which can be customised as to where it appears in your blog.
 - Supports the posting of blog posts to Fan Pages and Groups (if you are an administrator of that page or group).
+- Pulls and pushes comments between your Blog Posts and the corresponsding Facebook Wall Post.
 
 
 == Frequently Asked Questions ==
@@ -59,10 +60,10 @@ It is certainly similar, but not the same:
 
 - With Wordbooker, your blog postings will have their own space in your Facebook Wall - just as if you'd written directly on to the wall yourself.
 
-- Your updates will show up with a nifty WordPress logo next to them instead of the normal "Notes" icon, plus a link back to the full entry on your blog.
+- Your updates will show up with a Worbooker logo next to them instead of the normal "Notes" icon, plus a link back to the full entry on your blog.
 
 
-= Why doesn't the Facebook Like / Facebook Share show up properly even though I've enabled it?
+= Why doesn't the Facebook Like /Send  show up properly even though I've enabled it?
 
 You may need to add the following to the HMTL tag in your theme : xmlns:fb="http://www.facebook.com/2008/fbml".
 So it looks something like :  <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:fb="http://www.facebook.com/2008/fbml">
@@ -78,8 +79,7 @@ So it looks something like :  <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v
 
 = My WordPress database doesn't use the default 'wp_' table prefix. Will this plugin still work? =
 
-Yes, and its also WPMU/ WP Networked Blogs mode compliant.
-
+Yes, and its also  WP Networked Blogs mode compliant.
 
 
 = How do I reset my Wordbooker/WordPress configuration so I can start over from scratch? =
@@ -101,8 +101,6 @@ If you're using the Share action link on your posts to Facebook it uses the META
 
 - Use the [Wordbooker Support Forums](http://wordbooker.tty.org.uk/forums/). Either start a new topic, or add to an existing topic. Please don't post any issue you have onto an existing thread unless you are experiencing the same problem.
 
-- Alternatively, for major feature requests go to the Wordbooker Page on [GoogleCode](http://code.google.com/p/wordbooker/).
-
 
 == KNOWN CONFLICTS ==
 
@@ -116,6 +114,19 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 2. Wordbooker Options : Overrides when posting
 
 == Changelog ==
+
+= Version 2.1.13 09/06/2012 =
+- Fixed a bug where the Schema 4 code was messing up the schema 5 changes
+- Fixed a huge bug in how posting as a non Wordbooker configured user was working.
+- Fixed problems with Facebook rejecting large images by forcing the plugin to use the medium sized image if it could find it.
+- Limit caption field to 900 characters.. not that it should ever be that big.
+- Added support for translation of post title and post caption.
+- Added a check for undefined.undefined in shortened urls
+- Added support for translation of post attribute
+- Added a check to stop All in One Calendar events from taking the blog out due to a bug in the calendar code.
+- Removed the call to delete the stored session when the token is killed by Facebook. This stops the Status widgets from failing.
+- Added Japanese language files - Thanks to 田中昌平(Shohei Tanaka)
+
 
 = Version 2.1.12 24/05/2012 =
 - Fixed up another http reference that was upsetting secure Wordpress installs

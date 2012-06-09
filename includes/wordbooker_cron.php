@@ -43,7 +43,7 @@ function wordbooker_cache_refresh($user_id) {
 		# If we have an  $ret->error->message then we have a problem
 		if($ret->error->message)  {
 		wordbooker_append_to_errorlogs("Your Facebook Session is invalid", "99", $ret->error->message,'',$user_id);
-		wordbooker_delete_user($user_id,1);
+		#wordbooker_delete_user($user_id,1);
 		return;
 		}
 		if(strlen(serialize($ret))<20) {wordbooker_debugger("Permissions fetch failed - skipping ",'',-1,9) ;} else {
