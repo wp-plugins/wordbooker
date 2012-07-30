@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.13
+Version: 2.1.14
 */
 
  /*
@@ -38,7 +38,7 @@ if (! isset($wordbooker_settings['wordbooker_extract_length'])) $wordbooker_sett
 
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
-define('WORDBOOKER_CODE_RELEASE',"2.1.13 R01 - Live to Fight Another Day");
+define('WORDBOOKER_CODE_RELEASE',"2.1.14 R00 - One Foot Before The Other");
 
 # For Troubleshooting 
 define('ADVANCED_DEBUG',false);
@@ -1273,7 +1273,7 @@ function wordbooker_option_support() {
 	$curlcontent=__("Curl is not installed",'wordbooker');
 	if (function_exists('curl_init')) {
 	  $ch = curl_init();
-	   curl_setopt($ch, CURLOPT_URL, 'https://graph.facebook.com/platform');
+	   curl_setopt($ch, CURLOPT_URL, 'https://graph.facebook.com/wordbooker');
 	   curl_setopt($ch, CURLOPT_HEADER, 0);
 	   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 	   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -1282,7 +1282,7 @@ function wordbooker_option_support() {
 	   $curlcontent = @curl_exec($ch);
 	   $x=json_decode($curlcontent);
 	   $curlstatus=__("Curl is available but cannot access Facebook - This is a problem (",'wordbooker').curl_errno($ch)." - ". curl_error($ch) ." )";
-	   if ($x->name=="Facebook Platform") {$curlstatus=__("Curl is available and can access Facebook - All is OK",'wordbooker');}
+	   if ($x->name=="Wordbooker") {$curlstatus=__("Curl is available and can access Facebook - All is OK",'wordbooker');}
   	 curl_close($ch);
 	}
 
@@ -2560,9 +2560,9 @@ function wordbooker_process_post_data($newstatus, $oldstatus, $post) {
 		}
 	}
 
-	if ( !wordbooker_get_userdata($wb_user_id)) {
+	if ( !wordbooker_get_userdata($post->post_author)) {
 		wordbooker_debugger("No Settings for ".$post->post_author." so using default author settings",' ',$post->ID,80);
-		$wb_user_id=$wordbooker_settings["wordbooker_default_author"]; }
+		$wb_user_id=$wordbooker_settings["wordbooker_default_author"]; 
 		# New get the user level settings from the DB
 		$wordbooker_user_settings_id="wordbookuser".$blog_id;
 		$wordbookuser=get_usermeta($wb_user_id,$wordbooker_user_settings_id);
@@ -2584,7 +2584,7 @@ function wordbooker_process_post_data($newstatus, $oldstatus, $post) {
 				}
 			}
 		}
-	#}
+	}
 	# OK now lets get the settings from the POST array
 	foreach (array_keys($_POST) as $key ) {
 		if (substr($key,0,8)=='wordbook') {
