@@ -42,6 +42,7 @@ class WordbookWidget extends WP_Widget {
 		$userid=$instance['snorl'];
 		$result = wordbooker_get_cache($userid);
 		echo $before_widget;
+		echo "<!-- Wordbooker FB Status Widget -->"; 
 		$name=$result->name;
          	if (strlen($instance['dname']) >0 ) $name=$instance['dname'];
 		$title = empty($instance['title']) ? '&nbsp;' : apply_filters('widget_title', $instance['title']);
