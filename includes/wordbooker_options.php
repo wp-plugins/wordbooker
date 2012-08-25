@@ -88,7 +88,7 @@ function wordbooker_option_manager() {
 	$sql="Delete from ".WORDBOOKER_POSTCOMMENTS." where in_out='stat'";
 	$wpdb->query($sql);
 	if ( ($wordbooker_settings['wordbooker_comment_cron']=='Never') || ($wordbooker_settings['wordbooker_comment_cron']=='Manual')){} else {
-	$dummy=wp_schedule_event(time(), $wordbooker_settings['wordbooker_comment_cron'], 'wb_comment_job');}
+	$dummy=wp_schedule_event(current_time( 'timestamp' ), $wordbooker_settings['wordbooker_comment_cron'], 'wb_comment_job');}
 	} 
 	//Set some defaults:
 	# If the closedboxes are not set then lets set them up - General Options open, all the rest closed
@@ -172,6 +172,63 @@ function wordbooker_option_manager() {
  		}
 		# If the user saved their config after setting permissions or chose to refresh the cache then lets refresh the cache
 		if ( isset ($_POST["perm_save"])) { wordbooker_cache_refresh($user_ID,$fbclient); }
+		
+				
+	// Lets poll if they want to - we only poll for this user
+		if ( isset($wordbooker_settings["wordbooker_comment_poll"])  && ADVANCED_DEBUG ){
+			$dummy=wordbooker_poll_facebook($user_ID);
+		}
+		wordbooker_blog_level_options();
+		wordbooker_user_level_options();
+		wordbooker_render_errorlogs();
+		wordbooker_status($user_ID);
+		wordbooker_option_status($wbuser);
+
+		echo "<br /><hr><h3>";
+ 	_e("Donate", 'wordbooker');
+		echo "</h3>";
+
+	if (defined('WORDBOOKER_PREMIUM')) { _e("You're using the Premium options in Wordbooker. You really should contribute something to the support and development of this plugin.  Please provide your FB Id number and your website when making payment so your details can be added to the <a href='http://wordbooker.tty.org.uk/thanks/'>'Thanks'</a>  list on the web site", 'wordbooker');
+} 		
+	_e("If you've found this extension useful then please feel free to donate to its support and future development. Please provide your FB Id number and your website when making payment so your details can be added to the <a href='http://wordbooker.tty.org.uk/thanks/'>'Thanks'</a> page on the Website", 'wordbooker'); 
+	  ?><br /><br />
+	<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+">
+<input type="image" src="https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal — The safer, easier way to pay online.">
+<img alt="" border="0" src="https://www.paypalobjects.com/en_GB/i/scr/pixel.gif" width="1" height="1">
+</form>
+<br /><br /><hr><h3>
+		<?php
+
+		wordbooker_option_support();
+?>
+	<script type="text/javascript">
+		//<![CDATA[
+		jQuery(document).ready( function($) {
+			// close postboxes that should be closed
+			$('.if-js-closed').removeClass('if-js-closed').addClass('closed');
+			// postboxes setup
+			//save_postboxes_state('<?php echo $wordbooker_hook; ?>');
+			postboxes.add_postbox_toggles('<?php echo $wordbooker_hook; ?>');
+		});
+		//]]>
+	</script>
+		
+		<?php
+
+        }
+	 else {
+		wordbooker_option_setup($wbuser);
+		wordbooker_render_errorlogs();
+		wordbooker_option_support();
+	}	
+
+}	
+
 
 function wordbooker_blog_level_options() {
 		global $ol_flash, $wordbooker_settings, $_POST, $wp_rewrite,$user_ID,$wpdb, $blog_id,$wordbooker_user_settings_id,$wordbooker_hook;
@@ -739,57 +796,6 @@ function wordbooker_user_level_options(){
 		echo '<input type="submit" value="'.__("Save User Options", 'wordbooker').'" name="swbus" class="button-primary"  />&nbsp;&nbsp;&nbsp;<input type="submit" name="rwbus" value="'.__("Reset to Blog Defaults", 'wordbooker').'" class="button-primary"  /></form><br /></div><hr>';
 
 }
-		
-	// Lets poll if they want to - we only poll for this user
-		if ( isset($wordbooker_settings["wordbooker_comment_poll"])  && ADVANCED_DEBUG ){
-			$dummy=wordbooker_poll_facebook($user_ID);
-		}
-		wordbooker_blog_level_options();
-		wordbooker_user_level_options();
-		wordbooker_render_errorlogs();
-		wordbooker_status($user_ID);
-		wordbooker_option_status($wbuser);
-
-		echo "<br /><hr><h3>";
- 	_e("Donate", 'wordbooker');
-		echo "</h3>";
-
-	if (defined('WORDBOOKER_PREMIUM')) { _e("You're using the Premium options in Wordbooker. You really should contribute something to the support and development of this plugin.  Please provide your FB Id number and your website when making payment so your details can be added to the <a href='http://wordbooker.tty.org.uk/thanks/'>'Thanks'</a>  list on the web site", 'wordbooker');
-} 		
-	_e("If you've found this extension useful then please feel free to donate to its support and future development. Please provide your FB Id number and your website when making payment so your details can be added to the <a href='http://wordbooker.tty.org.uk/thanks/'>'Thanks'</a> page on the Website", 'wordbooker'); 
-	  ?><br /><br />
-		<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
-		<input type="hidden" name="cmd" value="_s-xclick">
-		<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----">
-		<input type="image" src="https://www.paypal.com/en_US/GB/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online.">
-		<img alt="" border="0" src="https://www.paypal.com/en_GB/i/scr/pixel.gif" width="1" height="1">
-		</form><br /><br /><hr><h3>
-		<?php
-
-		wordbooker_option_support();
-?>
-	<script type="text/javascript">
-		//<![CDATA[
-		jQuery(document).ready( function($) {
-			// close postboxes that should be closed
-			$('.if-js-closed').removeClass('if-js-closed').addClass('closed');
-			// postboxes setup
-			//save_postboxes_state('<?php echo $wordbooker_hook; ?>');
-			postboxes.add_postbox_toggles('<?php echo $wordbooker_hook; ?>');
-		});
-		//]]>
-	</script>
-		
-		<?php
-
-        }
-	 else {
-		wordbooker_option_setup($wbuser);
-		wordbooker_render_errorlogs();
-		wordbooker_option_support();
-	}	
-
-	}	
 
 
 function wordbooker_admin_menu() {

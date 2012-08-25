@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.14
+Version: 2.1.15
 */
 
  /*
@@ -38,7 +38,7 @@ if (! isset($wordbooker_settings['wordbooker_extract_length'])) $wordbooker_sett
 
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
-define('WORDBOOKER_CODE_RELEASE',"2.1.14 R00 - One Foot Before The Other");
+define('WORDBOOKER_CODE_RELEASE',"2.1.15 R00 - A Decent Cup of Tea");
 
 # For Troubleshooting 
 define('ADVANCED_DEBUG',false);
@@ -487,7 +487,7 @@ function wordbooker_upgrade() {
 		wordbooker_set_option('schema_vers', "5.1");
 	}
 	$dummy=wp_clear_scheduled_hook('wb_cron_job');
-	$dummy=wp_schedule_event(time(), 'hourly', 'wb_cron_job');
+	$dummy=wp_schedule_event(current_time( 'timestamp' ), 'hourly', 'wb_cron_job');
 	#wordbooker_set_option('schema_vers', WORDBOOKER_SCHEMA_VERSION );
 	wp_cache_flush();
 }
@@ -826,7 +826,7 @@ function wordbooker_delete_from_errorlogs($post_id) {
 }
 
 function wordbooker_render_errorlogs() {
-	wordbooker_renew_access_token();
+//	wordbooker_renew_access_token();
 	global $user_ID, $wpdb,$blog_id;
 	$diaglevel=wordbooker_get_option('wordbooker_advanced_diagnostics_level');
 #	echo "!!!!".$user_ID;
@@ -1109,6 +1109,7 @@ function wordbooker_option_setup($wbuser) {
 	}
 	 else  {
 		wordbooker_debugger("Everything looks good so lets ask them to refresh "," ",0,99) ;
+		wordbooker_renew_access_token();
 			echo __("Wordbooker should now be authorised. Please click on the Reload Page Button",'wordbooker').'<br> <form action="options-general.php?page=wordbooker" method="post">';
 		echo '<p style="text-align: center;"><input type="submit" name="perm_save" class="button-primary" value="'. __('Reload Page', 'wordbooker').'" /></p>';
 		echo '</form> '; 
@@ -1244,9 +1245,6 @@ function wordbooker_option_support() {
 	<li><?php _e('Read the release notes for Wordbooker on the ', 'wordbooker'); ?><a href="http://wordbooker.tty.org.uk/current-release/">Wordbooker</a> <?php _e('blog.', 'wordbooker'); ?></li>
 	<li><?php _e('Check the Wordbooker ', 'wordbooker'); ?><a href="http://wordbooker.tty.org.uk/faqs/">Wordbooker</a> <?php _e('FAQs', 'wordbooker'); ?></li>
 	</ul>
-	<br />
-	<?php _e('Please provide the following information about your installation:', 'wordbooker'); ?>
-	<ul>
 <?php
 	$active_plugins = get_option('active_plugins');
 	$plug_info=get_plugins();
@@ -1270,7 +1268,7 @@ function wordbooker_option_support() {
 		$int_coding=mb_internal_encoding();
 		$mb_language=mb_language();
 	}
-	$curlcontent=__("Curl is not installed",'wordbooker');
+	$curlstatus=__("Curl is not installed",'wordbooker');
 	if (function_exists('curl_init')) {
 	  $ch = curl_init();
 	   curl_setopt($ch, CURLOPT_URL, 'https://graph.facebook.com/wordbooker');
@@ -1279,17 +1277,32 @@ function wordbooker_option_support() {
 	   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 	   curl_setopt($ch, CURLOPT_CAINFO, dirname(__FILE__) . '/includes/fb_ca_chain_bundle.crt');
 	   curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.5) Gecko/20041107 Firefox/1.0');
+	   curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4 );
+	   $mtime = microtime(); 
+	   $mtime = explode(' ', $mtime); 
+	   $mtime = $mtime[1] + $mtime[0]; 
+	   $starttime = $mtime; 
 	   $curlcontent = @curl_exec($ch);
+	   $mtime = microtime(); 
+	   $mtime = explode(" ", $mtime); 
+	   $mtime = $mtime[1] + $mtime[0]; 
+	   $endtime = $mtime; 
+	   $totaltime = ($endtime - $starttime);
 	   $x=json_decode($curlcontent);
 	   $curlstatus=__("Curl is available but cannot access Facebook - This is a problem (",'wordbooker').curl_errno($ch)." - ". curl_error($ch) ." )";
-	   if ($x->name=="Wordbooker") {$curlstatus=__("Curl is available and can access Facebook - All is OK",'wordbooker');}
+	   if ($x->name=="Wordbooker") {$curlstatus=__("Curl is available and can access Facebook - All is OK ( <i> Response Time was : 
+	    ".$totaltime." seconds </i> )",'wordbooker');}
+	 //   print_r(curl_getinfo($ch));
+	//    echo "<br />";
   	 curl_close($ch);
+  	   $curlv2=curl_version();
+  	 $curlv=$curlv2['version'];
 	}
-
 	$new_wb_table_prefix=$wpdb->base_prefix;
 	if (isset ($db_prefix) ) { $new_wb_table_prefix=$db_prefix;}
 	$info = array(	
 		'Wordbooker' => $plug_info['wordbooker/wordbooker.php']['Version'],
+		'Wordbooker Code Base' => WORDBOOKER_CODE_RELEASE,
 		'Wordbooker ID'=>WORDBOOKER_FB_ID,
 		'Wordbooker Schema' => $wordbooker_settings['schema_vers'],
 		'WordPress' => $wp_version,
@@ -1300,6 +1313,7 @@ function wordbooker_option_support() {
 		'JSON Encode' => WORDBOOKER_JSON_ENCODE,
 		'JSON Decode' => WORDBOOKER_JSON_DECODE,
 		'Curl Status' => $curlstatus,
+		'Curl Version' => $curlv,
 #		'Fopen Status' => $fopenstat2.$fopenstat,
 		'JSON Version' => $jsonvers,
 		'SimpleXML library' => $sxmlvers." (". WORDBOOKER_SIMPLEXML.")",
@@ -1316,7 +1330,9 @@ function wordbooker_option_support() {
 	if ($mysqlvers != 'Unknown' && !wordbooker_version_ok($mysqlvers, $mysqlminvers)) {
 		$version_errors['MySQL'] = $mysqlminvers;
 	}
-
+	echo "<br />";
+	_e('Please provide the following information about your installation:', 'wordbooker'); 
+	echo "<ul>";
 	foreach ($info as $key => $value) {
 		$suffix = '';
 		if (($minvers = $version_errors[$key])) {
@@ -1415,7 +1431,7 @@ function wordbooker_return_images($post_content,$postid,$flag) {
 			  $junk=wp_get_attachment_image_src( $attachment->ID,'medium');
 			  $og_image=$junk[0];
 			  if(!isset($og_image)) {$og_image=wp_get_attachment_url($attachment->ID);}
-			  wordbooker_debugger("Adding image",$og_image,$postidD,80) ;
+			//  wordbooker_debugger("Adding image",$og_image,$postidD,80) ;
 	
 		#	$post_content2 .= ' <img src="' . wp_get_attachment_url($attachment->ID) . '"> ';}
 			$post_content2 .= ' <img src="' . $og_image . '"> ';}
@@ -1958,7 +1974,7 @@ function wordbooker_header($blah){
 
 function display_wordbooker_fb_comment() {
 	global $post;
-	if(!is_single()){return;}
+	if(!is_single || is_front_page() && !is_category() && !is_archive() && !is_home()){return;}
 	$wordbooker_settings = wordbooker_options(); 
 	if (!isset($wordbooker_settings['wordbooker_use_fb_comments'])) { return;}
 	$wordbooker_post_options= get_post_meta($post->ID, '_wordbooker_options', true);  
@@ -2724,13 +2740,6 @@ function wordbooker_init () {
 
 function wordbooker_schema($attr) {
        # $attr .= " xmlns:fb=\"http://www.facebook.com/2008/fbml\" xmlns:og=\"http://ogp.me/ns#\" ";
-/*
-	if ( (is_single() || is_page()) && !is_front_page() && !is_category() && !is_home() ) {
-		 $attr .=' xmlns:fb="http://ogp.me/ns/fb#" xmlns:article="http://ogp.me/ns/article#"';}
-	else {
-	   	 $attr .= ' xmlns:fb="http://ogp.me/ns#  xmlns:website="http://ogp.me/ns/website#"';}
-*/
-
   if (preg_match('/(prefix\s*=\s*[\"|\'])/i', $attr)) {
     $attr = preg_replace('/(prefix\s*=\s*[\"|\'])/i', '${1}" og: http://ogp.me/ns#"', $attr);
   } else {
@@ -2740,21 +2749,26 @@ function wordbooker_schema($attr) {
 }
 
 function wordbooker_get_avatar($avatar, $comment, $size="50"){
+	if (is_null($comment)) {return $avatar;}
 	$author_url = $comment->comment_author_url;
-	#if(strlen($author_url) < 7) {return $avatar;}
-	#var_dump($author_url);
 	$fb_id=get_comment_meta($comment->comment_ID,'fb_uid',true);
 	if (strlen($fb_id)<11) {
-		if(strlen($author_url) < 10) {return $avatar;}
-		$parse_author_url = (parse_url($author_url));
-		$fb_id_array = explode('/',$parse_author_url['path']);
-		$sizer = count($fb_id_array) -1;
-		$fb_id =  $fb_id_array[$sizer];
+	  if(strlen($author_url) < 11) {return $avatar;}
+	  $parse_author_url = (parse_url($author_url));
+	  $fb_id_array = explode('/',$parse_author_url['path']);
+	  $sizer = count($fb_id_array) -1;
+	  $fb_id =  $fb_id_array[$sizer];
+	  if ($parse_author_url['host']=='plus.google.com') {
+	      $grav_url= "https://profiles.google.com/s2/photos/profile/".$fb_id;
+	  } 
+	  if ($parse_author_url['host']=='www.facebook.com') {
+	      $grav_url= "https://graph.facebook.com/".$fb_id."/picture?type=square";
+	  }
+	} else
+	 {
+	$grav_url= "https://graph.facebook.com/".$fb_id."/picture?type=square";
 	}
-	if (strlen($fb_id)>1) {
-		$grav_url= "https://graph.facebook.com/".$fb_id."/picture?type=square";
-		$avatar = "<img src='".$grav_url."'  height='".$size."' width='".$size."' class='avatar avatar-40 photo' /> ";
-	}
+	$avatar = "<img src='".$grav_url."'  height='".$size."' width='".$size."' class='avatar avatar-40 photo' /> ";
 	return $avatar;
 }
 
