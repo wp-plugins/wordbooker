@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.15
+Version: 2.1.16
 */
 
  /*
@@ -38,7 +38,7 @@ if (! isset($wordbooker_settings['wordbooker_extract_length'])) $wordbooker_sett
 
 define('WORDBOOKER_DEBUG', false);
 define('WORDBOOKER_TESTING', false);
-define('WORDBOOKER_CODE_RELEASE',"2.1.15 R00 - A Decent Cup of Tea");
+define('WORDBOOKER_CODE_RELEASE',"2.1.16 R00 - Machine Beside Machine");
 
 # For Troubleshooting 
 define('ADVANCED_DEBUG',false);
@@ -107,6 +107,12 @@ if (function_exists('simplexml_load_string') ) {
 	define('WORDBOOKER_SIMPLEXML', 'provided by PHP');
 } else {
 	define('WORDBOOKER_SIMPLEXML', 'is missing - this is a problem');
+}
+$curlv2=curl_version();
+$bitfields = Array('CURL_VERSION_IPV6');
+foreach($bitfields as $feature)
+{
+  if ($curlv2['features'] & constant($feature)) {define('WORDBOOKER_IPV', '6');} else { define('WORDBOOKER_IPV', '4');}
 }
 
 
@@ -1277,7 +1283,9 @@ function wordbooker_option_support() {
 	   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 	   curl_setopt($ch, CURLOPT_CAINFO, dirname(__FILE__) . '/includes/fb_ca_chain_bundle.crt');
 	   curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.5) Gecko/20041107 Firefox/1.0');
+	   if (WORDBOOKER_IPV==6 && isset($wordbooker_settings['wordbooker_use_curl_4'])) {
 	   curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4 );
+	   }
 	   $mtime = microtime(); 
 	   $mtime = explode(' ', $mtime); 
 	   $mtime = $mtime[1] + $mtime[0]; 
@@ -1636,7 +1644,7 @@ function wordbooker_fbclient_publishaction($wbuser,$post_id,$wpuserid)
 
 	if (isset($wordbooker_settings['wordbooker_use_url_not_slug']))
 	{
-		$wordbooker_fb_post['caption'] = get_bloginfo(‘url’);
+		$wordbooker_fb_post['caption'] = get_bloginfo('url');
 	}
 	$wordbooker_fb_post['caption']=wordwrap($wordbooker_fb_post['caption'],900);
 	wordbooker_debugger("Post Titled : ",$post_data['post_title'],$post_id,90) ;

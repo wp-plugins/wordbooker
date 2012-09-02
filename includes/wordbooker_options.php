@@ -541,7 +541,7 @@ echo "<TEXTAREA NAME='wordbooker_settings[wordbooker_comment_post_format]' ROWS=
 
 		echo '<label for="fb_comment_count">'.__("Number of comments to display", 'wordbooker'). ' :</label>';
 		if (strlen($wordbooker_settings["fb_comment_box_count"])<1) {$wordbooker_settings["fb_comment_box_count"]=20;}
-		if ($wordbooker_settings["fb_comment_box_count"]<2) {$wordbooker_settings["fb_comment_box_count"]=2;}
+		if ($wordbooker_settings["fb_comment_box_count"]<0) {$wordbooker_settings["fb_comment_box_count"]=0;}
 		echo' <INPUT NAME="wordbooker_settings[fb_comment_box_count]" size=3 maxlength=3 value="'.stripslashes($wordbooker_settings["fb_comment_box_count"]).'"> <br />';
 
 		echo '<label for="wordbooker_comment_notify">'.__('Enable notification of new comments', 'wordbooker').' : </label>';
@@ -616,6 +616,10 @@ function wordbooker_blog_advanced_options() {
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_fake_publish]" '.$checked_flag[$wordbooker_settings["wordbooker_fake_publish"]].' /></P><p>';
 		echo '<label for="wb_disable">'.__("Disable ALL Wordbooker functionality", 'wordbooker'). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_disabled]" '.$checked_flag[$wordbooker_settings["wordbooker_disabled"]].' /></P>';
+		if (WORDBOOKER_IPV=='6'){
+		  echo '<label for="wordbooker_use_curl_4">'.__("Force Curl IP Resolution to IPv4", 'wordbooker'). ' : </label>';
+		  echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_use_curl_4]" '.$checked_flag[$wordbooker_settings["wordbooker_use_curl_4"]].' ></P><p>';
+		  }
 
 		echo '<input type="hidden" name="wordbooker_settings[wordbooker_page_post]" value="-100" />';
 		echo '<input type="hidden" name="wordbooker_settings[wordbooker_orandpage]" value="2" />';
