@@ -5,7 +5,7 @@ Tags: facebook, news feed, wall, fan page wall, group wall, crosspost, Facebook 
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=8XNJMQCYDJT6U&lc=GB&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Requires at least: 2.9
 Tested up to: 3.4.1
-Stable tag: 2.1.16
+Stable tag: 2.1.17
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for. 
 
@@ -115,11 +115,14 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 == Changelog ==
 
-= Version 2.1.16  02/09/2012 =
+= Version 2.1.17  02/09/2012 =
 - Changes to the IPv6 options to curl - option is disabled unless IPv6 available in curl
 - Added IPv6 Fail back to IPv4 for DNS resolution in Advanced Options section
 - Replaced two backticks with quotes to fix problems with Use Site URL not Blog Description in Wall Posts
 - Changed minimum number of FB comments from 2 to 0.
+
+= Version 2.1.16  02/09/2012 =
+- Lost in SVN.
 
 = Version 2.1.15 25/08/2012 =
 - Changes to the PayPal code to use different servers which should speed up load times.
