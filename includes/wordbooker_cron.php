@@ -232,11 +232,19 @@ function wordbooker_cache_refresh($user_id) {
 		}
 */
 		$fb_status_info=wordbooker_status_feed($suid,$wbuser2->access_token);
+		# put in check for not being an array and skip...
 		#var_dump($fb_status_info);
 		foreach($fb_status_info->data as $fbstat) {
 			if(!is_null($fbstat->message)){
-				if ($suid==$fbstat->from->id) {
-	
+				//		var_dump($fbstat->to->data[0]->id);
+				//		var_dump("XXXX".$fbstat->from->id);
+		//		var_dump($fbstat->message);
+			//	echo "<br />";
+		//		var_dump($fbstat->from->id);
+		//		echo "<br />";
+		//		var_dump($fbstat->to->data[0]->id);
+		//		echo "<br /><br />";
+				if (($suid==$fbstat->from->id) && (is_null($fbstat->to->data[0]->id ) )) {
 					$status_message=$fbstat->message;
 					$status_time=$fbstat->created_time;
 					break; 

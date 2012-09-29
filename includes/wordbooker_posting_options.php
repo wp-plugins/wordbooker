@@ -49,16 +49,18 @@ function wordbooker_inner_custom_box() {
 			} 
 		}
 	}
+	# Only replace the defaults if we've got a good set of post options.
 	$x = get_post_meta($post->ID, '_wordbooker_options', true); 
-	if(is_array($x)) {
+	if (count($x)>7) {
 		foreach (array_keys($x) as $key ) {
 			if (substr($key,0,8)=='wordbook') {
-				$post_meta[$key]=str_replace( array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),array('&','"','\'','<','>',"\t"),$x[$key]);
+				$post_meta[$key]= html_entity_decode($x[$key],ENT_QUOTES);
+			//	$post_meta[$key]=str_replace( array('&amp;','&quot;','&#039;','&lt;','&gt;','&nbsp;&nbsp;'),array('&','"','\'','<','>',"\t"),$x[$key]);
 			}
 		}
-	}	
-	if(is_array($post_meta)) {
-		$wordbooker_settings=$post_meta;
+		if(is_array($post_meta)) {
+			$wordbooker_settings=$post_meta;
+		}
 	}
 	#var_dump($user_ID);
 	if( !isset($wordbooker_settings['wordbooker_primary_type'])) {$wordbooker_settings['wordbooker_primary_type']=1;}

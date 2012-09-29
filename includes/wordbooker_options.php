@@ -85,8 +85,8 @@ function wordbooker_option_manager() {
 	if ( isset($wordbooker_settings['wordbooker_fake_publish'])) { echo "<div align='center'><b> ".__('WARNING : Wordbooker is in TEST mode - NO Posts will be made to Facebook','wordbooker')."</b></div>";}}
 	if ($wordbooker_settings['wordbooker_comment_cron']!=wp_get_schedule('wb_comment_job')) {
 	$dummy=wp_clear_scheduled_hook('wb_comment_job');
-	$sql="Delete from ".WORDBOOKER_POSTCOMMENTS." where in_out='stat'";
-	$wpdb->query($sql);
+	//$sql="Delete from ".WORDBOOKER_POSTCOMMENTS." where in_out='stat'";
+	//$wpdb->query($sql);
 	if ( ($wordbooker_settings['wordbooker_comment_cron']=='Never') || ($wordbooker_settings['wordbooker_comment_cron']=='Manual')){} else {
 	$dummy=wp_schedule_event(current_time( 'timestamp' ), $wordbooker_settings['wordbooker_comment_cron'], 'wb_comment_job');}
 	} 

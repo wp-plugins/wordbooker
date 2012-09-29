@@ -4,8 +4,8 @@ Contributors: SteveAtty
 Tags: facebook, news feed, wall, fan page wall, group wall, crosspost, Facebook Send, Facebook Like, social media, open graph.
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=8XNJMQCYDJT6U&lc=GB&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Requires at least: 2.9
-Tested up to: 3.4.1
-Stable tag: 2.1.18
+Tested up to: 3.4.2
+Stable tag: 2.1.19
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for. 
 
@@ -114,6 +114,16 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 2. Wordbooker Options : Overrides when posting
 
 == Changelog ==
+
+= Version 2.1.19  29/09/2012 =
+- Fix an issue with gravatars not displaying properly when there is no gravatar associated with the commenter
+- Put in a check for Attachment post types
+- Fixed a problem where invalid but not null Facebook IDs broke the cron job.
+- Fixed a prob where sometimes user settings were lost on scheduling a post.
+- Minor change to the refresh token process to reduce load on the server.
+- Added code to delete records from Wordbooker Comments table when a comment is deleted from the blog.
+- Changes to the Status Fetch to reduce incidents of incorrect status messages being posted.
+- Added option to Comment Admin page to remove a comment entry from the Wordbooker Comments table
 
 = Version 2.1.18  03/09/2012 =
 - Rollback some changes in the curl include file which were from 2.2 
@@ -380,6 +390,9 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 
 == Upgrade Notice ==
+
+= 2.1.19 =
+Improved comment handling plus other various performance tweaks.
 
 = 2.1.16 =
 Adds code to supress warnings related to curl options plus a couple of other minor bugs.

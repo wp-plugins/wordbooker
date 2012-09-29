@@ -25,7 +25,7 @@ Author: Steve Atty
  * Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-function wordbooker_wall_post($post_id,$access_token,$post_title,$post_data,$target_id,$dummy,$target_name,$wpuserid){
+function wordbooker_wall_post($post_id,$access_token,$post_title,$post_data,$target_id,$dummy,$target_name,$wpuserid,$fb_uid){
 	if (isset($dummy)) { 	
 		wordbooker_debugger("Wall Post to ".$target_name." Test Only",'No Post Made',$post_id,90) ;
 		return;
@@ -34,7 +34,7 @@ function wordbooker_wall_post($post_id,$access_token,$post_title,$post_data,$tar
 	global $user_ID;
 try {
 		$result = wordbooker_fb_stream_pubish($post_data,$target_id);
-		wordbooker_store_post_result($post_id,$result->id,$wpuserid);
+		wordbooker_store_post_result($post_id,$result->id,$wpuserid,$fb_uid,$target_id);
 		wordbooker_debugger("Wall Post to ".$target_name." Succeeded - result : ",$result->id,$post_id,90) ;
 	    }
 	catch (Exception $e) {
@@ -45,7 +45,7 @@ try {
 	}
 }
 
-function wordbooker_link_post($post_id,$access_token,$post_title,$post_data,$target_id,$dummy,$target_name,$wpuserid){
+function wordbooker_link_post($post_id,$access_token,$post_title,$post_data,$target_id,$dummy,$target_name,$wpuserid,$fb_uid){
 	if (isset($dummy)) { 	
 		wordbooker_debugger("Link Post to ".$target_name." Test Only",'No Post Made',$post_id,90) ;
 		return;
@@ -56,7 +56,7 @@ function wordbooker_link_post($post_id,$access_token,$post_title,$post_data,$tar
 	global $user_ID;
 try {
 		$result = wordbooker_fb_link_publish($post_data2,$target_id);
-		wordbooker_store_post_result($post_id,$result->id,$wpuserid);
+		wordbooker_store_post_result($post_id,$result->id,$wpuserid,$fb_uid,$target_id);
 		wordbooker_debugger("Link Post to ".$target_name." Succeeded - result : ",$result->id,$post_id,90) ;
 	    }
 	catch (Exception $e) {
@@ -66,7 +66,7 @@ try {
 		wordbooker_debugger("Link Post to ".$target_name." Failed : ",$error_msg,$post_id,99) ;
 	}
 }
-function wordbooker_status_update($post_id,$access_token,$post_date,$target_id,$dummy,$target_name,$wpuserid) {
+function wordbooker_status_update($post_id,$access_token,$post_date,$target_id,$dummy,$target_name,$wpuserid,$fb_uid) {
 	global $wordbooker_post_options,$user_ID;
 	wordbooker_debugger("Setting status_text".$wordbooker_post_options['wordbooker_status_update_text']," ",$post_id) ; 
 	if (isset($dummy)) { 	
@@ -79,7 +79,7 @@ function wordbooker_status_update($post_id,$access_token,$post_date,$target_id,$
 	$data=array( 'access_token'=>$access_token,'message' =>$status_text);
 	try {
 		$result = wordbooker_fb_status_update($data,$target_id);
-		wordbooker_store_post_result($post_id,$result->id,$wpuserid);
+		wordbooker_store_post_result($post_id,$result->id,$wpuserid,$fb_uid,$target_id);
 		wordbooker_debugger("Status update  to ".$target_name." suceeded result : ",$result->id,$post_id,90) ;
 	    }
 	catch (Exception $e) {
@@ -90,7 +90,7 @@ function wordbooker_status_update($post_id,$access_token,$post_date,$target_id,$
 	}
 }
 
-function wordbooker_notes_post($post_id,$access_token,$post_title,$target_id,$dummy,$target_name,$wpuserid){
+function wordbooker_notes_post($post_id,$access_token,$post_title,$target_id,$dummy,$target_name,$wpuserid,$fb_uid){
 	if (isset($dummy)) { 	
 		wordbooker_debugger("Notes publish  to ".$target_name." Test Only",'No Post Made',$post_id,90) ;
 		return;
@@ -103,7 +103,7 @@ function wordbooker_notes_post($post_id,$access_token,$post_title,$target_id,$du
 	);
 	try {
 		$result = wordbooker_fb_note_publish($data,$target_id);
-		wordbooker_store_post_result($post_id,$result->id,$wpuserid);
+		wordbooker_store_post_result($post_id,$result->id,$wpuserid,$fb_uid,$target_id);
 		wordbooker_debugger("Note Publish to ".$target_name." result : ",$result->id,$post_id,90) ;
 	} 	
 	catch (Exception $e) {
@@ -115,11 +115,11 @@ function wordbooker_notes_post($post_id,$access_token,$post_title,$target_id,$du
 }
 
 
-function wordbooker_store_post_result($post_id,$fb_post_id,$wpuserid) {
+function wordbooker_store_post_result($post_id,$fb_post_id,$wpuserid,$fb_uid,$target_id) {
 	global $wpdb,$blog_id,$user_ID;
 	$tstamp=time();
 	$wordbooker_settings = wordbooker_options();
-	$sql=	' INSERT INTO ' . WORDBOOKER_POSTCOMMENTS . ' (fb_post_id,comment_timestamp,wp_post_id,blog_id,user_id) VALUES ("'.$fb_post_id.'",'.$tstamp.','.$post_id.','.$blog_id.','.$wpuserid.')';
+	$sql=	' INSERT INTO ' . WORDBOOKER_POSTCOMMENTS . ' (fb_post_id,comment_timestamp,wp_post_id,blog_id,user_id,fb_user_id,fb_target_id) VALUES ("'.$fb_post_id.'",'.$tstamp.','.$post_id.','.$blog_id.','.$wpuserid.','.$fb_uid.','.$target_id.')';
 	$result = $wpdb->query($sql);
 	wordbooker_insert_into_postlogs($post_id,$blog_id);
 	# Clear down the diagnostics for this post if the user has chosen so
