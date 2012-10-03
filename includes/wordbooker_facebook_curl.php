@@ -44,8 +44,7 @@ function wordbooker_fb_note_publish($data,$target){
         return($x);
 }
 function wordbooker_fql_query($query,$access_token) {
-        #$url = 'https://api.facebook.com/method/fql.query?access_token='.$access_token.'&query='.rawurlencode($query).'&format=JSON-STRINGS';
-	$url = 'https://api.facebook.com/method/fql.query?&query='.rawurlencode($query).'&format=JSON-STRINGS&access_token='.$access_token;
+        $url = 'https://api.facebook.com/method/fql.query?access_token='.$access_token.'&query='.rawurlencode($query).'&format=JSON-STRINGS';
 	$x=wordbooker_make_curl_call($url);
         return($x);
 }
@@ -56,50 +55,32 @@ function wordbooker_me($access_token) {
 }
 function wordbooker_get_fb_id($fb_id,$access_token) {
 	if (!isset($fb_id)){$fb_id='me';}
-	if(strlen($fb_id)<2){$fb_id='me';}
         $url = 'https://graph.facebook.com/'.$fb_id.'?fields=id,name,link&access_token='.$access_token.'&format=JSON-STRINGS';
 	$x=wordbooker_make_curl_call($url);
         return($x);
 }
 function wordbooker_me_status($fb_id,$access_token) {
 	if (!isset($fb_id)){$fb_id='me';}
-	if(strlen($fb_id)<2){$fb_id='me';}
         $url = 'https://graph.facebook.com/'.$fb_id.'?access_token='.$access_token.'&format=JSON';
 	$x=wordbooker_make_curl_call($url);
         return($x);
 }
 
-function wordbooker_delete_fb_post($fb_post_id,$access_token){
-	$url='https://graph.facebook.com/'.$fb_post_id.'?method=delete&access_token='.$access_token;
-	$x=wordbooker_make_curl_call($url);
-        return($x);
-}
-
 function wordbooker_get_access_token($access_token) {
- 	#$url='https://graph.facebook.com/oauth/access_token?client_id='.WORDBOOKER_FB_ID.'&client_secret='.WORDBOOKER_FB_SECRET.'&grant_type=fb_exchange_token&fb_exchange_token='.$access_token;
-	#$url='https://wordbooker.tty.org.uk/refresh.php?oldie='.$access_token;
-	$version=explode(" ",WORDBOOKER_CODE_RELEASE);
-	$url='http://ccgi.pemmaquid.plus.com/cgi-bin/refresh.cgi?oldie='.$access_token.'&version='.$version[0];
-	//var_dump($url);
-	$x=wordbooker_make_curl_call2($url);
-	wordbooker_debugger("Access token returns ",print_r($x,true),-5,98) ;
+ 	$url='https://graph.facebook.com/oauth/access_token?client_id='.WORDBOOKER_FB_ID.'&client_secret='.WORDBOOKER_FB_SECRET.'&grant_type=fb_exchange_token&fb_exchange_token='.$access_token.'&format=JSON-STRINGS';
+	$x=wordbooker_make_curl_call($url);
 	return($x);
 }
 
 function wordbooker_status_feed($fb_id,$access_token) {
 	if (!isset($fb_id)){$fb_id='me';}
-	if(strlen($fb_id)<2){$fb_id='me';}
-        $url = 'https://graph.facebook.com/'.$fb_id.'/feed/?access_token='.$access_token.'&format=JSON&limit=150';
-       #var_dump($url);
+        $url = 'https://graph.facebook.com/'.$fb_id.'/feed/?access_token='.$access_token.'&format=JSON';
 	$x=wordbooker_make_curl_call($url);
-	#var_dump($x);
         return($x);
 }
 function wordbooker_fb_pemissions($fb_id,$access_token) {
 	if (!isset($fb_id)){$fb_id='me';}
-	if(strlen($fb_id)<2){$fb_id='me';}
         $url = 'https://graph.facebook.com/'.$fb_id.'/permissions?access_token='.$access_token.'&format=JSON';
-        #var_dump($url);
 	$x=wordbooker_make_curl_call($url);
         return($x);
 }
@@ -115,33 +96,15 @@ function wordbooker_fb_put_comments($fb_id,$comment,$access_token) {
 	$x=wordbooker_make_curl_post_call($url,$data);
         return($x);
 }
-
-function wordbooker_fb_create_event($fb_id,$event_data,$access_token) {
-        $url = 'https://graph.facebook.com/'.$fb_id.'?access_token='.$access_token;
-	$event_data = array(
-	    'name'          => 'Event: ' . date("H:m:s"),
-	    'start_time'    => time() + 60*60,
-	    'end_time'      => time() + 60*60*2,
-	    'owner'         => $page
-	);
-	$x=wordbooker_make_curl_post_call($url,$data);
-        return($x);
-}
-
 function wordbooker_make_curl_call($url) {
  	$ch = curl_init();
- 	global $wordbooker_settings;	
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
 	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
 	curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-	curl_setopt($ch,CURLOPT_USERAGENT,WORDBOOKER_USER_AGENT);
 	curl_setopt($ch, CURLOPT_CAINFO, dirname(__FILE__) . '/fb_ca_chain_bundle.crt');
-	if (WORDBOOKER_IPV==6 && isset($wordbooker_settings['wordbooker_use_curl_4'])) {
-	curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4 );
-	}
         $response = curl_exec($ch);
 	$err_no=curl_errno($ch);
 	$err_text=curl_error($ch);
@@ -152,47 +115,14 @@ function wordbooker_make_curl_call($url) {
 	}
 	 return( $x);
 }
-
-function wordbooker_make_curl_call2($url) {
- 	$ch = curl_init();
- 	global $wordbooker_settings;	
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
-	curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-	curl_setopt($ch,CURLOPT_USERAGENT,WORDBOOKER_USER_AGENT);
-	curl_setopt($ch, CURLOPT_CAINFO, dirname(__FILE__) . '/fb_ca_chain_bundle.crt');
-	if (WORDBOOKER_IPV==6 && isset($wordbooker_settings['wordbooker_use_curl_4'])) {
-	curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4 );
-	}
-        $response = curl_exec($ch);
-	$err_no=curl_errno($ch);
-	$err_text=curl_error($ch);
-        curl_close($ch);
-	wordbooker_debugger("Curl Call returns ",print_r($response,true),-5,98) ;
-	$x=json_decode($response);
-	if (is_null($x)) {$x=$response;}
-	if (isset($x->error->message)) { 
-		throw new Exception ($x->error->message);
-	}
-	 return( $x);
-}
-
 function wordbooker_make_curl_post_call($url,$data) {
  	$ch = curl_init();
- 	global $wordbooker_settings;	
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
 	curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-	curl_setopt($ch,CURLOPT_USERAGENT,WORDBOOKER_USER_AGENT);
    	curl_setopt($ch, CURLOPT_CAINFO, dirname(__FILE__) . '/fb_ca_chain_bundle.crt');
-	if (WORDBOOKER_IPV==6 && isset($wordbooker_settings['wordbooker_use_curl_4'])) {
-	curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4 );
-	}
    	 curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         $response = curl_exec($ch);
 	$err_no=curl_errno($ch);

@@ -75,12 +75,11 @@ class FacebookWidget extends WP_Widget {
 		} 
 		$fanpages=unserialize(stripslashes($instance['fanpages']));
 		$url=$fanpages[$instance['pid']];
-		echo "<!-- Wordbooker FB like box widget -->";
 		if ( (!isset($wordbooker_settings['wordbooker_like_button_show']) && !isset($wordbooker_settings['wordbooker_like_share_too'])) || isset($wordbooker_settings['wordbooker_iframe'])) {
-	echo'<iframe src="https://www.facebook.com/plugins/likebox.php?href='.urlencode(strtolower($url)).'&amp;width='.$width.'&amp;colorscheme='.$scheme.'&amp;show_faces='.$faces.'&amp;border_color=%23'.$border_colour.'&amp;stream='.$stream.'&amp;header='.$header.'&amp;height='.$height.'" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:'.$width.'px; height:'.$height.'px;" allowTransparency="true"></iframe>';
+	echo'<iframe src="http://www.facebook.com/plugins/likebox.php?href='.urlencode($url).'&amp;width='.$width.'&amp;colorscheme='.$scheme.'&amp;show_faces='.$faces.'&amp;border_color=%23'.$border_colour.'&amp;stream='.$stream.'&amp;header='.$header.'&amp;height='.$height.'" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:'.$width.'px; height:'.$height.'px;" allowTransparency="true"></iframe>';
 		}
 		else {
-		echo '<fb:like-box href="'.strtolower($url).'" width="'.$width.'" height="'.$height.'"  colorscheme="'.$scheme.'" show_faces="'.$faces.'" border_color="#'.$border_colour.'" stream="'.$stream.'" header="'.$header.'"></fb:like-box>';
+		echo '<fb:like-box href="'.$url.'" width="'.$width.'" height="'.$height.'"  colorscheme="'.$scheme.'" show_faces="'.$faces.'" border_color="#'.$border_colour.'" stream="'.$stream.'" header="'.$header.'"></fb:like-box>';
 		}	
 	#	echo '<br /><div class="fb-add-to-timeline" data-show-faces="true" data-mode="button"></div>';
 		echo $after_widget;
@@ -113,7 +112,7 @@ class FacebookWidget extends WP_Widget {
 		global $user_ID,$wpdb,$table_prefix,$blog_id;
 		$result = wordbooker_get_cache($user_ID,'pages',1);
 		$fanpages=unserialize($result->pages);
-		$xx=array('id'=>'FW:254577506873','name'=>'Wordbooker','url'=>'https://www.facebook.com/wordbooker');
+		$xx=array('id'=>'FW:254577506873','name'=>'Wordbooker','url'=>'http://www.facebook.com/Wordbooker');
 		$fanpages[]=$xx;
 		$default = array( 'title' => __('Fan Page','wordbooker'), 'snorl'=>$user_ID, 'dname'=>'', 'pid'=>'254577506873', 'stream'=>'false', 'connections'=>6, 'width'=>188, 'height'=>260, 'header'=>'false', 'scheme'=>'light' );
 		$instance = wp_parse_args( (array) $instance, $default );
