@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.20
+Version: 2.1.21
 */
 
  /*
@@ -38,7 +38,7 @@ function wordbooker_global_definitions() {
 	$wbooker_user_id=0;
 	define('WORDBOOKER_DEBUG', false);
 	define('WORDBOOKER_TESTING', false);
-	define('WORDBOOKER_CODE_RELEASE',"2.1.20 R00 - Embroidery in childhood");
+	define('WORDBOOKER_CODE_RELEASE',"2.1.21 R00 - A Wish For Something More");
 
 	# For Troubleshooting 
 	define('ADVANCED_DEBUG',false);
@@ -73,7 +73,7 @@ function wordbooker_global_definitions() {
 	define('WORDBOOKER_SETTINGS','wordbooker_settings');
 	define('WORDBOOKER_OPTION_SCHEMAVERS', 'schema_vers');
 	define('WORDBOOKER_USER_AGENT','WordPress/' . $wp_version . '; Wordbooker-' .WORDBOOKER_CODE_RELEASE );
-	define('WORDBOOKER_SCHEMA_VERSION', '5.4');
+	define('WORDBOOKER_SCHEMA_VERSION', '5.5');
 
 	$new_wb_table_prefix=$wpdb->base_prefix;
 	if (isset ($db_prefix) ) { $new_wb_table_prefix=$db_prefix;}
@@ -279,8 +279,8 @@ function wordbooker_activate() {
 		  `wp_comment_id` int(20) NOT NULL,
 		  `fb_comment_id` varchar(240) default NULL,
 		  `in_out` varchar(20) default NULL,
-		    `FB_USER_ID` varchar(120) NOT NULL,
-		   `FB_TARGET_ID` varchar(120) NOT NULL,
+		    `FB_USER_ID` varchar(120)  NULL,
+		   `FB_TARGET_ID` varchar(120)  NULL,
 		  UNIQUE KEY `fb_comment_id_idx` (`fb_comment_id`),
 		  KEY `in_out_idx` (`in_out`),
 		  KEY `main_index` (`blog_id`,`wp_post_id`,`fb_post_id`,`wp_comment_id`)
@@ -525,6 +525,12 @@ function wordbooker_upgrade() {
 		wordbooker_set_option('schema_vers', "5.4");
 	}
 	
+	if ($wordbooker_settings['schema_vers']=='5.4') {
+		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_POSTCOMMENTS. '  CHANGE `FB_USER_ID` `FB_USER_ID` VARCHAR( 120 )  NULL  ');
+		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_POSTCOMMENTS. ' CHANGE `FB_TARGET_ID` `FB_TARGET_ID` VARCHAR( 120 )  NULL  ');
+		wordbooker_set_option('schema_vers', "5.5");
+	}
+		
 	$dummy=wp_clear_scheduled_hook('wb_cron_job');
 	$dummy=wp_schedule_event(current_time( 'timestamp' ), 'hourly', 'wb_cron_job');
 	#wordbooker_set_option('schema_vers', WORDBOOKER_SCHEMA_VERSION );
