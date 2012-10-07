@@ -5,7 +5,7 @@ Tags: facebook, news feed, wall, fan page wall, group wall, crosspost, Facebook 
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=8XNJMQCYDJT6U&lc=GB&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Requires at least: 2.9
 Tested up to: 3.4.2
-Stable tag: 2.1.20
+Stable tag: 2.1.22
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for. 
 
@@ -114,6 +114,16 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 2. Wordbooker Options : Overrides when posting
 
 == Changelog ==
+
+= Version 2.1.22  05/10/2012 =
+- Changes to refresh_token calls to reduce load on server.
+- Add wrapper round curl_version to stop errors blowing things up.
+- Added new image size for og:tags so all new images will have a specific image for wordbooker og tags. 
+- Change og image code to use the new size, or fail back to large if missing.
+
+
+= Version 2.1.21  03/10/2012 =
+- Two new fields that should have been NULL weren't so data failed to get inserted into a table
 
 = Version 2.1.20  02/10/2012 =
 - DB changes needed to support new feature not included in create script so new installs would mis-behave
@@ -394,6 +404,9 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 
 == Upgrade Notice ==
+
+= 2.1.21 =
+Changes to og:tag images.
 
 = 2.1.20 =
 Database problem with new installs fixed.

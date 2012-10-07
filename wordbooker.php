@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.20
+Version: 2.1.22
 */
 
  /*
@@ -38,7 +38,7 @@ function wordbooker_global_definitions() {
 	$wbooker_user_id=0;
 	define('WORDBOOKER_DEBUG', false);
 	define('WORDBOOKER_TESTING', false);
-	define('WORDBOOKER_CODE_RELEASE',"2.1.20 R00 - Embroidery in childhood");
+	define('WORDBOOKER_CODE_RELEASE',"2.1.22 R00 - A Wish For Something More");
 
 	# For Troubleshooting 
 	define('ADVANCED_DEBUG',false);
@@ -73,7 +73,7 @@ function wordbooker_global_definitions() {
 	define('WORDBOOKER_SETTINGS','wordbooker_settings');
 	define('WORDBOOKER_OPTION_SCHEMAVERS', 'schema_vers');
 	define('WORDBOOKER_USER_AGENT','WordPress/' . $wp_version . '; Wordbooker-' .WORDBOOKER_CODE_RELEASE );
-	define('WORDBOOKER_SCHEMA_VERSION', '5.4');
+	define('WORDBOOKER_SCHEMA_VERSION', '5.5');
 
 	$new_wb_table_prefix=$wpdb->base_prefix;
 	if (isset ($db_prefix) ) { $new_wb_table_prefix=$db_prefix;}
@@ -155,7 +155,7 @@ function wordbooker_global_definitions() {
 			return $var;
 		}
 	}
-
+	if (function_exists('curl_version')) {
 	$curlv2=curl_version();
 	$curlv=$curlv2['version'];
 	$bitfields = Array('CURL_VERSION_IPV6');
@@ -163,7 +163,7 @@ function wordbooker_global_definitions() {
 	{
 	  if ($curlv2['features'] & constant($feature)) {define('WORDBOOKER_IPV', '6');} else { define('WORDBOOKER_IPV', '4');}
 	}
-
+} else {define('WORDBOOKER_IPV', '4');}
 
 	define('GLOBAL_DEFINITIONS_NOT_CALLED','not a problem');
 }
@@ -279,8 +279,8 @@ function wordbooker_activate() {
 		  `wp_comment_id` int(20) NOT NULL,
 		  `fb_comment_id` varchar(240) default NULL,
 		  `in_out` varchar(20) default NULL,
-		    `FB_USER_ID` varchar(120) NOT NULL,
-		   `FB_TARGET_ID` varchar(120) NOT NULL,
+		    `FB_USER_ID` varchar(120)  NULL,
+		   `FB_TARGET_ID` varchar(120)  NULL,
 		  UNIQUE KEY `fb_comment_id_idx` (`fb_comment_id`),
 		  KEY `in_out_idx` (`in_out`),
 		  KEY `main_index` (`blog_id`,`wp_post_id`,`fb_post_id`,`wp_comment_id`)
@@ -525,6 +525,12 @@ function wordbooker_upgrade() {
 		wordbooker_set_option('schema_vers', "5.4");
 	}
 	
+	if ($wordbooker_settings['schema_vers']=='5.4') {
+		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_POSTCOMMENTS. '  CHANGE `FB_USER_ID` `FB_USER_ID` VARCHAR( 120 )  NULL  ');
+		$result = $wpdb->query('ALTER TABLE '. WORDBOOKER_POSTCOMMENTS. ' CHANGE `FB_TARGET_ID` `FB_TARGET_ID` VARCHAR( 120 )  NULL  ');
+		wordbooker_set_option('schema_vers', "5.5");
+	}
+		
 	$dummy=wp_clear_scheduled_hook('wb_cron_job');
 	$dummy=wp_schedule_event(current_time( 'timestamp' ), 'hourly', 'wb_cron_job');
 	#wordbooker_set_option('schema_vers', WORDBOOKER_SCHEMA_VERSION );
@@ -796,7 +802,6 @@ function wordbooker_delete_from_errorlogs($post_id) {
 }
 
 function wordbooker_render_errorlogs() {
-//	wordbooker_renew_access_token();
 	global $user_ID, $wpdb,$blog_id;
 	$diaglevel=wordbooker_get_option('wordbooker_advanced_diagnostics_level');
 #	echo "!!!!".$user_ID;
@@ -1406,8 +1411,12 @@ function wordbooker_return_images($post_content,$postid,$flag) {
 	if ( $attachments ) {
 		foreach ( $attachments as $attachment ) {
 			if ($attachment->post_type=='attachment') {
-			  $junk=wp_get_attachment_image_src( $attachment->ID,'medium');
+			  $junk=wp_get_attachment_image_src( $attachment->ID,'wordbooker_og');
 			  $og_image=$junk[0];
+			  if(!isset($og_image)) {
+				$junk=wp_get_attachment_image_src( $attachment->ID,'large');
+				$og_image=$junk[0];
+			  }
 			  if(!isset($og_image)) {$og_image=wp_get_attachment_url($attachment->ID);}
 			//  wordbooker_debugger("Adding image",$og_image,$postidD,80) ;
 	
@@ -2726,6 +2735,7 @@ add_action('delete_user', 'wordbooker_remove_user');
 
 function wordbooker_init () {
 	load_plugin_textdomain ('wordbooker',false,basename(dirname(__FILE__)).'/languages');
+	add_image_size( 'wordbooker_og', 500, 500 );
 }
 
 function wordbooker_schema($attr) {
