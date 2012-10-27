@@ -15,6 +15,8 @@ function wordbooker_option_init(){
 
 function worbooker_validate_options($options) {
 	global $user_ID;
+	if ($options["wordbooker_close_comment"]<0) {$options["wordbooker_close_comment"]=0;}
+	if (!is_numeric($options["wordbooker_close_comment"])) {$options["wordbooker_close_comment"]=0;}
 	# Do they want to reset? If so we reset the options and let WordPress do the business for us!
 	if (isset( $_POST["mcp"] )) {
 	 wordbooker_poll_comments($user_ID);
@@ -313,7 +315,8 @@ function wordbooker_blog_posting_options() {
 		echo' <INPUT NAME="wordbooker_settings[wordbooker_status_update_text]" size=60 maxlength=60 value="'.stripslashes($wordbooker_settings["wordbooker_status_update_text"]).'"> ';
 
 		echo '<br /><label for="wb_action_link">'.__("Action Link Option ", 'wordbooker'). ': </label><select id="wordbooker_actionlink" name="wordbooker_settings[wordbooker_actionlink]"  >';	
-      		 $arr = array(100=> "None ",  200=> __("Share Link ", 'wordbooker'), 300=>__("Read Full Article", 'wordbooker'));
+      		if($wordbooker_settings['wordbooker_actionlink']==200) {$wordbooker_settings['wordbooker_actionlink']=100;}
+      		 $arr = array(100=> __("Share Link ", 'wordbooker'), 300=>__("Read Full Article", 'wordbooker'));
                 foreach ($arr as $i => $value) {
                         if ($i==$wordbooker_settings['wordbooker_actionlink']){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
                        else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}}
@@ -485,7 +488,7 @@ function wordbooker_blog_comment_options() {
 		echo '<br /><label for="wb_publish_comment_handling">'.__("Enable Comment processing", 'wordbooker'). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_comment_handling]" '.$checked_flag[$wordbooker_settings["wordbooker_comment_handling"]].' /><br />';
 		echo '<label for="wb_import_comment">&nbsp;&nbsp;'.__("Disable Comment Importing", 'wordbooker'). ': </label>';
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_comment_pul]" '.$checked_flag[$wordbooker_settings["wordbooker_comment_pull"]]. '/> <br />';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_comment_pull]" '.$checked_flag[$wordbooker_settings["wordbooker_comment_pull"]]. '/> <br />';
 		echo '<label for="wb_import_comment">&nbsp;&nbsp;'.__("Disable Comment Exporting", 'wordbooker'). ': </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_comment_push]" '.$checked_flag[$wordbooker_settings["wordbooker_comment_push"]]. '/> <br />';
 		if (!isset($wordbooker_settings["wordbooker_comment_attribute"])) {
@@ -504,6 +507,15 @@ echo "<TEXTAREA NAME='wordbooker_settings[wordbooker_comment_post_format]' ROWS=
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_comment_put]" '.$checked_flag[$wordbooker_settings["wordbooker_comment_put"]].' /> <br />  ';
 		echo '<label for="wb_publish_comment_approve">'.__("Auto Approve imported comments", 'wordbooker'). ' :</label> ';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_comment_approve]" '.$checked_flag[$wordbooker_settings["wordbooker_comment_approve"]].' /><br />';
+		echo '<label for="wb_attribute">'.__('Comment Cut off (days) ', 'wordbooker').' : </label>';
+		if ($wordbooker_settings["wordbooker_close_comment"]<0) {$wordbooker_settings["wordbooker_close_comment"]=0;}
+		if (!is_numeric($wordbooker_settings["wordbooker_close_comment"])) {$wordbooker_settings["wordbooker_close_comment"]=0;}
+		$close_comments=get_option('close_comments_for_old_posts');
+		$close_days_old=get_option('close_comments_days_old');
+		echo '<INPUT NAME="wordbooker_settings[wordbooker_close_comment]" size=4 maxlength=4 value="'.stripslashes($wordbooker_settings["wordbooker_close_comment"]).'"> '.__('0 = Use blog settings', 'wordbooker');
+		if ($close_comments) {$cdostring=sprintf(__("(Currently set to %s days)",'wordbooker'),$close_days_old);
+	} else {$cdostring=__("(Currently not set)",'wordbooker'); }
+		echo " ".$cdostring.'<br />';
 		if ($wordbooker_settings['wordbooker_comment_cron']!='Never') {
 		echo '<br /><input type="submit" value="'.__("Run Comment Handling Now", 'wordbooker').'" name="mcp" class="button-primary"  />';
 		}
@@ -750,13 +762,14 @@ function wordbooker_user_level_options(){
 
 	echo '<label for="wb_status_update">'.__('Facebook Status Text', 'wordbooker').'  : </label> ';
 		echo '<INPUT NAME="wordbooker_status_update_text" size=60 maxlength=60 value="'.stripslashes($wordbookeruser_settings["wordbooker_status_update_text"]).'"> ';
-		echo '</select><br />';
+		//echo '</select><br />';
 
 		echo '<label for="wb_attribute">'.__('Post Attribute', 'wordbooker').' : </label>';
 		echo '<INPUT NAME="wordbooker_attribute" size=60 maxlength=240 value="'.stripslashes($wordbookeruser_settings["wordbooker_attribute"]).'"><br />';
 
 		echo '<label for="wb_action_link">'.__('Action Link Option', 'wordbooker').' : </label><select id="wordbooker_actionlink" name="wordbooker_actionlink"  >';	
-       		$arr = array(0=> __("Same as Blog", 'wordbooker'), 100=> __("None", 'wordbooker'),  200=> __("Share Link", 'wordbooker'), 300=>__("Read Full Article", 'wordbooker'));
+		if($wordbookeruser_settings['wordbooker_actionlink']==200) {$wordbookeruser_settings['wordbooker_actionlink']=100;}
+       		$arr = array(0=> __("Same as Blog", 'wordbooker'), 100=> __("Share Link", 'wordbooker'), 300=>__("Read Full Article", 'wordbooker'));
                 foreach ($arr as $i => $value) {
                         if ($i==$wordbookeruser_settings['wordbooker_actionlink']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
                        else {echo '<option value="'.$i.'" >'.$arr[$i].'</option>';}

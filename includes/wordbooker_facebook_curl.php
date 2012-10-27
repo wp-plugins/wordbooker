@@ -81,7 +81,7 @@ function wordbooker_get_access_token($access_token) {
 	$version=explode(" ",WORDBOOKER_CODE_RELEASE);
 	#	$url='http://ccgi.pemmaquid.plus.com/cgi-bin/refresh.cgi?oldie='.$access_token.'&version='.$version[0];
 	$url='https://wordbooker.tty.org.uk/refresh_curl.cgi?oldie='.$access_token.'&version='.$version[0];
-	//var_dump($url);
+	var_dump($url);
 	$x=wordbooker_make_curl_call2($url);
 	wordbooker_debugger("Access token returns ",print_r($x,true),-5,98) ;
 	return($x);

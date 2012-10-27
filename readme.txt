@@ -5,7 +5,7 @@ Tags: facebook, news feed, wall, fan page wall, group wall, crosspost, Facebook 
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=8XNJMQCYDJT6U&lc=GB&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Requires at least: 2.9
 Tested up to: 3.4.2
-Stable tag: 2.1.22
+Stable tag: 2.1.23
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for. 
 
@@ -115,19 +115,36 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 == Changelog ==
 
+= Version 2.1.23 27/10/2012 =
+- Fix problem with Editors publishing where designated wordbooker settings were being lost.
+- Minor change to refresh_token call again.
+- Add index on post_comments table.
+- Fix problem in DB upgrade process so changes roll forward properly.
+- Added option to control comment pulling pushing cut off dates rather than relying on the blog setting.
+- Recoded a couple of the comment handling queries to make things tighter.
+- Fixed a bug in the comment handling process which produced odd results on some installations.
+- Removed a pile of redundant diagnostic messages.
+- Fixed a problem with a couple of diagnostic messages during comment handling erroring.
+- Fix a missing function relating to comment deletion.
+- Fix an obscure problem with some installs failing with a unexpected T_VARIABLE error
+- Removed the "None" Option from the Action Links. Changed "Share" to use the built in FB Share option
+
+
 = Version 2.1.22  05/10/2012 =
 - Changes to refresh_token calls to reduce load on server.
-- Add wrapper round curl_version to stop errors blowing things up.
+- Add wrapper round curl_version to stop errors blowing things up
 - Added new image size for og:tags so all new images will have a specific image for wordbooker og tags. 
 - Change og image code to use the new size, or fail back to large if missing.
 
 
 = Version 2.1.21  03/10/2012 =
-- Two new fields that should have been NULL weren't so data failed to get inserted into a table
+- Two new fields that should have been NULL weren't so data failed to get inserted into a table.
+
 
 = Version 2.1.20  02/10/2012 =
-- DB changes needed to support new feature not included in create script so new installs would mis-behave
+- DB changes needed to support new feature not included in create script so new installs would mis-behave.
 - Remove a totally obsolete function.
+
 
 = Version 2.1.19  29/09/2012 =
 - Fix an issue with gravatars not displaying properly when there is no gravatar associated with the commenter
@@ -137,10 +154,12 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 - Minor change to the refresh token process to reduce load on the server.
 - Added code to delete records from Wordbooker Comments table when a comment is deleted from the blog.
 - Changes to the Status Fetch to reduce incidents of incorrect status messages being posted.
-- Added option to Comment Admin page to remove a comment entry from the Wordbooker Comments table
+- Added option to Comment Admin page to remove a comment entry from the Wordbooker Comments table.
+
 
 = Version 2.1.18  03/09/2012 =
 - Rollback some changes in the curl include file which were from 2.2 
+
 
 = Version 2.1.17  02/09/2012 =
 - Changes to the IPv6 options to curl - option is disabled unless IPv6 available in curl
@@ -148,8 +167,10 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 - Replaced two backticks with quotes to fix problems with Use Site URL not Blog Description in Wall Posts
 - Changed minimum number of FB comments from 2 to 0.
 
+
 = Version 2.1.16  02/09/2012 =
 - Lost in SVN.
+
 
 = Version 2.1.15 25/08/2012 =
 - Changes to the PayPal code to use different servers which should speed up load times.
@@ -163,6 +184,7 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 = Version 2.1.14 30/07/2012 =
 - Fixes a problem with Curl detection caused by FB changing things without telling people.
+
 
 = Version 2.1.13 09/06/2012 =
 - Fixed a bug where the Schema 4 code was messing up the schema 5 changes

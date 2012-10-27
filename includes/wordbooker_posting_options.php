@@ -159,9 +159,9 @@ if (count($fanpages)>1){
 	               else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
 		}
 	        echo "</select><br />";
-
+		if($wordbooker_settings['wordbooker_actionlink']==200) {$wordbooker_settings['wordbooker_actionlink']=100;}
 		echo __('Action Link Option', 'wordbooker').' :<select id="wordbooker_actionlink" name="wordbooker_actionlink"  >';	
-	       $arr = array(100=> "None ",  200=> __("Share Link", 'wordbooker'), 300=>__("Read Full Article", 'wordbooker'));
+	       $arr = array(100=> __("Share Link", 'wordbooker'), 300=>__("Read Full Article", 'wordbooker'));
 		        foreach ($arr as $i => $value) {
 		                if ($i==$wordbooker_settings['wordbooker_actionlink']){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';} 
 		               else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}}
@@ -222,16 +222,14 @@ $arr = array(1=> __("Yes", 'wordbooker'),  2=> __("No", 'wordbooker') );
 				echo "</select><br />";
 */
 		}
-
-
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_comment_put" '.$checked_flag[$wordbooker_settings["wordbooker_comment_put"]].' > '.__('Push Comments from this post to Facebook', 'wordbooker').'<br />';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_comment_get" '.$checked_flag[$wordbooker_settings["wordbooker_comment_get"]].' > '.__('Pull Comments from Facebook for this post', 'wordbooker').'<br />';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_use_facebook_comments" '.$checked_flag[$wordbooker_settings["wordbooker_use_facebook_comments"]].' > '.__('Enable Facebook Comments for this post', 'wordbooker').'<br />';
+		echo '<input type="hidden" name="crabstick" value="fruitbat" />';
 	}  else {
 echo "<p>".__('Wordbooker Blog level settings are in force','wordbooker')."<br /></p>";
-
-if ( isset($wordbooker_settings['wordbooker_allow_publish_select'])) { 
 echo '<input type="hidden" name="crabstick" value="stairwell" />';
+if ( isset($wordbooker_settings['wordbooker_allow_publish_select'])) { 
 echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_publish_default" '.$checked_flag[$wordbooker_settings["wordbooker_publish_default"]].' > '.__('Publish This Post to Facebook', 'wordbooker').'<br />';
 #echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_publish_override" '.$checked_flag[$wordbooker_settings["wordbooker_publish_override"]].' >'.__('Force Re-Publish Post to Facebook on Edit (overrides republish window)').'<br />';
 } else { echo '<input type="hidden" name="wordbooker_publish_default" value="'.$wordbooker_settings["wordbooker_publish_default"].'" />';}
