@@ -5,7 +5,7 @@ Tags: facebook, news feed, wall, fan page wall, group wall, crosspost, Facebook 
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=8XNJMQCYDJT6U&lc=GB&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Requires at least: 2.9
 Tested up to: 3.4.2
-Stable tag: 2.1.23
+Stable tag: 2.1.24
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for. 
 
@@ -114,6 +114,10 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 2. Wordbooker Options : Overrides when posting
 
 == Changelog ==
+
+= Version 2.1.24 10/11/12 =
+- Fixed a bug where setting Meta Tag length to 0 got rid of the og: description tag
+- Added code to turn off Jetpacks open graph tags if you are using Wordbookers.
 
 = Version 2.1.23 27/10/2012 =
 - Fix problem with Editors publishing where designated wordbooker settings were being lost.
@@ -426,6 +430,9 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 
 == Upgrade Notice ==
+
+= 2.1.24 =
+Fixes a problem with Version 2 of Jetpack
 
 = 2.1.21 =
 Changes to og:tag images.

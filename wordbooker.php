@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty 
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.23
+Version: 2.1.24
 */
 
  /*
@@ -38,7 +38,7 @@ function wordbooker_global_definitions() {
 	$wbooker_user_id=0;
 	define('WORDBOOKER_DEBUG', false);
 	define('WORDBOOKER_TESTING', false);
-	define('WORDBOOKER_CODE_RELEASE',"2.1.23 R00 - Under The Sun");
+	define('WORDBOOKER_CODE_RELEASE',"2.1.24 R00 - Some Kind of Wizard");
 
 	# For Troubleshooting 
 	define('ADVANCED_DEBUG',false);
@@ -1941,38 +1941,39 @@ function wordbooker_og_tags(){
 	else
 	{ # Not a single post so we only need the og:type tag
 		echo '<meta property="og:type" content="blog" /> ';
-		#echo '<meta property="og:description" content="'.$bdesc.'" /> ';
 	}
-	if ($meta_length = wordbooker_get_option('wordbooker_description_meta_length')) {
-		if (is_single() || is_page()) {
-			$excerpt=get_post_meta($post->ID, '_wordbooker_extract', TRUE);
-			if(strlen($excerpt) < 5 ) {
-				$excerpt=wordbooker_post_excerpt($post->post_content,250);
-				update_post_meta($post->ID, '_wordbooker_extract', $excerpt);
-			}
-			# If we've got an excerpt use that instead
-			if ((strlen($post->post_excerpt)>3) && (strlen($excerpt) <=5)) { 
-				$excerpt=$post->post_excerpt; 
-				$description = str_replace('"','&quot;',$post->post_content);
-				$excerpt = wordbooker_post_excerpt($description,1000);
-				$excerpt = preg_replace('/(\r|\n)+/',' ',$excerpt);
-				$excerpt = preg_replace('/\s\s+/',' ',$excerpt);
-	
-				update_post_meta($post->ID, '_wordbooker_extract', $excerpt);
-			}
-			# Now if we've got something put the meta tag out.
-			if (isset($excerpt)){ 
-				if ($meta_length > 0 ) {$meta_string .= sprintf("<meta name=\"description\" content=\"%s\" /> ", htmlspecialchars($excerpt,ENT_QUOTES));}
-				$meta_string .= sprintf("<meta property=\"og:description\" content=\"%s\" /> ", htmlspecialchars($excerpt,ENT_QUOTES));
-				echo $meta_string;
-			}
+	$meta_length=0;
+	$meta_length = $meta_length + wordbooker_get_option('wordbooker_description_meta_length');
+	if (is_single() || is_page()) {
+		$excerpt=get_post_meta($post->ID, '_wordbooker_extract', TRUE);
+		if(strlen($excerpt) < 5 ) {
+			$excerpt=wordbooker_post_excerpt($post->post_content,250);
+			update_post_meta($post->ID, '_wordbooker_extract', trim($excerpt));
 		}
-	else
-		{		
-			if ($meta_length > 0 ) {$meta_string .= sprintf("<meta name=\"description\" content=\"%s\" /> ", $bdesc); }
-			$meta_string .= sprintf("<meta property=\"og:description\" content=\"%s\" /> ", $bdesc);
+		# If we've got an excerpt use that instead
+		if ((strlen($post->post_excerpt)>3) && (strlen($excerpt) <=5)) { 
+			$excerpt=$post->post_excerpt; 
+			$description = str_replace('"','&quot;',$post->post_content);
+			$excerpt = wordbooker_post_excerpt($description,1000);
+			$excerpt = preg_replace('/(\r|\n)+/',' ',$excerpt);
+			$excerpt = preg_replace('/\s\s+/',' ',$excerpt);
+
+			update_post_meta($post->ID, '_wordbooker_extract', trim($excerpt));
+		}
+		# Now if we've got something put the meta tag out.
+		if (isset($excerpt)){ 
+			if ($meta_length > 0 ) {$meta_string .= sprintf("<meta name=\"description\" content=\"%s\" /> ", htmlspecialchars(trim($excerpt),ENT_QUOTES));}
+			$meta_string .= sprintf("<meta property=\"og:description\" content=\"%s\" /> ", htmlspecialchars(trim($excerpt),ENT_QUOTES));
+			# convert blank lines into spaces.
+			$meta_string=str_replace("\r\n", "   ", $meta_string); 
 			echo $meta_string;
 		}
+	}
+else
+	{		
+		if ($meta_length > 0 ) {$meta_string .= sprintf("<meta name=\"description\" content=\"%s\" /> ", $bdesc); }
+		$meta_string .= sprintf("<meta property=\"og:description\" content=\"%s\" /> ", trim($bdesc));
+		echo $meta_string;
 	}
 	echo '<!-- End Wordbooker og tags -->';
 }
@@ -2875,6 +2876,10 @@ include("includes/wordbooker_options.php");
 
 # If they've disabled Wordbooker then we don't need to load any of these.
 if (!isset($wordbooker_disabled)){
+	$wordbooker_disable_og=wordbooker_get_option('wordbooker_fb_disable_og');
+	if ((function_exists('jetpack_og_tags')) && (!isset($wordbooker_disable_og))){
+		remove_action( 'wp_head', 'jetpack_og_tags' ); 
+	}
 	include("includes/wordbooker_wb_widget.php");
 	include("includes/wordbooker_fb_widget.php");
 	include("includes/wordbooker_cron.php");
