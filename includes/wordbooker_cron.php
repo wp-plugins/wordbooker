@@ -11,7 +11,6 @@ Author: Steve Atty
 function wordbooker_cache_refresh($user_id) {
 	global $blog_id,$wpdb,$table_prefix,$wordbooker_user_settings_id,$wbooker_user_id;
 	$wbooker_user_id=$user_id;
-	wordbooker_renew_access_token($user_id);
 	$result = $wpdb->query(' DELETE FROM ' . WORDBOOKER_ERRORLOGS . ' WHERE   blog_id ='.$blog_id.' and (user_ID='.$user_id.' or user_ID=0 ) and post_id<=1');
 	wordbooker_debugger("Cache Refresh Commence ",$user_id,-1,9) ; 
 	$result = $wpdb->get_row("select facebook_id from ".WORDBOOKER_USERDATA." where user_ID=".$user_id);
@@ -43,7 +42,6 @@ function wordbooker_cache_refresh($user_id) {
 		# If we have an  $ret->error->message then we have a problem
 		if($ret->error->message)  {
 		wordbooker_append_to_errorlogs("Your Facebook Session is invalid", "99", $ret->error->message,'',$user_id);
-		#wordbooker_delete_user($user_id,1);
 		return;
 		}
 		if(strlen(serialize($ret))<20) {wordbooker_debugger("Permissions fetch failed - skipping ",'',-1,9) ;} else {
@@ -185,71 +183,26 @@ function wordbooker_cache_refresh($user_id) {
 		
 		$all_pages_groups=@array_merge($all_pages,$all_groups);
 		$encoded_names=str_replace('\\','\\\\',serialize($all_pages_groups));
-/*
 
-		try {
-			$query="SELECT flid, owner, name FROM friendlist WHERE owner=$uid";
-			$fb_friend_lists= wordbooker_fql_query($query,$wbuser2->access_token);
-		if (is_array($fb_friend_lists)) {
-		$sql="Delete from ".WORDBOOKER_FB_FRIEND_LISTS." where user_id=".$user_id;
-		$result = $wpdb->get_results($sql);
-		foreach ($fb_friend_lists as $friend_list) {
-			if (function_exists('mb_convert_encoding')) {
-				$friend_list->name=mb_convert_encoding($friend_list->name,'UTF-8');
-			}
-		$sql="replace into ".WORDBOOKER_FB_FRIEND_LISTS." (user_id, flid,  owner, name) values (".$user_id.",'".$friend_list->flid."','".$friend_list->owner."','".$friend_list->name."')";
-		$result = $wpdb->get_results($sql);
-		}
-		}	
-
-		}
-		catch (Exception $e) 
-		{
-			$error_msg = $e->getMessage();
-			wordbooker_debugger("Failed to get friend lists : ",$error_msg,-1,9);
-		}
-
- 
-		try {
-			$query="Select name,uid from user where uid in (Select uid from friendlist_member where flid='10150839623220195')";
-			$fb_friends_info = wordbooker_fql_query($query,$wbuser2->access_token);
-		} 
-		catch (Exception $e) 
-		{
-			$error_msg = $e->getMessage();
-			wordbooker_debugger("Failed to get friends : ",$error_msg,-1,9);
-		}
-			if (is_array($fb_friends_info) ) {
-			$sql="delete from ".WORDBOOKER_FB_FRIENDS." where user_id=".$user_id;
-			$result = $wpdb->get_results($sql);
-			foreach ($fb_friends_info as $friend_info) {
-				if (function_exists('mb_convert_encoding')) {
-					$friend_info->name=mb_convert_encoding($friend_info->name,'UTF-8');
-				}
-			$sql="insert into ".WORDBOOKER_FB_FRIENDS." (user_id, facebook_id, name, blog_id) values (".$user_id.",'".$friend_info->uid."','".$friend_info->name."',".$blog_id.")";
-			$result = $wpdb->get_results($sql);
-			}
-		}
-*/
 		$fb_status_info=wordbooker_status_feed($suid,$wbuser2->access_token);
-		# put in check for not being an array and skip...
-		#var_dump($fb_status_info);
-		foreach($fb_status_info->data as $fbstat) {
-			if(!is_null($fbstat->message)){
-				//		var_dump($fbstat->to->data[0]->id);
-				//		var_dump("XXXX".$fbstat->from->id);
-		//		var_dump($fbstat->message);
-			//	echo "<br />";
-		//		var_dump($fbstat->from->id);
-		//		echo "<br />";
-		//		var_dump($fbstat->to->data[0]->id);
-		//		echo "<br /><br />";
-				if (($suid==$fbstat->from->id) && (is_null($fbstat->to->data[0]->id ) )) {
-					$status_message=$fbstat->message;
-					$status_time=$fbstat->created_time;
-					break; 
-				}
-			 }
+		if (!is_null($fb_status_info)) {
+			foreach($fb_status_info->data as $fbstat) {
+				if(!is_null($fbstat->message)){
+				//		var_dump($fbstat->message);
+			//		echo "<br />";
+			//		var_dump($suid);
+			//		echo "<br />";
+			//		var_dump($fbstat->from->id);
+			//		echo "<br />";
+			//		var_dump($fbstat->to->data[0]->id);
+			//		echo "<br /><br />";
+					if (($suid==$fbstat->from->id) && (is_null($fbstat->to->data[0]->id ) )) {
+						$status_message=$fbstat->message;
+						$status_time=$fbstat->created_time;
+						break; 
+					}
+				 }
+			}
 		}
 		$picture = 'https://graph.facebook.com/'.$suid.'/picture?type=normal';
 		$fb_profile_info=wordbooker_get_fb_id($suid,$wbuser2->access_token);
@@ -301,7 +254,6 @@ function wordbooker_cache_refresh($user_id) {
 		
 		$result = $wpdb->get_results($sql);
 	}
-#fclose($fp);
 	wordbooker_debugger("Cache Refresh Complete for user",$uid,-1,90) ; 
 }
 
@@ -328,6 +280,5 @@ function wordbooker_poll_facebook($single_user=null) {
 		wordbooker_debugger("Batch Cache Refresh completed "," ",-1,90) ; 
 	}
 }
-
 
 ?>
