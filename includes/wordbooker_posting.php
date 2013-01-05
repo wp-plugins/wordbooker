@@ -69,6 +69,10 @@ try {
 function wordbooker_status_update($post_id,$access_token,$post_date,$target_id,$dummy,$target_name,$wpuserid,$fb_uid) {
 	global $wordbooker_post_options,$user_ID;
 	wordbooker_debugger("Setting status_text".$wordbooker_post_options['wordbooker_status_update_text']," ",$post_id) ; 
+	if (strlen($wordbooker_post_options['wordbooker_status_update_text'])< 4) { 	
+		wordbooker_debugger("Status update text is too short",$post_id,90) ;
+		return;
+	}
 	if (isset($dummy)) { 	
 		wordbooker_debugger("Status update to ".$target_name." Test Only",'No Post Made',$post_id,90) ;
 		return;

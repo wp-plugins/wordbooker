@@ -4,21 +4,21 @@ Contributors: SteveAtty
 Tags: facebook, news feed, wall, fan page wall, group wall, crosspost, Facebook Send, Facebook Like, social media, open graph.
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=8XNJMQCYDJT6U&lc=GB&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Requires at least: 2.9
-Tested up to: 3.4.2
-Stable tag: 2.1.24
+Tested up to: 3.5
+Stable tag: 2.1.25
 
-This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for. 
+This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for.
 
 == Description ==
 
-This plugin allows you to cross-post your blog posts to your Facebook Wall / Fan Page Wall / Group Wall. You can Post as an Extract, A Status Update or even as a Note. 
+This plugin allows you to cross-post your blog posts to your Facebook Wall / Fan Page Wall / Group Wall. You can Post as an Extract, A Status Update or even as a Note.
 
 Wordbooker populates all the Open Graph tags needed to integrate your blog post with Facebook's Social Graph.
 
 NOTE : You MUST have the PHP Curl module enabled and configured in such a way that it can connect to the Facebook Servers on a secure HTTP connection. If you do not have curl OR if your hosting company block curl access to externals sites you cannot use this plugin.
 
 
-== IMPORTANT ==  
+== IMPORTANT ==
 
 Wordbooker 2.0 is a completely new implementation of most of the original Wordbooker functionality. You will need to revisit the Options screen to reset your configuration
 
@@ -68,7 +68,7 @@ It is certainly similar, but not the same:
 You may need to add the following to the HMTL tag in your theme : xmlns:fb="http://www.facebook.com/2008/fbml".
 So it looks something like :  <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:fb="http://www.facebook.com/2008/fbml">
 
- 
+
 = Why aren't my blog posts showing up in Facebook? =
 
 - Wordbooker will not publish password-protected posts.
@@ -107,17 +107,33 @@ If you're using the Share action link on your posts to Facebook it uses the META
 There will be conflicts with other plugins providing Facebook Like/Send Share functionality
 
 
+
 == Screenshots ==
 
 1. Wordbooker Options/Configuration : Blog Level options
 1. Wordbooker Options/Configuration : User Level options
 2. Wordbooker Options : Overrides when posting
 
+
 == Changelog ==
+
+= Version 2.1.25 05/01/13 =
+- Confirmed to work with Wordpress 3.5
+- Fixed a bug in the custom image meta tag handling
+- Fixed a problem with a warning about parameters not being arrays.
+- Added a check condition for missing Status Messages
+- fixed post variable references in wordbooker_return_images
+- Added a check in the comment avatar code to catch screwed comment structures
+- Fixed an array index typo.
+- Removed two calls to mysql_query which has been obsoleted.
+- Recoded date cut off logic in the comment handling processes to use calculated timestamps rather than built in functions.
+- Added some checks to stop spurious warnings being produced for a couple of no-initialised array entries
+
 
 = Version 2.1.24 10/11/12 =
 - Fixed a bug where setting Meta Tag length to 0 got rid of the og: description tag
 - Added code to turn off Jetpacks open graph tags if you are using Wordbookers.
+
 
 = Version 2.1.23 27/10/2012 =
 - Fix problem with Editors publishing where designated wordbooker settings were being lost.
@@ -137,7 +153,7 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 = Version 2.1.22  05/10/2012 =
 - Changes to refresh_token calls to reduce load on server.
 - Add wrapper round curl_version to stop errors blowing things up
-- Added new image size for og:tags so all new images will have a specific image for wordbooker og tags. 
+- Added new image size for og:tags so all new images will have a specific image for wordbooker og tags.
 - Change og image code to use the new size, or fail back to large if missing.
 
 
@@ -162,7 +178,7 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 
 = Version 2.1.18  03/09/2012 =
-- Rollback some changes in the curl include file which were from 2.2 
+- Rollback some changes in the curl include file which were from 2.2
 
 
 = Version 2.1.17  02/09/2012 =
@@ -234,11 +250,11 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 - Changed some HTTP references to HTTPS to hopefully stop warnings when running blogs on HTTPS front ends.
 - Fixed a typo in the auto approve comment variable check. Thanks to Stefan Jacobi
 - Tidied up the schema cross check code and moved it into its own function. Part of longer term plan to strip a lot of the "non core" code out of the main wordbooker file.
- 
+
 
 
 = Version 2.1.10 04/05/2012 =
-- Recoded the token renewal code to handle Facebook returning null values 
+- Recoded the token renewal code to handle Facebook returning null values
 - Added jpe in the list of recognised image files.
 
 
@@ -283,15 +299,15 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 - Removed a duplicated xmlns tag.
 
 
-= Version 2.1.4 16/02/2012 = 
+= Version 2.1.4 16/02/2012 =
 - Rebuild for SVN after WP restored the plugin and messed things up
 
 
-= Version 2.1.3 16/02/2012 = 
+= Version 2.1.3 16/02/2012 =
 - Rebuild for SVN after WP restored the plugin and messed things up
 
 
-= Version 2.1.2 16/02/2012 = 
+= Version 2.1.2 16/02/2012 =
 - Lost in SVN after WP restored the plugin and messed things up
 
 
@@ -301,7 +317,7 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 - Fixed a bug in the comment inport/export where the check for disabling incoming comments used the outgoing comment disabled flag!
 
 
-= Version 2.1.0 15/02/2012 = 
+= Version 2.1.0 15/02/2012 =
 - Added comment handling - too many individual changes to comment
 - Added a function to delete Wordbooker data when a post is deleted.
 - Fixed a long standing bug relating to the og:image tag when posts have no image
@@ -424,12 +440,15 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 = Verson 2.0.0 30/09/2011 =
 - Major new release - too many changes to document here
 
- 
+
 = version 1.0 :  02/01/2010 =
  - Base Release.
 
 
 == Upgrade Notice ==
+
+= 2.1.25 =
+A few minor bug fixes and confirmed compatiblity with Wordpress 3.5
 
 = 2.1.24 =
 Fixes a problem with Version 2 of Jetpack

@@ -4,7 +4,7 @@
 Description: Collection of functions related to comment handling
 Author: Stephen Atty
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.22
+Version: 2.1.25
 */
 
 function wordbooker_poll_comments($userid=0) {
@@ -12,8 +12,17 @@ function wordbooker_poll_comments($userid=0) {
 	$comment_user=1;	
 	wordbooker_debugger("Comment handling starting "," ",-3,9) ;
 	$wordbooker_settings=get_option('wordbooker_settings'); 	
-	$result = $wpdb->query('DELETE FROM ' . WORDBOOKER_ERRORLOGS . ' WHERE timestamp < DATE_SUB(CURDATE(), INTERVAL '.( $wordbooker_settings['wordbooker_comment_cron'] * 3 ) .' MINUTE)  and blog_id ='.$blog_id.' and post_id=-2');
+	$scheds1['Never'] = array('interval'   => 999999999,'display'   => __('Never ', 'wordbooker'),);
+	$scheds1['Manual'] = array('interval'   => 999999999,'display'   => __('Manual Polling ', 'wordbooker'),);
+	$scheds2=wp_get_schedules();
+	$scheds=array_merge($scheds1,$scheds2);
+	$trimtime=strtotime("now")-($scheds[$wordbooker_settings['wordbooker_comment_cron']]["interval"]*3);
+	$result = $wpdb->query('DELETE FROM ' . WORDBOOKER_ERRORLOGS . ' WHERE timestamp < '.$trimtime.' and blog_id ='.$blog_id.' and post_id=-2');
 	if (! $wordbooker_settings['wordbooker_comment_handling']) {
+		wordbooker_debugger("Comment handling disabled "," ",-3,9) ;
+		return;
+	 }
+	if ( $wordbooker_settings['wordbooker_comment_handling']=='Never') {
 		wordbooker_debugger("Comment handling disabled "," ",-3,9) ;
 		return;
 	 }
@@ -53,17 +62,20 @@ function wordbooker_post_comments_to_facebook($user_id) {
 		wordbooker_debugger("No user session for comment handling "," ",-3,9) ;
 		return 0; 
 	}
-	$wordbooker_settings=wordbooker_options();
+$wordbooker_settings=wordbooker_options();
 	$close_comments=get_option('close_comments_for_old_posts');
 	$close_days_old=get_option('close_comments_days_old');
 	$comment_structure=$wordbooker_settings['wordbooker_comment_post_format'];
 	$comment_tag=$wordbooker_settings['wordbooker_comment_attribute'];
 	$wordbooker_close=$wordbooker_settings['wordbooker_close_comment'];
+	$closedays_ts=strtotime("-".$close_days_old." DAYS");
+	$closecomments_ts=strtotime("-".$wordbooker_close." DAYS");
 	wordbooker_debugger("Auto close comments ".$close_comments,$close_days_old,-3,98);
 	$sql="select distinct wp_post_id,fb_post_id from ".WORDBOOKER_POSTCOMMENTS." where fb_comment_id is null and blog_id=".$blog_id." and user_id=".$user_id." and in_out is null";
-	if ($close_comments==1) {$sql.=" and comment_timestamp  > DATE_SUB( CURDATE( ) , INTERVAL ".$close_days_old." DAY )";}
-	if ($wordbooker_close>0) {$sql.=" and comment_timestamp > DATE_SUB( CURDATE( ) , INTERVAL ".$wordbooker_close." DAY )";}
+	if ($close_comments==1) {$sql.=" and comment_timestamp  > ".$closedays_ts ;}
+	if ($wordbooker_close>0) {$sql.=" and comment_timestamp > ".$closecomments_ts;}
 	$rows = $wpdb->get_results($sql);
+
 
 	wordbooker_debugger("Blog posts for comment handling : ".$sql,count($rows),-3,98);
 	foreach($rows as $row) {
@@ -120,10 +132,12 @@ function wordbooker_get_comments_from_facebook($user_id) {
 	$wordbooker_settings=get_option('wordbooker_settings'); 
 	$wordbooker_close=$wordbooker_settings['wordbooker_close_comment'];
 	$comment_approve=0;
+	$closedays_ts=strtotime("-".$close_days_old." DAYS");
+	$closecomments_ts=strtotime("-".$wordbooker_close." DAYS");
 	if (isset($wordbooker_settings['wordbooker_comment_approve'])) {$comment_approve=1;}
 	$sql='Select distinct fb_post_id from '.WORDBOOKER_POSTCOMMENTS.' where fb_comment_id is null and user_id='.$user_id.' and blog_id='.$blog_id. " and in_out is null ";
-	if ($close_comments==1) { $sql.=" and comment_timestamp  > DATE_SUB( CURDATE( ) , INTERVAL ".$close_days_old." DAY )";}
-	if ($wordbooker_close>0) {$sql.=" and comment_timestamp  > DATE_SUB( CURDATE( ) , INTERVAL ".$wordbooker_close." DAY )";}
+	if ($close_comments==1) {$sql.=" and comment_timestamp  > ".$closedays_ts ;}
+	if ($wordbooker_close>0) {$sql.=" and comment_timestamp > ".$closecomments_ts;}
 	$rows = $wpdb->get_results($sql);
 	wordbooker_debugger("Blog posts with FB Posts against them : ".$sql,count($rows),-3,98);
 	foreach ($rows as $fb_comment) {
