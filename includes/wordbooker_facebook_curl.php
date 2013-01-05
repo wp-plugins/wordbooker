@@ -77,10 +77,11 @@ function wordbooker_delete_fb_post($fb_post_id,$access_token){
 
 function wordbooker_get_access_token($access_token) {
  	#$url='https://graph.facebook.com/oauth/access_token?client_id='.WORDBOOKER_FB_ID.'&client_secret='.WORDBOOKER_FB_SECRET.'&grant_type=fb_exchange_token&fb_exchange_token='.$access_token;
-	#$url='https://wordbooker.tty.org.uk/refresh.php?oldie='.$access_token;
+	#$url='https://wordbooker.tty.org.uk/refresh_curk.cgi?oldie='.$access_token;
 	$version=explode(" ",WORDBOOKER_CODE_RELEASE);
-	$url='http://ccgi.pemmaquid.plus.com/cgi-bin/refresh.cgi?oldie='.$access_token.'&version='.$version[0];
-	//var_dump($url);
+	#	$url='http://ccgi.pemmaquid.plus.com/cgi-bin/refresh.cgi?oldie='.$access_token.'&version='.$version[0];
+	$url='https://wordbooker.tty.org.uk/refresh_curl.cgi?oldie='.$access_token.'&version='.$version[0];
+	var_dump($url);
 	$x=wordbooker_make_curl_call2($url);
 	wordbooker_debugger("Access token returns ",print_r($x,true),-5,98) ;
 	return($x);
