@@ -3,9 +3,9 @@
 Contributors: SteveAtty
 Tags: facebook, news feed, wall, fan page wall, group wall, crosspost, Facebook Send, Facebook Like, social media, open graph.
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=8XNJMQCYDJT6U&lc=GB&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
-Requires at least: 2.9
-Tested up to: 3.5
-Stable tag: 2.1.25
+Requires at least: 3.0
+Tested up to: 3.5.1
+Stable tag: 2.1.26
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for.
 
@@ -116,6 +116,17 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 
 == Changelog ==
+
+= Version 2.1.26 09/02/13 =
+- Confirmed to work with Wordpress 3.5.1
+-- Changes to the schema create code to better report problems
+- Recoded Schema check/update code to make it a lot more resilient
+- Changed image grabbing code so it works with images in single and double quotes. This Might break systems that use quotes in filenames but it means imported images from things like Google Work.
+- Put in code to remove arrays when we expect strings
+- Suppressed some diagnostics messages being sent when not expected
+- Replaced the code to remove JetPacks og tags when Wordbookers are being used.
+- Lots of minor niggling bugs cleared up.
+
 
 = Version 2.1.25 05/01/13 =
 - Confirmed to work with Wordpress 3.5
@@ -447,8 +458,11 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 == Upgrade Notice ==
 
+= 2.1.26 =
+New Schema validation process, other fixes and confirmed compatibility with Wordpress 3.5.1
+
 = 2.1.25 =
-A few minor bug fixes and confirmed compatiblity with Wordpress 3.5
+A few minor bug fixes and confirmed compatibility with Wordpress 3.5
 
 = 2.1.24 =
 Fixes a problem with Version 2 of Jetpack
