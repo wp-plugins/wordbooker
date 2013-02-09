@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.26
+Version: 2.1.27
 */
 
  /*
@@ -38,7 +38,7 @@ function wordbooker_global_definitions() {
 	$wbooker_user_id=0;
 	define('WORDBOOKER_DEBUG', false);
 	define('WORDBOOKER_TESTING', false);
-	define('WORDBOOKER_CODE_RELEASE',"2.1.26 R00 - One of Our Fruitmachines is Missing");
+	define('WORDBOOKER_CODE_RELEASE',"2.1.27 R00 - Loud, Confident and Wrong");
 
 	# For Troubleshooting
 	define('ADVANCED_DEBUG',false);
@@ -308,15 +308,16 @@ function wordbooker_activate() {
 		if ($result ==0) trigger_error($x,E_USER_ERROR);
 
 	$result = $wpdb->query(' CREATE TABLE IF NOT EXISTS ' . WORDBOOKER_FB_FRIENDS . ' (
-	  `user_id` int(11) NOT NULL,
-	  `blog_id` bigint(20) NOT NULL,
-	  `facebook_id` varchar(80) NOT NULL,
-	  `name` varchar(200) NOT NULL,
-	  PRIMARY KEY  (`user_id`,`facebook_id`,`blog_id`),
-	  KEY `user_id_idx` (`user_id`),
-	  KEY `fb_id_idx` (`facebook_id`)
-	)  DEFAULT CHARSET=utf8;
-		');
+			  `user_id` int(11) NOT NULL,
+			  `blog_id` bigint(20) NOT NULL,
+			  `facebook_id` varchar(80) NOT NULL,
+			  `name` varchar(200) NOT NULL,
+			  PRIMARY KEY  (`user_id`,`facebook_id`,`blog_id`),
+			  KEY `user_id_idx` (`user_id`),
+			  KEY `fb_id_idx` (`facebook_id`),
+			  FULLTEXT KEY `name_idx` (`name`)
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+		 ' );
 		$x=$wpdb->last_error;
 		if ($result ==0) trigger_error($x,E_USER_ERROR);
 
@@ -395,6 +396,15 @@ function wordbooker_db_crosscheck() {
 	$wordbooker_index_fix[WORDBOOKER_FB_FRIENDS]= array ('PRIMARY' => 'ADD PRIMARY KEY (user_id, facebook_id, blog_id);' ,'user_id_idx' => 'ADD INDEX user_id_idx (user_id);' ,'fb_id_idx' => 'ADD INDEX fb_id_idx (facebook_id);' ,'name_idx' => 'ADD FULLTEXT INDEX name_idx (name);' );
 	$wordbooker_index_fix[WORDBOOKER_FB_FRIEND_LISTS]= array ('PRIMARY' => 'ADD PRIMARY KEY (user_id, flid);' ) ;
 
+	$wordbooker_storage[WORDBOOKER_ERRORLOGS]="Not important";
+	$wordbooker_storage[WORDBOOKER_POSTLOGS]="Not important";
+	$wordbooker_storage[WORDBOOKER_USERDATA]="Not important";
+	$wordbooker_storage[WORDBOOKER_USERSTATUS]="Not important";
+	$wordbooker_storage[WORDBOOKER_POSTCOMMENTS]="Not important";
+	$wordbooker_storage[WORDBOOKER_PROCESS_QUEUE]="Not important";
+	$wordbooker_storage[WORDBOOKER_FB_FRIENDS]="MyISAM";
+	$wordbooker_storage[WORDBOOKER_FB_FRIEND_LISTS]="Not important";
+
 # this is used by Steve to build new data sets
 /*
 	foreach ($table_array as $table) {
@@ -410,6 +420,18 @@ function wordbooker_db_crosscheck() {
 				echo "'".$row['Field']."'=>'".$row['Type']."',";
 			}
 			echo "<br />";
+		}
+			foreach ($table_array as $table) {
+				   $sql='show create table '.$table. '';
+				   echo "<br /> ------------------------------------------<br />";
+				   echo $sql."<br />";
+			$rows =  $wpdb->get_results($sql,ARRAY_A);
+					foreach ($rows as $row ) {
+			//	echo "'".$row['Create Table']."',";
+				$x=preg_split("/ ENGINE=/",$row['Create Table']);
+				$x2=preg_split("/ /",$x[1]);
+				var_dump($x2[0]);
+			}
 		}
 	foreach ($table_array as $table) {
 				   $sql='show index from '.$table;
@@ -467,6 +489,19 @@ function wordbooker_db_crosscheck() {
 				if ($correct_def_sql!='zed') {$sql_run[]=$correct_def_sql;}
 				}
 	}
+	# Cross check storage....
+	foreach ($table_array as $table) {
+		   $sql='show create table '.$table. '';
+	$rows =  $wpdb->get_results($sql,ARRAY_A);
+			foreach ($rows as $row ) {
+		$x=preg_split("/ ENGINE=/",$row['Create Table']);
+		$x2=preg_split("/ /",$x[1]);;
+		if($wordbooker_storage[$table]!=$x2[0] && $wordbooker_storage[$table]!='Not important') {
+		//	echo "Mis match on ".$table.' : '.$x2[0].' should be '.$wordbooker_storage[$table].'<br />';
+			$sql_run[]='ALTER TABLE '.$table.' ENGINE = '.$wordbooker_storage[$table];
+			}
+	}
+}
 
 	// Cross check Indexes
 	foreach ($table_array as $table) {
@@ -924,6 +959,7 @@ function wordbooker_option_notices() {
 	global $user_ID, $wp_version,$blog_id;
 	wordbooker_upgrade();
 	$doy=date ( 'z');
+	//$doy=22;
 	$schemacheck=wordbooker_get_option('schema_check');
 	// If we've not run the schema check today then lets run it - just in case someone has done something stupid.
 	if($doy!=$schemacheck) {wordbooker_db_crosscheck();}

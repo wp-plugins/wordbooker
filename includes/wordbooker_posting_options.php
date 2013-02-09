@@ -40,7 +40,7 @@ function wordbooker_inner_custom_box() {
 	$wordbooker_user_settings_id="wordbookuser".$blog_id;
 
 	# We need to do some more checking here. If the user does not have an entry in the wordbooker user table then we should get the user options for the user set as the default user.
-	$wordbookuser=get_usermeta($wb_user_id,$wordbooker_user_settings_id);
+	$wordbookuser=get_user_meta($wb_user_id,$wordbooker_user_settings_id,true);
 	# If we have user settings then lets go through and override the blog level defaults.
 	if(is_array($wordbookuser)) {
 		foreach (array_keys($wordbookuser) as $key) {
@@ -51,7 +51,7 @@ function wordbooker_inner_custom_box() {
 	}
 	# Only replace the defaults if we've got a good set of post options.
 	$x = get_post_meta($post->ID, '_wordbooker_options', true);
-	if (count($x)>7) {
+	if ( isset($x['wordbooker_primary_target'])) {
 		foreach (array_keys($x) as $key ) {
 			if (substr($key,0,8)=='wordbook') {
 				$post_meta[$key]= html_entity_decode($x[$key],ENT_QUOTES);

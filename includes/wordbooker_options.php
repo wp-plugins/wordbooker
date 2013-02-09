@@ -95,7 +95,7 @@ function wordbooker_option_manager() {
 	//Set some defaults:
 	# If the closedboxes are not set then lets set them up - General Options open, all the rest closed
 	$wordbooker_settings=wordbooker_options();
-	$wb_boxes=get_user_meta($user_ID,'closedpostboxes_settings_page_wordbooker');
+	$wb_boxes=get_user_meta($user_ID,'closedpostboxes_settings_page_wordbooker',true);
 	if (count($wb_boxes)==0) {
 		$wb_boxes[0]='wb_opt2';
 		$wb_boxes[1]='wb_opt3';
@@ -659,7 +659,7 @@ function wordbooker_user_level_options(){
 		global $ol_flash, $wordbooker_settings, $_POST, $wp_rewrite,$user_ID,$wpdb, $blog_id,$wordbooker_user_settings_id,$user_ID,$wordbooker_hook;
 		# USER LEVEL OPTIONS
 		$checked_flag=array('on'=>'checked','off'=>'');
-		$wordbookeruser_settings=get_user_meta($user_ID,$wordbooker_user_settings_id);
+		$wordbookeruser_settings=get_user_meta($user_ID,$wordbooker_user_settings_id,true);
 		# Set a couple of options that we really need.
 		if( !isset($wordbookeruser_settings['wordbooker_primary_type'])) {$wordbookeruser_settings['wordbooker_primary_type']=1;}
 		if( !isset($wordbookeruser_settings['wordbooker_secondary_type'])) {$wordbookeruser_settings['wordbooker_secondary_type']=1;}
