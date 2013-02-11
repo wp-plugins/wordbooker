@@ -28,21 +28,21 @@ Version: 2.1
 #global $wp_version;
 
 class WordbookWidget extends WP_Widget {
-	 
+
 	function WordbookWidget() {
-		parent::WP_Widget('wordbooker_widget', 'Wordbooker FB Status ', array('description' => __('Allows you to have one or more Facebook Status widgets in your sidebar. The widget picks up the user id of the person who drags it onto the side bar','wordbooker') , 'class' => 'WordbookWidget'));	
+		parent::WP_Widget('wordbooker_widget', 'Wordbooker FB Status ', array('description' => __('Allows you to have one or more Facebook Status widgets in your sidebar. The widget picks up the user id of the person who drags it onto the side bar','wordbooker') , 'class' => 'WordbookWidget'));
 	}
-	
+
 	/**
 	 * display widget
-	 */	 
+	 */
 	function widget($args, $instance) {
 		extract($args, EXTR_SKIP);
 		global  $wpdb, $user_ID,$table_prefix,$blog_id;
 		$userid=$instance['snorl'];
 		$result = wordbooker_get_cache($userid);
 		echo $before_widget;
-		echo "<!-- Wordbooker FB Status Widget -->"; 
+		echo "<!-- Wordbooker FB Status Widget -->";
 		$name=$result->name;
          	if (strlen($instance['dname']) >0 ) $name=$instance['dname'];
 		$title = empty($instance['title']) ? '&nbsp;' : apply_filters('widget_title', $instance['title']);
@@ -51,14 +51,14 @@ class WordbookWidget extends WP_Widget {
                 echo '<a href="'.$result->url.'" target="facebook">';
                 echo '<img src="'. $result->pic.'" alt=" FB photo for '.$name.'" /></a>';
                 echo '</div>';
-	
-                if ($result->status) {			
+
+                if ($result->status) {
 			$current_offset=0;
 		#	$current_offset = get_option('gmt_offset');
                 	echo '<p><br /><a href="'.$result->url.'">'.$name.'</a> : ';
 			echo '<i>'.$result->status.'</i><br />';
-       			if ($instance['df']=='fbt') { 
-         			echo '('.nicetime($result->updated+(3600*$current_offset)).').'; 
+       			if ($instance['df']=='fbt') {
+         			echo '('.wordbooker_nicetime($result->updated+(3600*$current_offset)).').';
 			}
          		else {
 				echo '('.date($instance['df'], $result->updated+(3600*$current_offset)).').';
@@ -66,7 +66,7 @@ class WordbookWidget extends WP_Widget {
 		}
 		echo "</p>".$after_widget;
 	}
-	
+
 	function update($new_instance, $old_instance) {
 		$instance = $old_instance;
 		$instance['title'] = strip_tags($new_instance['title']);
@@ -74,8 +74,8 @@ class WordbookWidget extends WP_Widget {
 		$instance['dname'] = strip_tags($new_instance['dname']);
 		$instance['df'] = strip_tags($new_instance['df']);
 		return $instance;
-	}	
-	 	
+	}
+
 	function form($instance) {
 		global $user_ID;
 		$default = array( 'title' => __('Facebook Status','wordbooker'), 'snorl'=>$user_ID, 'dname'=>'', 'df'=>'D M j, g:i a' );
@@ -91,7 +91,7 @@ class WordbookWidget extends WP_Widget {
 		echo '<p><label for="'.$title_id.'">'.__('Title of Widget','wordbooker').': </label> <input type="text" class="widefat" id="'.$title_id.'" name="'.$title_name.'" value="'.attribute_escape( $instance['title'] ).'" /></p>';
 		echo '<p><label for="'.$dname_id.'">'.__('Display this name','wordbooker').': <input type="text" class="widefat" id="'.$dname_id.'" name="'.$dname_name.'" value="'.attribute_escape( $instance['dname'] ).'" /></label></p>';
 		echo '<input type="hidden" class="widefat" id="'.$snorl_id.'" name="'.$snorl_name.'" value="'.attribute_escape( $instance['snorl'] ).'" /></p>';
-		echo '<p><label for="'.$df_id.'">'.__('Date Format','wordbooker').':  </label>'; 
+		echo '<p><label for="'.$df_id.'">'.__('Date Format','wordbooker').':  </label>';
 		echo '<select id=id="'.$df_id.'"  name="'.$df_name.'" >';
 		$ds12=date('D M j, g:i a');
 		$dl12=date('l F j, g:i a');
@@ -117,43 +117,43 @@ function wordbooker_widgets(){
 }
 
 
-function nicetime($date)
+function wordbooker_nicetime($date)
 {
-   
+
     $periods         = array(__("second",'wordbooker'), __("minute",'wordbooker'), __("hour",'wordbooker'), __("day",'wordbooker'), __("week",'wordbooker'), __("month",'wordbooker'), __("year",'wordbooker'), __("decade",'wordbooker'));
     $lengths         = array("60","60","24","7","4.35","12","10");
-   
+
     $now             = time();
     $unix_date         = $date;
-   
+
        // check validity of date
-    if(empty($unix_date)) {   
+    if(empty($unix_date)) {
         return "Bad date";
     }
 
     // is it future date or past date
-    if($now > $unix_date) {   
+    if($now > $unix_date) {
         $difference     = $now - $unix_date;
         $tense         = __("ago", 'wordbooker');
-       
+
     } else {
         $difference     = $unix_date - $now;
         $tense         = __("from now", 'wordbooker');
     }
-   
+
     for($j = 0; $difference >= $lengths[$j] && $j < count($lengths)-1; $j++) {
         $difference /= $lengths[$j];
     }
-   
+
     $difference = round($difference);
-   
+
     if($difference != 1) {
         $periods[$j].= "s";
     } else {$difference=__("an",'wordbooker');}
-   
+
     return __("about",'wordbooker')." $difference $periods[$j] {$tense}";
 }
 
 
- 
+
 ?>
