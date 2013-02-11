@@ -26,7 +26,7 @@ Author: Steve Atty
  */
 
 function wordbooker_wall_post($post_id,$access_token,$post_title,$post_data,$target_id,$dummy,$target_name,$wpuserid,$fb_uid){
-	if (isset($dummy)) { 	
+	if (isset($dummy)) {
 		wordbooker_debugger("Wall Post to ".$target_name." Test Only",'No Post Made',$post_id,90) ;
 		return;
 	}
@@ -46,7 +46,7 @@ try {
 }
 
 function wordbooker_link_post($post_id,$access_token,$post_title,$post_data,$target_id,$dummy,$target_name,$wpuserid,$fb_uid){
-	if (isset($dummy)) { 	
+	if (isset($dummy)) {
 		wordbooker_debugger("Link Post to ".$target_name." Test Only",'No Post Made',$post_id,90) ;
 		return;
 	}
@@ -68,23 +68,23 @@ try {
 }
 function wordbooker_status_update($post_id,$access_token,$post_date,$target_id,$dummy,$target_name,$wpuserid,$fb_uid) {
 	global $wordbooker_post_options,$user_ID;
-	wordbooker_debugger("Setting status_text".$wordbooker_post_options['wordbooker_status_update_text']," ",$post_id) ; 
-	if (strlen($wordbooker_post_options['wordbooker_status_update_text'])< 4) { 	
+	wordbooker_debugger("Setting status_text".$wordbooker_post_options['wordbooker_status_update_text']," ",$post_id) ;
+	if (strlen($wordbooker_post_options['wordbooker_status_update_text'])< 4) {
 		wordbooker_debugger("Status update text is too short",$post_id,90) ;
 		return;
 	}
-	if (isset($dummy)) { 	
+	if (isset($dummy)) {
 		wordbooker_debugger("Status update to ".$target_name." Test Only",'No Post Made',$post_id,90) ;
 		return;
 	}
-		
-	$status_text = parse_wordbooker_attributes(stripslashes($wordbooker_post_options['wordbooker_status_update_text']),$post_id,strtotime($post_date)); 
-	$status_text = wordbooker_post_excerpt($status_text,420); 		
+
+	$status_text = parse_wordbooker_attributes(stripslashes($wordbooker_post_options['wordbooker_status_update_text']),$post_id,strtotime($post_date));
+	$status_text = wordbooker_post_excerpt($status_text,420);
 	$data=array( 'access_token'=>$access_token,'message' =>$status_text);
 	try {
 		$result = wordbooker_fb_status_update($data,$target_id);
 		wordbooker_store_post_result($post_id,$result->id,$wpuserid,$fb_uid,$target_id);
-		wordbooker_debugger("Status update  to ".$target_name." suceeded result : ",$result->id,$post_id,90) ;
+		wordbooker_debugger("Status update  to ".$target_name." Succeeded result : ",$result->id,$post_id,90) ;
 	    }
 	catch (Exception $e) {
 		$error_code = $e->getCode();
@@ -95,7 +95,7 @@ function wordbooker_status_update($post_id,$access_token,$post_date,$target_id,$
 }
 
 function wordbooker_notes_post($post_id,$access_token,$post_title,$target_id,$dummy,$target_name,$wpuserid,$fb_uid){
-	if (isset($dummy)) { 	
+	if (isset($dummy)) {
 		wordbooker_debugger("Notes publish  to ".$target_name." Test Only",'No Post Made',$post_id,90) ;
 		return;
 	}
@@ -109,7 +109,7 @@ function wordbooker_notes_post($post_id,$access_token,$post_title,$target_id,$du
 		$result = wordbooker_fb_note_publish($data,$target_id);
 		wordbooker_store_post_result($post_id,$result->id,$wpuserid,$fb_uid,$target_id);
 		wordbooker_debugger("Note Publish to ".$target_name." result : ",$result->id,$post_id,90) ;
-	} 	
+	}
 	catch (Exception $e) {
 		$error_code = $e->getCode();
 		$error_msg = $e->getMessage();
@@ -130,9 +130,9 @@ function wordbooker_store_post_result($post_id,$fb_post_id,$wpuserid,$fb_uid,$ta
 	if (isset($wordbooker_settings['wordbooker_clear_diagnostic'])){
 	$result = $wpdb->query(' DELETE FROM ' . WORDBOOKER_ERRORLOGS . ' WHERE   blog_id ='.$blog_id.' and post_id='.$post_id.' and (error_message not like "(%_%)" and method not like "% - result")'); }
 	# Now Change the publish flag for this post to mark it as published.
-	$wb_params=get_post_meta($post_id, '_wordbooker_options', true); 
+	$wb_params=get_post_meta($post_id, '_wordbooker_options', true);
 	$wb_params["wordbooker_publish_default"]='published';
-	update_post_meta($post_id, '_wordbooker_options', $wb_params); 
+	update_post_meta($post_id, '_wordbooker_options', $wb_params);
 
 }
 

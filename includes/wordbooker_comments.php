@@ -9,9 +9,9 @@ Version: 2.1.25
 
 function wordbooker_poll_comments($userid=0) {
 	global  $wpdb, $user_ID,$table_prefix,$blog_id,$comment_user;
-	$comment_user=1;	
+	$comment_user=1;
 	wordbooker_debugger("Comment handling starting "," ",-3,9) ;
-	$wordbooker_settings=get_option('wordbooker_settings'); 	
+	$wordbooker_settings=get_option('wordbooker_settings');
 	$scheds1['Never'] = array('interval'   => 999999999,'display'   => __('Never ', 'wordbooker'),);
 	$scheds1['Manual'] = array('interval'   => 999999999,'display'   => __('Manual Polling ', 'wordbooker'),);
 	$scheds2=wp_get_schedules();
@@ -31,36 +31,36 @@ function wordbooker_poll_comments($userid=0) {
 	if ($userid>0) { $sql.=" and user_ID=".$userid;}
 	$rows = $wpdb->get_results($sql);
 	foreach ($rows as $comment_row) {
-		$comment_user=$comment_row->user_ID; 
+		$comment_user=$comment_row->user_ID;
 		wordbooker_debugger("Processing comments for ".$comment_row->name," ",-3,9) ;
-		wordbooker_debugger("Processing your comments "," ",-3,9) ;	
-		if (!isset($wordbooker_settings['wordbooker_comment_pull']) ) {	
+		wordbooker_debugger("Processing your comments "," ",-3,9) ;
+		if (!isset($wordbooker_settings['wordbooker_comment_pull']) ) {
 			wordbooker_debugger("Starting Incoming comment handling"," ",-3,9);
 			$incoming=wordbooker_get_comments_from_facebook($comment_row->user_ID);
 			wordbooker_debugger("Incoming comment handling completed"," ",-3,9);
-		 }	
+		 }
 		else {wordbooker_debugger("Incoming comment handling disabled "," ",-3,9) ; }
 		$outgoing=0;
-		if (!isset($wordbooker_settings['wordbooker_comment_push']) ) {	
+		if (!isset($wordbooker_settings['wordbooker_comment_push']) ) {
 			wordbooker_debugger("Starting Outgoing comment handling"," ",-3,9);
 			$outgoing=wordbooker_post_comments_to_facebook($comment_row->user_ID);
 			wordbooker_debugger("Outgoing comment handling completed"," ",-3,9);
-		}	
+		}
 		else {wordbooker_debugger("Outgoing comment handling disabled "," ",-3,9) ; }
-		wordbooker_debugger("Completed comment processing for ".$comment_row->name," In : ".$incoming." - Out : ".$outgoing,-3,9) ; 
-		wordbooker_debugger("Completed your comment processing "," In : ".$incoming." - Out : ".$outgoing,-3,9) ; 
-	}	
-	wordbooker_debugger("Comment handling completed "," ",-3,9) ; 
+		wordbooker_debugger("Completed comment processing for ".$comment_row->name," In : ".$incoming." - Out : ".$outgoing,-3,9) ;
+		wordbooker_debugger("Completed your comment processing "," In : ".$incoming." - Out : ".$outgoing,-3,9) ;
+	}
+	wordbooker_debugger("Comment handling completed "," ",-3,9) ;
 }
 
 function wordbooker_post_comments_to_facebook($user_id) {
-	global  $wpdb, $user_ID,$table_prefix,$blog_id,$comment_user;	
+	global  $wpdb, $user_ID,$table_prefix,$blog_id,$comment_user;
 	$processed_posts=0;
 	$comment_user=$user_id;
 	$wbuser = wordbooker_get_userdata($user_id);
 	if (strlen($wbuser->access_token)<20) {
 		wordbooker_debugger("No user session for comment handling "," ",-3,9) ;
-		return 0; 
+		return 0;
 	}
 $wordbooker_settings=wordbooker_options();
 	$close_comments=get_option('close_comments_for_old_posts');
@@ -82,21 +82,21 @@ $wordbooker_settings=wordbooker_options();
 		wordbooker_debugger("Starting comment handling for WP post ".$row->wp_post_id,$row->fb_post_id,-3,9);
 		$wordbooker_post_options = get_post_meta($row->wp_post_id, '_wordbooker_options', true);
 		if (!isset($wordbooker_post_options['wordbooker_comment_put'])) {
-			wordbooker_debugger("Outgoing comment disabled for WP post ".$row->wp_post_id,$row->fb_post_id,-3,9);;	
+			wordbooker_debugger("Outgoing comment disabled for WP post ".$row->wp_post_id,$row->fb_post_id,-3,9);;
 			continue ;
 		}
 			$andlogic="";
 		if ($wordbooker_close>0) { $andlogic=" and wpposts2.post_date > DATE_SUB( CURDATE( ) , INTERVAL ".$wordbooker_close." DAY )";}
-		$sql="select distinct comment_ID,comment_date from ".$wpdb->comments." wpcom, ".$wpdb->posts." wpposts2, ".WORDBOOKER_POSTCOMMENTS." wbcom2 where wpcom.comment_post_id=".$row->wp_post_id." and wpcom.comment_approved=1 and wpcom.comment_post_id = wpposts2.ID  and wbcom2.wp_post_id=wpposts2.ID and wbcom2.user_id=".$user_id." and wbcom2.blog_id=".$blog_id." and wbcom2.fb_post_id='".$row->fb_post_id."' and wpcom.comment_id not in (select distinct wp_comment_id from ".WORDBOOKER_POSTCOMMENTS." wbcom, ".$wpdb->posts." wpposts where wbcom.wp_post_id=".$row->wp_post_id." and wbcom.fb_post_id='".$row->fb_post_id."' and wbcom.user_id=".$user_id." and wbcom.wp_post_id = wpposts.ID and  wpposts.comment_status='open')".$andlogic;
+		$sql="select distinct comment_ID,comment_date from ".$wpdb->comments." wpcom, ".$wpdb->posts." wpposts2, ".WORDBOOKER_POSTCOMMENTS." wbcom2 where wpcom.comment_post_id=".$row->wp_post_id." and wpcom.comment_approved=1 and wpcom.comment_post_id = wpposts2.ID  and wbcom2.wp_post_id=wpposts2.ID and wbcom2.user_id=".$user_id." and wbcom2.blog_id=".$blog_id." and wbcom2.fb_post_id='".$row->fb_post_id."' and  wpposts2.comment_status='open' and wpcom.comment_id not in (select distinct wp_comment_id from ".WORDBOOKER_POSTCOMMENTS." wbcom, ".$wpdb->posts." wpposts where wbcom.wp_post_id=".$row->wp_post_id." and wbcom.fb_post_id='".$row->fb_post_id."' and wbcom.user_id=".$user_id." and wbcom.wp_post_id = wpposts.ID and  wpposts.comment_status='open')".$andlogic;
 		$results = $wpdb->get_results($sql);
 		wordbooker_debugger("Comments for processing : ".$sql,count($results),-3,98);
-		foreach($results as $result){	
+		foreach($results as $result){
 			$x=0;
 			$comment_content=parse_wordbooker_comment_attributes($result->comment_ID,$comment_structure,$comment_tag);
 			try {
 				$x=wordbooker_fb_put_comments($row->fb_post_id,$comment_content,$wbuser->access_token);
 			}
-			catch (Exception $e) 
+			catch (Exception $e)
 			{
 				$error_msg = $e->getMessage();
 				$err_no=(integer) substr($error_msg,2,3);
@@ -125,11 +125,11 @@ function wordbooker_get_comments_from_facebook($user_id) {
 	$wbuser = wordbooker_get_userdata($user_id);
 	if (strlen($wbuser->access_token)<20) {
 		wordbooker_debugger("No user session for comment handling "," ",-3,9) ;
-		return 0; 
+		return 0;
 	}
 	$close_comments=get_option('close_comments_for_old_posts');
 	$close_days_old=get_option('close_comments_days_old');
-	$wordbooker_settings=get_option('wordbooker_settings'); 
+	$wordbooker_settings=get_option('wordbooker_settings');
 	$wordbooker_close=$wordbooker_settings['wordbooker_close_comment'];
 	$comment_approve=0;
 	$closedays_ts=strtotime("-".$close_days_old." DAYS");
@@ -146,7 +146,7 @@ function wordbooker_get_comments_from_facebook($user_id) {
 			$all_comments=wordbooker_fb_get_comments($fb_comment->fb_post_id,$wbuser->access_token);
 			wordbooker_debugger("Comments pulled from Facebook",count($all_comments->data),-3,9);
 		}
-		catch (Exception $e) 
+		catch (Exception $e)
 		{
 			$error_msg = $e->getMessage();
 			$err_no=(integer) substr($error_msg,2,3);
@@ -169,7 +169,7 @@ function wordbooker_get_comments_from_facebook($user_id) {
 					foreach ($wp_post_rows as $wp_post_row) {
 						$wordbooker_post_options = get_post_meta($wp_post_row->wp_post_id, '_wordbooker_options', true);
 						if (!isset($wordbooker_post_options['wordbooker_comment_get'])) {
-							wordbooker_debugger("Incoming comments disabled for WP post ".$wp_post_row->wp_post_id,' ',-3,9);	
+							wordbooker_debugger("Incoming comments disabled for WP post ".$wp_post_row->wp_post_id,' ',-3,9);
 							continue ;
 						}
 						$data = array(
@@ -186,7 +186,7 @@ function wordbooker_get_comments_from_facebook($user_id) {
 						   	'comment_agent' => 'Wordbooker plugin '.WORDBOOKER_CODE_RELEASE,
 							'comment_approved' => $comment_approve,
 						);
-						$data = apply_filters('preprocess_comment', $data); 
+						$data = apply_filters('preprocess_comment', $data);
 						$data['comment_parent'] = isset($data['comment_parent']) ? absint($data['comment_parent']) : 0;
 						$parent_status = ( 0 < $data['comment_parent'] ) ? wp_get_comment_status($data['comment_parent']) : '';
 						$data['comment_parent'] = ( 'approved' == $parent_status || 'unapproved' == $parent_status ) ? $data['comment_parent'] : 0;
@@ -213,7 +213,7 @@ function wordbooker_get_comments_from_facebook($user_id) {
 function parse_wordbooker_comment_attributes($comment_id,$comment_structure,$comment_tag) {
 	# Changes various "tags" into their WordPress equivalents.
 	$comment = get_comment($comment_id);
-	$comment_author=$comment->comment_author; 
+	$comment_author=$comment->comment_author;
 	$comment_date=date_i18n(get_option('date_format'),strtotime($comment->comment_date));
 	$comment_time=date_i18n(get_option('time_format'),strtotime($comment->comment_date));
 	$comment_content=$comment->comment_content;

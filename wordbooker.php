@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.27
+Version: 2.1.28
 */
 
  /*
@@ -38,7 +38,7 @@ function wordbooker_global_definitions() {
 	$wbooker_user_id=0;
 	define('WORDBOOKER_DEBUG', false);
 	define('WORDBOOKER_TESTING', false);
-	define('WORDBOOKER_CODE_RELEASE',"2.1.27 R00 - Loud, Confident and Wrong");
+	define('WORDBOOKER_CODE_RELEASE',"2.1.28 R00 - I Can't tell the Bottom from The Top");
 
 	# For Troubleshooting
 	define('ADVANCED_DEBUG',false);
@@ -1159,7 +1159,7 @@ function wordbooker_status($user_id)
 	echo '<h3>'.__('Status', 'wordbooker').'</h3>';
 	global  $wpdb, $user_ID,$table_prefix,$blog_id;
 	$wordbooker_user_settings_id="wordbookuser".$blog_id;
-	$wordbookuser=get_user_meta($user_ID,$wordbooker_user_settings_id);
+	$wordbookuser=get_user_meta($user_ID,$wordbooker_user_settings_id,true);
 	if ($wordbookuser['wordbooker_disable_status']=='on') {return;}
 	global $shortcode_tags;
 	$result = wordbooker_get_cache($user_id);
@@ -2570,7 +2570,7 @@ function wordbooker_process_post_data($newstatus, $oldstatus, $post) {
 		if (count($wb_params)> 10 ) {$wordbooker_settings=$wb_params;}
 		else {
 			$wordbooker_user_settings_id="wordbookuser".$blog_id;
-			$wordbookuser=get_user_meta($wb_user_id,$wordbooker_user_settings_id);
+			$wordbookuser=get_user_meta($wb_user_id,$wordbooker_user_settings_id,true);
 			if(is_array($wordbookuser)) {
 				foreach (array_keys($wordbookuser) as $key) {
 					if ((strlen($wordbookuser[$key])>0) && ($wordbookuser[$key]!="0") ) {
@@ -2598,7 +2598,7 @@ function wordbooker_process_post_data($newstatus, $oldstatus, $post) {
 		$wordbooker_global_settings=wordbooker_options();
 		$wordbooker_settings=$wordbooker_global_settings;
 		$wordbooker_user_settings_id="wordbookuser".$blog_id;
-		$wordbookuser=get_user_meta($wb_user_id,$wordbooker_user_settings_id);
+		$wordbookuser=get_user_meta($wb_user_id,$wordbooker_user_settings_id,true);
 		# If we have user settings then lets go through and override the blog level defaults.
 		if(is_array($wordbookuser)) {
 			foreach (array_keys($wordbookuser) as $key) {
@@ -2623,7 +2623,7 @@ function wordbooker_process_post_data($newstatus, $oldstatus, $post) {
 		$wb_user_id=$wordbooker_settings["wordbooker_default_author"];
 		# New get the user level settings from the DB
 		$wordbooker_user_settings_id="wordbookuser".$blog_id;
-		$wordbookuser=get_user_meta($wb_user_id,$wordbooker_user_settings_id);
+		$wordbookuser=get_user_meta($wb_user_id,$wordbooker_user_settings_id,true);
 		# If we have user settings then lets go through and override the blog level defaults.
 		if(is_array($wordbookuser)) {
 			foreach (array_keys($wordbookuser) as $key) {
