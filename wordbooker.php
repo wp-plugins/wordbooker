@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.28
+Version: 2.1.29
 */
 
  /*
@@ -38,7 +38,7 @@ function wordbooker_global_definitions() {
 	$wbooker_user_id=0;
 	define('WORDBOOKER_DEBUG', false);
 	define('WORDBOOKER_TESTING', false);
-	define('WORDBOOKER_CODE_RELEASE',"2.1.28 R00 - I Can't tell the Bottom from The Top");
+	define('WORDBOOKER_CODE_RELEASE',"2.1.29 R00 - One of These Days");
 
 	# For Troubleshooting
 	define('ADVANCED_DEBUG',false);
@@ -1649,8 +1649,8 @@ function wordbooker_fbclient_publishaction($wbuser,$post_id,$wpuserid)
 	if ($wordbooker_post_options['wordbooker_actionlink']==300) {
 		// Read Full
 		wordbooker_debugger("Read Full link being used"," ",$post_id,80) ;
-		#$action_links = array('name' => __('Read entire article', 'wordbooker'),'link' => $post_data['post_link_share']);
-		$action_links = array('name' => __('Read entire article', 'wordbooker'),'link' => 'https://wordbooker.tty.org.uk/redirect.php?P='.substr($wordbooker_post_options['wordbooker_primary_target'],3)."&P2=".substr($wordbooker_post_options['wordbooker_secondary_target'],3)."&t=".urlencode($post_data['post_link_share']));
+		$action_links = array('name' => __('Read entire article', 'wordbooker'),'link' => $post_data['post_link_share']);
+		#$action_links = array('name' => __('Read entire article', 'wordbooker'),'link' => 'https://wordbooker.tty.org.uk/redirect.php?P='.substr($wordbooker_post_options['wordbooker_primary_target'],3)."&P2=".substr($wordbooker_post_options['wordbooker_secondary_target'],3)."&t=".urlencode($post_data['post_link_share']));
 		$wordbooker_fb_post['actions'] =json_encode($action_links);
 	}
 
