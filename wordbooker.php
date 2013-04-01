@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.29
+Version: 2.1.30
 */
 
  /*
@@ -38,7 +38,7 @@ function wordbooker_global_definitions() {
 	$wbooker_user_id=0;
 	define('WORDBOOKER_DEBUG', false);
 	define('WORDBOOKER_TESTING', false);
-	define('WORDBOOKER_CODE_RELEASE',"2.1.29 R00 - One of These Days");
+	define('WORDBOOKER_CODE_RELEASE',"2.1.30 R00 - Classy Girls");
 
 	# For Troubleshooting
 	define('ADVANCED_DEBUG',false);
@@ -221,7 +221,7 @@ function wordbooker_activate() {
 			) DEFAULT CHARSET=utf8;
 		');
 		$x=$wpdb->last_error;
-		if ($result ==0) trigger_error($x,E_USER_ERROR);
+		if (strlen($x)>0) trigger_error($x,E_USER_ERROR);
 
 	$result = $wpdb->query('
 		CREATE TABLE IF NOT EXISTS ' . WORDBOOKER_ERRORLOGS . ' (
@@ -240,7 +240,7 @@ function wordbooker_activate() {
 			) DEFAULT CHARSET=utf8;
 		');
 		$x=$wpdb->last_error;
-		if ($result ==0) trigger_error($x,E_USER_ERROR);
+		if (strlen($x)>0) trigger_error($x,E_USER_ERROR);
 
 	$result = $wpdb->query('
 		CREATE TABLE IF NOT EXISTS ' . WORDBOOKER_USERDATA . ' (
@@ -268,7 +268,7 @@ function wordbooker_activate() {
 			) DEFAULT CHARSET=utf8;
 		');
 		$x=$wpdb->last_error;
-		if ($result ==0) trigger_error($x,E_USER_ERROR);
+		if (strlen($x)>0) trigger_error($x,E_USER_ERROR);
 
 	$result = $wpdb->query('
 		CREATE TABLE IF NOT EXISTS ' . WORDBOOKER_POSTCOMMENTS . ' (
@@ -289,7 +289,7 @@ function wordbooker_activate() {
 			)  DEFAULT CHARSET=utf8;
 		');
 		$x=$wpdb->last_error;
-		if ($result ==0) trigger_error($x,E_USER_ERROR);
+		if (strlen($x)>0) trigger_error($x,E_USER_ERROR);
 
 	$result = $wpdb->query('
 		CREATE TABLE IF NOT EXISTS ' . WORDBOOKER_USERSTATUS . ' (
@@ -305,7 +305,7 @@ function wordbooker_activate() {
 			)  DEFAULT CHARSET=utf8;
 		');
 		$x=$wpdb->last_error;
-		if ($result ==0) trigger_error($x,E_USER_ERROR);
+		if (strlen($x)>0) trigger_error($x,E_USER_ERROR);
 
 	$result = $wpdb->query(' CREATE TABLE IF NOT EXISTS ' . WORDBOOKER_FB_FRIENDS . ' (
 			  `user_id` int(11) NOT NULL,
@@ -319,7 +319,7 @@ function wordbooker_activate() {
 			) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 		 ' );
 		$x=$wpdb->last_error;
-		if ($result ==0) trigger_error($x,E_USER_ERROR);
+		if (strlen($x)>0) trigger_error($x,E_USER_ERROR);
 
 		$result = $wpdb->query('
 			CREATE TABLE IF NOT EXISTS ' . WORDBOOKER_FB_FRIEND_LISTS . ' (
@@ -332,7 +332,7 @@ function wordbooker_activate() {
 
 		');
 		$x=$wpdb->last_error;
-		if ($result ==0) trigger_error($x,E_USER_ERROR);;
+		if (strlen($x)>0) trigger_error($x,E_USER_ERROR);
 
 
 	$result = $wpdb->query(' CREATE TABLE IF NOT EXISTS ' . WORDBOOKER_PROCESS_QUEUE . ' (
@@ -345,7 +345,7 @@ function wordbooker_activate() {
 	) DEFAULT CHARSET=utf8;
 		');
 		$x=$wpdb->last_error;
-		if ($result ==0) trigger_error($x,E_USER_ERROR); ;
+		if (strlen($x)>0) trigger_error($x,E_USER_ERROR);
 
 	if ($errors) { wordbooker_db_crosscheck();}
 	$wordbooker_settings=wordbooker_options();
@@ -1078,8 +1078,17 @@ function get_check_session(){
 		$session->access_token=$newkey[0];
 		$session->session_key=$oldkey[1];
 		$session->expires=0;
+		try {
 		$ret_code=wordbooker_me_status($session->facebook_id,$session->access_token);
+		}
+		catch (Exception $e) {
+		# We don't have a good session so
+		wordbooker_debugger("User Session invalid - clear down data "," ",0) ;
+		#wordbooker_delete_user($user_ID,1);
+		return;
+	    }
 		wordbooker_debugger("Checking session (2) "," ",0) ;
+
 		if (strlen($session->access_token)>5){
 		wordbooker_debugger("Session found. Store it "," ",0) ;
 			# Yes! so lets store it
@@ -1194,6 +1203,13 @@ function wordbooker_option_status($wbuser) {
 			echo"<p>".__('Wordbooker appears to be configured and working just fine', 'wordbooker');
 			wordbooker_check_permissions($wbuser,$user);
 			echo "</p><p>".__("If you like, you can start over from the beginning (this does not delete your posting and comment history)", 'wordbooker').":</p>";
+		  $wbuser2= wordbooker_get_userdata($user_ID);
+		  $at=wordbooker_check_access_token($wbuser2->access_token);
+		  if(!$at->data->is_valid) {
+		    echo "<p><b>".__('WARNING : Your Access token is not valid  ', 'wordbooker')."</b>";
+		    if (isset($at->data->error->message)) {echo "( ".$at->data->error->message." )";}
+		    echo "</p>";
+		  }
 		}
 		else
 		{
@@ -1297,6 +1313,9 @@ function wordbooker_option_support() {
   	 curl_close($ch);
   	   $curlv2=curl_version();
   	 $curlv=$curlv2['version'];
+  	 $wordbooker_access=wordbooker_check_access();
+	if (trim($wordbooker_access)!="Wordbooker Acccess OK"){$wordbooker_access="Wordbooker Access Failed";}
+	$wordbooker_access=strip_tags($wordbooker_access);
 	}
 	$new_wb_table_prefix=$wpdb->base_prefix;
 	if (isset ($db_prefix) ) { $new_wb_table_prefix=$db_prefix;}
@@ -1314,7 +1333,7 @@ function wordbooker_option_support() {
 		'JSON Decode' => WORDBOOKER_JSON_DECODE,
 		'Curl Status' => $curlstatus,
 		'Curl Version' => $curlv,
-#		'Fopen Status' => $fopenstat2.$fopenstat,
+		'Wordbooker Server Access' => $wordbooker_access,
 		'JSON Version' => $jsonvers,
 		'SimpleXML library' => $sxmlvers." (". WORDBOOKER_SIMPLEXML.")",
 		'HTTP Output Character Encoding'=>$http_coding,
@@ -1324,6 +1343,7 @@ function wordbooker_option_support() {
 	$version_errors = array();
 	$phpminvers = '5.0';
 	$mysqlminvers = '4.0';
+//	var_dump(get_option('gmt_offset'));
 	if (!wordbooker_version_ok($phpvers, $phpminvers)) {
 		$version_errors['PHP'] = $phpminvers;
 	}
@@ -1579,7 +1599,7 @@ function wordbooker_fbclient_publishaction($wbuser,$post_id,$wpuserid)
 	$post = get_post($post_id);
 	$post_link_share = get_permalink($post_id);
 	$post_link=wordbooker_short_url($post_id);
-	$post_title=ltrim(wordbooker_translate($post->post_title),'@');
+	$post_title=html_entity_decode(ltrim(wordbooker_translate($post->post_title),'@'));
 	$post_content = $post->post_content;
 	wordbooker_debugger("Getting the Excerpt"," ",$post->ID,80) ;
 	$images=wordbooker_return_images($post_content,$post_id,1) ;
@@ -2910,7 +2930,6 @@ if (!isset($wordbooker_disabled)){
 	if (function_exists('jfb_output_facebook_init')) {
 	    add_filter('wpfb_output_facebook_locale', 'wordbooker_get_language');
 	}
-
 }
 include("includes/wordbooker_facebook_curl.php");
 ?>
