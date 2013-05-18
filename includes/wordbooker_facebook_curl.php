@@ -73,9 +73,21 @@ function wordbooker_delete_fb_post($fb_post_id,$access_token){
 }
 
 function wordbooker_get_access_token($access_token) {
-    $url='https://graph.facebook.com/oauth/access_token?client_id='.WORDBOOKER_FB_ID.'&client_secret=df04f22f3239fb75bf787f440e726f31&grant_type=fb_exchange_token&fb_exchange_token='.$access_token;
+	if (!defined('WORDBOOKER_FB_SECRET')) {$secret='df04f22f3239fb75bf787f440e726f31'; } else {$secret=WORDBOOKER_FB_SECRET;}
+    $url='https://graph.facebook.com/oauth/access_token?client_id='.WORDBOOKER_FB_ID.'&client_secret='.$secret.'&grant_type=fb_exchange_token&fb_exchange_token='.$access_token;
+	//wordbooker_debugger("Access token returns ",$x,-5,98) ;
+	return($x);
+}
+
+function wordbooker_check_access_token($access_token) {
+	if (!defined('WORDBOOKER_FB_ACCESS_TOKEN')) {$access='254577506873|szBVgLKb2hvtvSkMeSMTkaPnGFM'; } else {$access=WORDBOOKER_FB_ACCESS_TOKEN;}
+	 $url='https://graph.facebook.com/debug_token?input_token='.$access_token.'&access_token='.$access;
+	 try {
 	$x=wordbooker_make_curl_call2($url);
-	wordbooker_debugger("Access token returns ",$x,-5,98) ;
+	}
+	catch (Exception $e) {
+		$x = $e;
+	}
 	return($x);
 }
 
@@ -83,18 +95,6 @@ function wordbooker_check_access() {
 	$version=explode(" ",WORDBOOKER_CODE_RELEASE);
 	$url='https://wordbooker.tty.org.uk/check_access.cgi';
 	$x=wordbooker_make_curl_call2($url);
-	return($x);
-}
-
-function wordbooker_check_access_token($access_token) {
-	$version=explode(" ",WORDBOOKER_CODE_RELEASE);
-	 $url='https://graph.facebook.com/debug_token?input_token='.$access_token.'&access_token=254577506873|szBVgLKb2hvtvSkMeSMTkaPnGFM';
-	 try {
-	$x=wordbooker_make_curl_call2($url);
-	}
-	catch (Exception $e) {
-		$x = $e;
-	}
 	return($x);
 }
 

@@ -81,7 +81,6 @@ function wordbooker_post_comments_to_facebook($user_id) {
 	$sql="select distinct wp_post_id,fb_post_id from ".WORDBOOKER_POSTCOMMENTS." where fb_comment_id is null and blog_id=".$blog_id." and user_id=".$user_id." and in_out is null";
 	if ($close_comments==1) {$sql.=" and comment_timestamp  > ".$closedays_ts ;}
 	if ($wordbooker_close>0) {$sql.=" and comment_timestamp > ".$closecomments_ts;}
-
 	$rows = $wpdb->get_results($sql);
 	wordbooker_debugger("Blog posts for comment handling : ".$sql,count($rows),-3,98);
 	foreach($rows as $row) {
@@ -136,7 +135,7 @@ function wordbooker_get_comments_from_facebook($user_id) {
 		wordbooker_debugger("No user session for comment handling "," ",-3,9) ;
 		return 0;
 	}
-		$at=wordbooker_check_access_token($wbuser->access_token);
+	$at=wordbooker_check_access_token($wbuser->access_token);
 	if(!$at->data->is_valid) {
 		wordbooker_debugger("Comment Processing failed : Access Token is not valid ",$at->data->error->message,-3,9) ;
 		return 0;
@@ -172,8 +171,11 @@ function wordbooker_get_comments_from_facebook($user_id) {
 		}
 		if(count($all_comments->data) > 0 ) {
 			foreach($all_comments->data as $single_comment) {
+				$s = explode("_",$single_comment->id);
+				$fb_comid=end($s);
 				# Now check that we don't already have this comment in the table as it means we've processed it before (or sent it to FB)
-				$sql="Select fb_comment_id from ".WORDBOOKER_POSTCOMMENTS." where fb_comment_id='".$single_comment->id."'";
+				$sql="Select fb_comment_id from ".WORDBOOKER_POSTCOMMENTS." where fb_comment_id like'%".$fb_comid."'";
+				wordbooker_debugger("Checking If comment exists : ".$sql,' ',-3,98);
 				$commq=$wpdb->query($sql);
 				if(!$commq) {
 					wordbooker_debugger("Found new comment for FB post ".$fb_comment->fb_post_id,"from : ".$single_comment->from->name,-3,9);
@@ -200,7 +202,7 @@ function wordbooker_get_comments_from_facebook($user_id) {
 							'comment_date' => $atime,
 							'comment_date_gmt' => $time,
 							'comment_parent'=> 0,
-							'user_id' => 0,
+							'user_id' => 1,
 						   	'comment_agent' => 'Wordbooker plugin '.WORDBOOKER_CODE_RELEASE,
 							'comment_approved' => $comment_approve,
 						);
