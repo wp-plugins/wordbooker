@@ -176,10 +176,11 @@ if (count($fanpages)>1){
 
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_use_excerpt" '.$checked_flag[$wordbooker_settings["wordbooker_use_excerpt"]].' > Use Wordpress Excerpt for Wall Post <br />';
 		echo 'Facebook Post Attribute line: <INPUT NAME="wordbooker_attribute" size=60 maxlength=240 value="'.stripslashes($wordbooker_settings["wordbooker_attribute"]).'"><br />';
-		echo __('Facebook Status Update text', 'wordbooker').' : <INPUT NAME="wordbooker_status_update_text" size=60 maxlength=240 value="'.stripslashes($wordbooker_settings["wordbooker_status_update_text"]).'"><br />';
+		if(!isset($wordbooker_settings['wordbooker_excerpt_for_attribute'])) {$wordbooker_settings['wordbooker_excerpt_for_attribute']="off";}
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_excerpt_for_attribute" '.$checked_flag[$wordbooker_settings["wordbooker_excerpt_for_attribute"]].'> '.__("Use Post Excerpt as Post Attribute", 'wordbooker').' </P><p>';
 
-		echo '<label for="wb_wordbooker_override_author">'.__("Override Post Author Options and use Current logged in user", 'wordbooker'). ' : </label>';
-		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_override_author" '.$checked_flag[$wordbooker_settings["wordbooker_override_author"]].' ></P><p>';
+		echo __('Facebook Status Update text', 'wordbooker').' : <INPUT NAME="wordbooker_status_update_text" size=60 maxlength=240 value="'.stripslashes($wordbooker_settings["wordbooker_status_update_text"]).'"><br />';
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_override_author" '.$checked_flag[$wordbooker_settings["wordbooker_override_author"]].'> '.__("Override Post Author Options and use Current logged in use", 'wordbooker').' </P><p>';
 
 		if($post->post_type=='page'){
 			if(!isset($wordbooker_settings['wordbooker_like_button_page'])) {$wordbooker_settings['wordbooker_like_button_page']=1;}

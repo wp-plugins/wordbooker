@@ -5,7 +5,7 @@ Tags: facebook, news feed, wall, fan page wall, group wall, crosspost, Facebook 
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=8XNJMQCYDJT6U&lc=GB&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 2.1.29
+Stable tag: 2.1.32
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for.
 
@@ -82,7 +82,7 @@ So it looks something like :  <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v
 Yes, and its also  WP Networked Blogs mode compliant.
 
 
-= How do I reset my Wordbooker/WordPress configuration so I can start over from scratch? =
+= How do I completely reset my Wordbooker/WordPress configuration so I can start over from scratch? =
 
 1. Click the "Reset configuration" button in the "Wordbooker" panel of the "Options" WordPress admin page.
 1. Deactivate the Wordbook plugin from your WordPress installation.
@@ -117,12 +117,35 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 == Changelog ==
 
+= Version 2.1.32 29/05/13 =
+- Fixed a bug in the token auth swapping code.
+
+= Version 2.1.31 18/05/13 =
+- Fix for quotes being mangled on some installs
+- Adjustment to comment handling to hopefully avoid being tripped up by spam checkers
+- Added option to use Post Excerpt as the Post Attribute
+- Adjustment to the Tag Stripping and Content Parsing to better support the Canalplan AC Plugin.
+- Rebuild Facebook Authorise Button to work round undocumented removal of support of custom button by Facebook
+- Added up to date fb_ca_chain_bundle.crt file
+- Backported Session checking from 2.2
+- Change to Comment handling to handle FB returning different Comment IDs to the ones they actually store.
+
+
+= Version 2.1.30 01/04/13 =
+- Schema creation code fixed so that some installs don't explode with a rogue Fatal Error
+- Added a Valid Access token check to hopefully reduce the number of errors being reported by the FB API.
+- Changed the Token Swapping process to take a server out of the loop which should help fix problems with some oddly configured hosts
+- Added a HTML entity decode to cope with some Wordpress installs that do funky things with html entities in Post Titles.
+
+
 = Version 2.1.29 12/02/13 =
 - Experimental code for Read All Link escaped into the wild. This release rolls that change back
+
 
 = Version 2.1.28 10/02/13 =
 - Fixed a problem with comment handing on posts pushed to FB when comments are closed
 - Fixed some more issues with user_meta calls.
+
 
 = Version 2.1.27 09/02/13 =
 - Added a check for Table Storage. FULLTEXT indexes don't work on InnoDB tables.
