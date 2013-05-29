@@ -39,6 +39,7 @@ function wordbooker_cache_refresh($user_id) {
 		$at=wordbooker_check_access_token($wbuser2->access_token);
 		if(!$at->data->is_valid) {
 			wordbooker_debugger("Cache Refresh Failed : Access Token is not valid ",$at->data->error->message,-1,9) ;
+			wordbooker_debugger("Cache Refresh Failed : Access Token was ",$wbuser2->access_token,-1,9) ;
 			return;
 		}
 		wordbooker_debugger("Getting Permisions for : ",$uid,-1,9) ;

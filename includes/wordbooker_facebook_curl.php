@@ -75,6 +75,7 @@ function wordbooker_delete_fb_post($fb_post_id,$access_token){
 function wordbooker_get_access_token($access_token) {
 	if (!defined('WORDBOOKER_FB_SECRET')) {$secret='df04f22f3239fb75bf787f440e726f31'; } else {$secret=WORDBOOKER_FB_SECRET;}
     $url='https://graph.facebook.com/oauth/access_token?client_id='.WORDBOOKER_FB_ID.'&client_secret='.$secret.'&grant_type=fb_exchange_token&fb_exchange_token='.$access_token;
+    $x=wordbooker_make_curl_call2($url);
 	//wordbooker_debugger("Access token returns ",$x,-5,98) ;
 	return($x);
 }
