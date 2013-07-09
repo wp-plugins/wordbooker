@@ -11,7 +11,7 @@ Author: Steve Atty
 function wordbooker_cache_refresh($user_id) {
 	global $blog_id,$wpdb,$table_prefix,$wordbooker_user_settings_id,$wbooker_user_id;
 	$wbooker_user_id=$user_id;
-	$result = $wpdb->query(' DELETE FROM ' . WORDBOOKER_ERRORLOGS . ' WHERE   blog_id ='.$blog_id.' and (user_ID='.$user_id.' or user_ID=0 ) and post_id<=1');
+	$result = $wpdb->query(' DELETE FROM ' . WORDBOOKER_ERRORLOGS . ' WHERE   blog_id ='.$blog_id.' and (user_ID='.$user_id.' or user_ID=0 ) and post_id<=1 and post_id>-3');
 	wordbooker_debugger("Cache Refresh Commence ",$user_id,-1,9) ;
 	$result = $wpdb->get_row("select facebook_id from ".WORDBOOKER_USERDATA." where user_ID=".$user_id);
 	$uid=$result->facebook_id;
@@ -92,6 +92,7 @@ function wordbooker_cache_refresh($user_id) {
 		$suid=$x[1];
 
 		wordbooker_debugger("Getting Pages administered by : ",$uid,-1,9) ;
+		/*
 		try {
 			$query="SELECT name, page_url, page_id FROM page WHERE page_id IN (SELECT page_id FROM page_admin WHERE uid= $uid )";
 			$fb_page_info = wordbooker_fql_query($query,$wbuser2->access_token);
@@ -101,6 +102,8 @@ function wordbooker_cache_refresh($user_id) {
 		$error_msg = $e->getMessage();
 		wordbooker_debugger("Failed to get page info : ",$error_msg,-1,9);
 		}
+		*/
+			$all_pages=array();
 		try {
 		$ret_code=wordbooker_me($wbuser2->access_token);
 		}
@@ -111,8 +114,20 @@ function wordbooker_cache_refresh($user_id) {
 		}
 		if (isset($ret_code->data)){
 		foreach($ret_code->data as $page_access) {
-			$page_token[$page_access->id]=$page_access->access_token;
+			$pages["access_token"]=$page_access->access_token;
+			$pages["id"]="FW:".$page_access->id;
+			if (function_exists('mb_convert_encoding')) {
+					$pages["name"]=mb_convert_encoding($page_access->name,'UTF-8');
+			}
+				else
+			{
+					$pages["name"]=$pageinfo->$page_access->name;
+				}
+			wordbooker_debugger("Page info for page ID ".$page_access->id,$pages["name"],-1,9) ;
+			$all_pages[]=$pages;
 		}
+	}
+	/*
 		$all_pages=array();
 		if (is_array($fb_page_info)) {
 			$encoded_names=str_replace('\\','\\\\',serialize($fb_page_info));
@@ -135,25 +150,40 @@ function wordbooker_cache_refresh($user_id) {
 				}
 
 			}
-		}
+		} */
 		 else {
 			wordbooker_debugger("Failed to get page information from FB"," ",-1,9);
 		 }
-		}
+	//	}
 		$fb_group_list=array();
 		$all_groups=array();
 		wordbooker_debugger("Getting Groups owned or managed by : ",$uid,-1,9) ;
 		try {
+			// Put a call in to wordbooker_me_groups here and parse that
+			//  if the administrator field is set then we should store - otherwise not.
+			$fb_groups= wordbooker_me_groups($wbuser2->access_token);
 			$query="Select positions, gid from group_member where uid=$uid";
-			$fb_groups= wordbooker_fql_query($query,$wbuser2->access_token);
-			if(is_array($fb_groups)){
-				foreach($fb_groups as $fb_group){
+			//$fb_groups= wordbooker_fql_query($query,$wbuser2->access_token);
+			if(is_array($fb_groups->data)){
+				foreach($fb_groups->data as $fb_group){
 					# Check to see if there are any positions. If not then the user is only a member of the group and thus we dont want it in the list.
-					if(count($fb_group->positions)>0) {
-						wordbooker_debugger("Getting details for group : ",$fb_group->gid,-1,9) ;
-						$query="Select name,gid from group where gid =".$fb_group->gid;
-						$fb_group_info= wordbooker_fql_query($query,$wbuser2->access_token);
-						$fb_group_list[]= (array) $fb_group_info;
+					if(isset($fb_group->administrator)) {
+						wordbooker_debugger("Getting details for group : ",$fb_group->id,-1,9) ;
+					//	$query="Select name,gid from group where gid =".$fb_group->gid;
+					//	$fb_group_info= wordbooker_fql_query($query,$wbuser2->access_token);
+						$fb_group_list[]->name=$fb_group->name;
+						if (function_exists('mb_convert_encoding')) {
+							$groups["name"]=mb_convert_encoding($fb_group->name,'UTF-8');
+						}
+						else
+						{
+							$groups["name"]=$fb_group->name;
+						}
+						$groups["page_id"]->gid=$fb_group->id;
+						$groups["id"]="GW:".$gb_group->id;
+						$groups["access_token"]="dummy access token";
+						$all_groups[]=$groups;
+						wordbooker_debugger("Group info for group ID ".$fb_group->id,$fb_group->name,-1,9) ;
 					}
 				}
 			}
@@ -164,7 +194,8 @@ function wordbooker_cache_refresh($user_id) {
 			$error_msg = $e->getMessage();
 			wordbooker_debugger("Failed to get group info : ",$error_msg,-1,9);
 		}
-
+		/*
+		var_dump($fb_group_list);
 		if (is_array($fb_group_list)) {
 		$encoded_names=str_replace('\\','\\\\',serialize($fb_group_list));
 		 foreach ( $fb_group_list as $groupinfo ) {
@@ -188,14 +219,14 @@ function wordbooker_cache_refresh($user_id) {
 		 else {
 			wordbooker_debugger("Failed to get group information from FB"," ",-1,9);
 		 }
-
+*/
 
 		$all_pages_groups=@array_merge($all_pages,$all_groups);
 		$encoded_names=str_replace('\\','\\\\',serialize($all_pages_groups));
 
 /*
 
-		wordbooker_debugger("Getting Friends Lists for ",$uid,-1,9) ;
+		wordbooker_debugger("Getting Friends Lists for ",$uid,-1,9) ;``
 		try {
 			$query="SELECT flid, owner, name FROM friendlist WHERE owner=$uid";
 			$fb_friend_lists= wordbooker_fql_query($query,$wbuser2->access_token);

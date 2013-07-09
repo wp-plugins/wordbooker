@@ -230,6 +230,8 @@ $arr = array(1=> __("Yes", 'wordbooker'),  2=> __("No", 'wordbooker') );
 	}  else {
 echo "<p>".__('Wordbooker Blog level settings are in force','wordbooker')."<br /></p>";
 echo '<input type="hidden" name="crabstick" value="stairwell" />';
+if($wordbooker_settings["wordbooker_post_edited"]!='yes') {$wordbooker_settings["wordbooker_publish_default"]=$publish;}
+if ($post->post_status=="publish") {$wordbooker_settings["wordbooker_publish_default"]='';}
 if ( isset($wordbooker_settings['wordbooker_allow_publish_select'])) {
 echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_publish_default" '.$checked_flag[$wordbooker_settings["wordbooker_publish_default"]].' > '.__('Publish This Post to Facebook', 'wordbooker').'<br />';
 #echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_publish_override" '.$checked_flag[$wordbooker_settings["wordbooker_publish_override"]].' >'.__('Force Re-Publish Post to Facebook on Edit (overrides republish window)').'<br />';

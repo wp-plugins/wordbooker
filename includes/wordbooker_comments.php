@@ -10,14 +10,14 @@ Author: Steve Atty
 function wordbooker_poll_comments($userid=0) {
 	global  $wpdb, $user_ID,$table_prefix,$blog_id,$comment_user;
 	$comment_user=1;
-	wordbooker_debugger("Comment handling starting "," ",-3,9) ;
 	$wordbooker_settings=get_option('wordbooker_settings');
 	$scheds1['Never'] = array('interval' => 3600,);
 	$scheds1['Manual'] = array('interval' => 3600,);
 	$scheds2=wp_get_schedules();
 	$scheds=array_merge($scheds1,$scheds2);
-	$trimtime=strtotime("now")-($scheds[$wordbooker_settings['wordbooker_comment_cron']]["interval"]*3);
-	$result = $wpdb->query('DELETE FROM '.WORDBOOKER_ERRORLOGS.' WHERE timestamp < '.$trimtime.' and blog_id ='.$blog_id.' and post_id=-2');
+	$trimtime=(strtotime("now")-($scheds[$wordbooker_settings['wordbooker_comment_cron']]["interval"]*3));
+
+
 	if (! $wordbooker_settings['wordbooker_comment_handling']) {
 		wordbooker_debugger("Comment handling disabled "," ",-3,9) ;
 		return;
@@ -32,6 +32,14 @@ function wordbooker_poll_comments($userid=0) {
 	$rows = $wpdb->get_results($sql);
 	foreach ($rows as $comment_row) {
 		$comment_user=$comment_row->user_ID;
+		$sql1='SELECT count(*) as count FROM '.WORDBOOKER_ERRORLOGS.' WHERE timestamp < DATE_SUB(NOW(), INTERVAL '.($scheds[$wordbooker_settings['wordbooker_comment_cron']]["interval"]*3).' SECOND) and blog_id ='.$blog_id.' and post_id=-3';
+		$rcount = $wpdb->get_results($sql1);
+		sleep(1);
+	$sql='DELETE FROM '.WORDBOOKER_ERRORLOGS.' WHERE timestamp < DATE_SUB(NOW(), INTERVAL '.($scheds[$wordbooker_settings['wordbooker_comment_cron']]["interval"]*3).' SECOND) and blog_id ='.$blog_id.' and post_id=-3';
+	$result = $wpdb->query($sql);
+		sleep(1);
+	  //  wordbooker_debugger("Processing your comments ",$sql1,-3,9);
+		wordbooker_debugger("Comment logs deleted (older than ".($scheds[$wordbooker_settings['wordbooker_comment_cron']]["interval"]*3).")",$rcount[0]->count,-3,9) ;
 		wordbooker_debugger("Processing comments for ".$comment_row->name," ",-3,9) ;
 		wordbooker_debugger("Processing your comments "," ",-3,9) ;
 		if (!isset($wordbooker_settings['wordbooker_comment_pull']) ) {
@@ -74,10 +82,11 @@ function wordbooker_post_comments_to_facebook($user_id) {
 	$comment_structure=$wordbooker_settings['wordbooker_comment_post_format'];
 	$comment_tag=$wordbooker_settings['wordbooker_comment_attribute'];
 	$wordbooker_close=$wordbooker_settings['wordbooker_close_comment'];
+	$closed_comment_flag=array('1'=>'Enabled',''=>'Disabled');
 	$closedays_ts=strtotime("-".$close_days_old." DAYS");
 	$closecomments_ts=strtotime("-".$wordbooker_close." DAYS");
 	$closeposts=date("Y-m-d H:i:s", strtotime("-".$wordbooker_close." DAYS"));
-	wordbooker_debugger("Auto close comments ".$close_comments,$close_days_old,-3,98);
+	wordbooker_debugger("Auto close comments is set to ".$closed_comment_flag[$close_comments],$close_days_old,-3,98);
 	$sql="select distinct wp_post_id,fb_post_id from ".WORDBOOKER_POSTCOMMENTS." where fb_comment_id is null and blog_id=".$blog_id." and user_id=".$user_id." and in_out is null";
 	if ($close_comments==1) {$sql.=" and comment_timestamp  > ".$closedays_ts ;}
 	if ($wordbooker_close>0) {$sql.=" and comment_timestamp > ".$closecomments_ts;}
@@ -148,6 +157,8 @@ function wordbooker_get_comments_from_facebook($user_id) {
 	$closedays_ts=strtotime("-".$close_days_old." DAYS");
 	$closecomments_ts=strtotime("-".$wordbooker_close." DAYS");
 	if (isset($wordbooker_settings['wordbooker_comment_approve'])) {$comment_approve=1;}
+	$closed_comment_flag=array('1'=>'Enabled',''=>'Disabled');
+	wordbooker_debugger("Auto close comments is set to ".$closed_comment_flag[$close_comments],$close_days_old,-3,98);
 	$sql='Select distinct fb_post_id from '.WORDBOOKER_POSTCOMMENTS.' where fb_comment_id is null and user_id='.$user_id.' and blog_id='.$blog_id. " and in_out is null ";
 	if ($close_comments==1) {$sql.=" and comment_timestamp  > ".$closedays_ts ;}
 	if ($wordbooker_close>0) {$sql.=" and comment_timestamp > ".$closecomments_ts;}
@@ -212,7 +223,7 @@ function wordbooker_get_comments_from_facebook($user_id) {
 						$data['comment_parent'] = ( 'approved' == $parent_status || 'unapproved' == $parent_status ) ? $data['comment_parent'] : 0;
 						$newComment= wp_insert_comment($data);
 						update_comment_meta($newComment, "fb_uid", $single_comment->from->id);
-						update_comment_meta($newComment, “akismet_result”, true);
+						update_comment_meta($newComment, "akismet_result", true);
 						wordbooker_debugger("Inserted comment from ".$single_comment->from->name." into ".$wp_post_row->wp_post_id." as ".$newComment,"",-3,9);
 						$sql="Insert into ".WORDBOOKER_POSTCOMMENTS." (fb_post_id,user_id,comment_timestamp,wp_post_id,blog_id,wp_comment_id,fb_comment_id,in_out) values ('".$fb_comment->fb_post_id."',".$user_id.",".strtotime($single_comment->created_time).",".$wp_post_row->wp_post_id.",".$blog_id.",".$newComment.",'".$single_comment->id."','in' )";
 						$commq2=$wpdb->query($sql);

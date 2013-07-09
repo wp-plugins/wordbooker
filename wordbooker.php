@@ -5,13 +5,13 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.32
+Version: 2.1.33
 */
 
  /*
  *
  *
- * Copyright 2011 Steve Atty (email : posty@tty.org.uk)
+ * Copyright 2011- 2013 Steve Atty (email : posty@tty.org.uk)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -38,7 +38,7 @@ function wordbooker_global_definitions() {
 	$wbooker_user_id=0;
 	define('WORDBOOKER_DEBUG', false);
 	define('WORDBOOKER_TESTING', false);
-	define('WORDBOOKER_CODE_RELEASE',"2.1.32 R00 - When a Warm Wind Blows Through the Grass");
+	define('WORDBOOKER_CODE_RELEASE',"2.1.33 R01 - Fisticuffs in Frederick Street");
 
 	# For Troubleshooting
 	define('ADVANCED_DEBUG',false);
@@ -569,6 +569,8 @@ function wordbooker_db_crosscheck() {
 	wordbooker_set_option('schema_vers', WORDBOOKER_SCHEMA_VERSION );
 	$doy=date ( 'z');
 	wordbooker_set_option('schema_check', $doy );
+	$dummy=wp_clear_scheduled_hook('wb_cron_job');
+	$dummy=wp_schedule_event(time(), 'hourly', 'wb_cron_job');
 }
 
 function wordbooker_upgrade() {
@@ -1347,6 +1349,7 @@ function wordbooker_option_support() {
 		 'PHP' => $phpvers,
 		 'PHP Memory Limit' => ini_get('memory_limit'),
 		 'PHP Memory Usage (MB)' => memory_get_usage(true)/1024/1024,
+		  'PHP Max Execution Time' => ini_get('max_execution_time'),
 		'JSON Encode' => WORDBOOKER_JSON_ENCODE,
 		'JSON Decode' => WORDBOOKER_JSON_DECODE,
 		'Curl Status' => $curlstatus,
@@ -1514,11 +1517,27 @@ function wordbooker_return_images($post_content,$postid,$flag) {
 		if ($flag==1) {wordbooker_debugger("Getting the rest of the images "," ",$postid,80) ;}
 		preg_match_all('/<img \s+ ([^>]*\s+)? src \s* = \s* ["\'](.*?)["\']/ix',$processed_content, $matched);
 		$x=strip_shortcodes($post_content);
-		preg_match_all( '#http://(www.youtube|youtube|[A-Za-z]{2}.youtube)\.com/(watch\?v=|w/\?v=|\?v=|embed/)([\w-]+)(.*?)#i', $x, $matches3 );
-		if (is_array($matches3[3])) {
-			foreach ($matches3[3] as $key ) {
-				$yturls[]='http://img.youtube.com/vi/'.$key.'/0.jpg';
+		$regexes = array(
+	    '#<object[^>]+>.+?(?:https?:)?//www\.youtube(?:\-nocookie)?\.com/[ve]/([A-Za-z0-9\-_]+).+?</object>#s',
+	    '#(?:https?:)?//www\.youtube(?:\-nocookie)?\.com/[ve]/([A-Za-z0-9\-_]+)#',
+	    '#(?:https?:)?//www\.youtube(?:\-nocookie)?\.com/embed/([A-Za-z0-9\-_]+)#',
+	    '#(?:https?(?:a|vh?)?://)?(?:www\.)?youtube(?:\-nocookie)?\.com/watch\?.*v=([A-Za-z0-9\-_]+)#',
+	    '#(?:https?(?:a|vh?)?://)?youtu\.be/([A-Za-z0-9\-_]+)#',
+	    '#<div class="lyte" id="([A-Za-z0-9\-_]+)"#'
+		);
+		foreach($regexes as $regex) {
+			preg_match_all($regex, $x, $matches4 );
+			$matches3[]=$matches4[1];
+		}
+		if (is_array($matches3)) {
+			foreach ($matches3 as $key ) {
+			if(strlen($key[0])>1){
+				$yturls[]='http://img.youtube.com/vi/'.$key[0].'/0.jpg';
 			}
+			}
+		}
+		if ( function_exists( 'get_video_thumbnail' )) {
+			$yturls[] = get_video_thumbnail();
 		}
 
 	}
