@@ -101,7 +101,7 @@ function wordbooker_post_comments_to_facebook($user_id) {
 		}
 		$andlogic="";
 		if ($wordbooker_close>0) {
-			$andlogic=" and wpposts2.post_date > ".$closeposts;
+			$andlogic=" and wpposts2.post_date > '".$closeposts."'";
 			}
 		$sql="select distinct comment_ID,comment_date from ".$wpdb->comments." wpcom, ".$wpdb->posts." wpposts2, ".WORDBOOKER_POSTCOMMENTS." wbcom2 where wpcom.comment_post_id=".$row->wp_post_id." and wpcom.comment_approved=1 and wpcom.comment_post_id = wpposts2.ID  and wbcom2.wp_post_id=wpposts2.ID and wbcom2.user_id=".$user_id." and wbcom2.blog_id=".$blog_id." and wbcom2.fb_post_id='".$row->fb_post_id."' and  wpposts2.comment_status='open' and wpcom.comment_id not in (select distinct wp_comment_id from ".WORDBOOKER_POSTCOMMENTS." wbcom, ".$wpdb->posts." wpposts where wbcom.wp_post_id=".$row->wp_post_id." and wbcom.fb_post_id='".$row->fb_post_id."' and wbcom.user_id=".$user_id." and wbcom.wp_post_id = wpposts.ID and  wpposts.comment_status='open')".$andlogic;
 		$results = $wpdb->get_results($sql);

@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.33
+Version: 2.1.34
 */
 
  /*
@@ -38,7 +38,7 @@ function wordbooker_global_definitions() {
 	$wbooker_user_id=0;
 	define('WORDBOOKER_DEBUG', false);
 	define('WORDBOOKER_TESTING', false);
-	define('WORDBOOKER_CODE_RELEASE',"2.1.33 R01 - Fisticuffs in Frederick Street");
+	define('WORDBOOKER_CODE_RELEASE',"2.1.34 R00 - Summer Gurl");
 
 	# For Troubleshooting
 	define('ADVANCED_DEBUG',false);
@@ -1503,8 +1503,8 @@ function wordbooker_return_images($post_content,$postid,$flag) {
 
 	$meta_tag_scan=explode(',',$wordbooker_settings['wordbooker_meta_tag_scan']);
 	foreach($meta_tag_scan as $meta_tag) {
-		$xx=get_post_meta($postid, $meta_tag, true);
-		if(strlen($xx)>= 5 ) {$matches_ct[]=$xx;}
+		$xx=get_post_meta($postid, trim($meta_tag), true);
+		if(strlen($xx)>= 5 ) {$matches_ct[]=trim($xx);}
 		if ($flag==1) {wordbooker_debugger("Getting image from custom meta : ".$meta_tag,$xx,$postid,80) ;}
 	}
 	$matches=$matches_ct;
@@ -2019,7 +2019,7 @@ function wordbooker_og_tags(){
 			update_post_meta($post->ID, '_wordbooker_extract', trim($excerpt));
 		}
 		# Now if we've got something put the meta tag out.
-		if (isset($excerpt)){
+		if (isset($excerpt) && strlen(trim($excerpt))>2 ){
 			if ($meta_length > 0 ) {$meta_string .= sprintf("<meta name=\"description\" content=\"%s\" /> ", htmlspecialchars(trim($excerpt),ENT_QUOTES));}
 			$meta_string .= sprintf("<meta property=\"og:description\" content=\"%s\" /> ", htmlspecialchars(trim($excerpt),ENT_QUOTES));
 			# convert blank lines into spaces.
@@ -2424,6 +2424,14 @@ function wordbooker_get_cache($user_id,$field=null,$table=0) {
 	return $result;
 }
 
+function wordbooker_permissions_ok($user_id){
+	global $wpdb;
+	$wbooker_user_id=$user_id;
+	$sql="select auths_needed from  ".WORDBOOKER_USERDATA."  where user_ID=".$user_id;
+	$result = $wpdb->get_results($sql);;
+	return $result[0]->auths_needed;
+}
+
 function wordbooker_check_permissions($wbuser,$user) {
 	global $user_ID;
 	$perm_miss=wordbooker_get_cache($user_ID,'auths_needed',1);
@@ -2471,8 +2479,8 @@ function wordbooker_post_excerpt($excerpt, $maxlength,$doyoutube=1) {
 	$excerpt=wordbooker_translate($excerpt);
 	# Now lets strip any tags which dont have balanced ends
 	#  Need to put NGgallery tags in there - there are a lot of them and they are all different.
-	$open_tags="[simage,[[CPRz,[gallery,[imagebrowser,[slideshow,[tags,[albumtags,[singlepic,[album,[contact-form,[contact-field,[/contact-form,<strong>Google+:</strong>";
-	$close_tags="],]],],],],],],],],],],],Daniel Treadwell</a>.</i>";
+	$open_tags="[simage,[[CPR,[gallery,[imagebrowser,[slideshow,[tags,[albumtags,[singlepic,[album,[contact-form,[contact-field,[/contact-form,<strong>Google+:</strong>,[aartikel";
+	$close_tags="],]],],],],],],],],],],],Daniel Treadwell</a>.</i>,[/aartikel";
 	$open_tag=explode(",",$open_tags);
 	$close_tag=explode(",",$close_tags);
 	foreach (array_keys($open_tag) as $key) {
@@ -2553,6 +2561,12 @@ function wordbooker_publish_action($post_id) {
 	if ($wordbooker_post_options["wordbooker_publish_default"]!="on") {
 		wordbooker_debugger("Publish Default is not Set, Giving up ",$wpuserid,$post->ID) ;
 	 	return;
+	}
+
+	$perms_missing=wordbooker_permissions_ok($wpuserid);
+	if ($perms_missing>0) {
+		wordbooker_debugger("Permissions incorrect - please reauthenticate ",$wpuserid,$post->ID,80);
+		return;
 	}
 
 	wordbooker_debugger("User has been set to : ",$wpuserid,$post->ID,80) ;
