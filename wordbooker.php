@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.34
+Version: 2.1.35
 */
 
  /*
@@ -38,7 +38,7 @@ function wordbooker_global_definitions() {
 	$wbooker_user_id=0;
 	define('WORDBOOKER_DEBUG', false);
 	define('WORDBOOKER_TESTING', false);
-	define('WORDBOOKER_CODE_RELEASE',"2.1.34 R00 - Summer Gurl");
+	define('WORDBOOKER_CODE_RELEASE',"2.1.35 R00 - Donna Lucrezia");
 
 	# For Troubleshooting
 	define('ADVANCED_DEBUG',false);
@@ -560,9 +560,9 @@ function wordbooker_db_crosscheck() {
 	_e("Schema differences found - fixing up ", 'wordbooker');
 	echo '<br /></p></div>';
 	foreach($sql_run as $sql_fix) {
-	wordbooker_debugger("SQL Fixup : ",$sql_fix,-4,99);
+	wordbooker_debugger("SQL Fixup : ",$sql_fix,-7,99);
 	$result=$wpdb->get_results($sql_fix);
-	if (strlen($wpdb->last_error)>4) {wordbooker_debugger("SQL Fixup Fail : ",$wpdb->last_error,-4,99);}
+	if (strlen($wpdb->last_error)>4) {wordbooker_debugger("SQL Fixup Fail : ",$wpdb->last_error,-7,99);}
 	}
 	echo "<br />";
 	}
@@ -845,8 +845,7 @@ function wordbooker_render_errorlogs() {
 		</tr>
 <?php
 	foreach ($rows as $row) {
-		#var_dump($row);
-		$row_type=array(-1=>"Cache Refresh",-2=>"Comment Processing (Admin Diag)",-3=>"Comment Processing (User Diag)",-4=>"Post Deletion",-5=>'Access Token Exchange');
+		$row_type=array(0=>'Authorisation Process',-1=>"Cache Refresh",-2=>"Comment Processing (Admin Diag)",-3=>"Comment Processing (User Diag)",-4=>"Post Deletion",-5=>'Access Token Exchange',-6=>'Authorisation Process',-7=>'DB Maintenance');
 		$hyperlinked_post = '';
 		if (($post = get_post($row->post_id))) {
 			$hyperlinked_post = '<a href="'. get_permalink($row->post_id) . '">'. apply_filters('the_title',get_the_title($row->post_id)) . '</a>';
@@ -1282,6 +1281,9 @@ function wordbooker_option_support() {
 	</ul>
 <?php
 	$active_plugins = get_option('active_plugins');
+	$sitewide_active_plugins= get_site_option('active_sitewide_plugins');
+	if (is_array($sitewide_active_plugins)){
+	foreach($sitewide_active_plugins as $key => $value) {$active_plugins[]=$key;} }
 	$plug_info=get_plugins();
 	$phpvers = phpversion();
 	$jsonvers=phpversion('json');
@@ -1333,15 +1335,30 @@ function wordbooker_option_support() {
   	 curl_close($ch);
   	   $curlv2=curl_version();
   	 $curlv=$curlv2['version'];
-  	 $wordbooker_access=wordbooker_check_access();
-	if (trim($wordbooker_access)!="Wordbooker Acccess OK"){$wordbooker_access="Wordbooker Access Failed";}
-	$wordbooker_access=strip_tags($wordbooker_access);
 	}
 	$new_wb_table_prefix=$wpdb->base_prefix;
 	if (isset ($db_prefix) ) { $new_wb_table_prefix=$db_prefix;}
+	$my_version=$plug_info['wordbooker/wordbooker.php']['Version'];
+	$stable_release=$wordbooker_settings['current_release'];
+	$stable=$stable_release;
+	if(strlen($stable)<6) {$stable='0.0.0';}
+	$my_minor=substr($my_version,2);
+	$stable_minor=substr($stable,2);
+	$ver_diff=0;
+	if ($stable_minor > 0) {
+		$ver_diff=($stable_minor-$my_minor)*100;
+		if ($ver_diff<0) {$ver_diff=0;}
+		if ($ver_diff>5) {$ver_diff=6;}
+		$ver_diff=round($ver_diff,0);
+	}
+	wordbooker_set_option('version_difference', $ver_diff );
+	$ver_col=array(0=>'green',1=>'black', 2=>'blue', 3=>'yellow',4=>'orange',5=>'red',6=>'red');
+	if(strlen($stable_release)<6) { $stable_release='Stable Version information not verified';}
+	if ($stable_release=='0.0.0') { $stable_release='Unable to obtain stable version information';}
 	$info = array(
-		'Wordbooker' => $plug_info['wordbooker/wordbooker.php']['Version'],
+		'Wordbooker' => "<span style='color:".$ver_col[$ver_diff]."';>".$plug_info['wordbooker/wordbooker.php']['Version']."</span>",
 		'Wordbooker Code Base' => WORDBOOKER_CODE_RELEASE,
+		'Wordbooker Current Stable Release' =>$stable_release,
 		'Wordbooker ID'=>WORDBOOKER_FB_ID,
 		'Wordbooker Schema' => $wordbooker_settings['schema_vers'],
 		'WordPress' => $wp_version,
@@ -1354,7 +1371,6 @@ function wordbooker_option_support() {
 		'JSON Decode' => WORDBOOKER_JSON_DECODE,
 		'Curl Status' => $curlstatus,
 		'Curl Version' => $curlv,
-		'Wordbooker Server Access' => $wordbooker_access,
 		'JSON Version' => $jsonvers,
 		'SimpleXML library' => $sxmlvers." (". WORDBOOKER_SIMPLEXML.")",
 		'HTTP Output Character Encoding'=>$http_coding,
@@ -1374,6 +1390,10 @@ function wordbooker_option_support() {
 	echo "<br />";
 	_e('Please provide the following information about your installation:', 'wordbooker');
 	echo "<ul>";
+	$hide=0;
+	if (is_multisite() ) $hide=1;
+	if (is_super_admin() ) $hide=0;
+	if ($hide==1) { echo "<br />"; _e('<li> Multisite is enabled - Please talk to your Super Adminstrator for support information </li>', 'wordbooker'); } else {
 	foreach ($info as $key => $value) {
 		$suffix = '';
 		if (($minvers = $version_errors[$key])) {
@@ -1399,6 +1419,7 @@ function wordbooker_option_support() {
 		if ( $plug_info[$name]['Title']!='Wordbooker') {
 		echo "&nbsp;&nbsp;&nbsp;".$plug_info[$name]['Title']." ( ".$plug_info[$name]['Version']." ) <br />";}
 	}
+}
 	echo "</b><br /><li> Wordbooker Table Status :</li><b>";
 	//var_dump(get_blog_count());
 	$table_array= array (WORDBOOKER_ERRORLOGS,WORDBOOKER_POSTLOGS,WORDBOOKER_USERDATA,WORDBOOKER_USERSTATUS,WORDBOOKER_POSTCOMMENTS,WORDBOOKER_PROCESS_QUEUE,WORDBOOKER_FB_FRIENDS,WORDBOOKER_FB_FRIEND_LISTS);

@@ -26,25 +26,17 @@ Version: 2.1
  */
 
 global $wp_version;
-if((float)$wp_version >= 2.8){
-
 class FacebookWidget extends WP_Widget {
-	
-	/**
-	 * constructor
-	 */	 
+
 	function FacebookWidget() {
-		parent::WP_Widget('wordbookfb_widget', 'Wordbooker FB Like', array('description' => __('Allows you to have multiple Like/Fan boxes. Fan pages cane be picked from a dropdown list in the options. Each user gets the choice of all the FB Fan pages they administer','wordbooker') , 'class' => 'FacebookWidget'));	
+		parent::WP_Widget('wordbookfb_widget', 'Wordbooker FB Like', array('description' => __('Allows you to have multiple Like/Fan boxes. Fan pages cane be picked from a dropdown list in the options. Each user gets the choice of all the FB Fan pages they administer','wordbooker') , 'class' => 'FacebookWidget'));
 	}
-	
-	/**
-	 * display widget
-	 */	 
+
 	function widget($args, $instance) {
 		extract($args, EXTR_SKIP);
 		global  $wpdb, $user_ID,$table_prefix,$blog_id;
 		$userid=$instance['snorl'];
-		$wordbooker_settings = wordbooker_options(); 
+		$wordbooker_settings = wordbooker_options();
 		echo $before_widget;
          	if (strlen($instance['dname']) >0 ) $name=$instance['dname'];
 		$title = empty($instance['title']) ? '&nbsp;' : apply_filters('widget_title', $instance['title']);
@@ -63,7 +55,7 @@ class FacebookWidget extends WP_Widget {
 		if ($instance['stream']=='on') {
 			$height = $height+300;
 			$stream="true";
-		} 
+		}
 		if ($instance['header']=='on') {
 			$height = $height + 18;
 			$header="true";
@@ -72,23 +64,19 @@ class FacebookWidget extends WP_Widget {
 		if ($instance['faces']=='on') {
 			$faces="true";
 			$height=$height+40;
-		} 
-		$fanpages=unserialize(stripslashes($instance['fanpages']));
-		$url=$fanpages[$instance['pid']];
+		}
+		$url="http://www.facebook.com/";
+		if (substr($instance['pid'],0,1)=='G') $url.="groups/";
+		$url.=substr($instance['pid'],3);
 		echo "<!-- Wordbooker FB like box widget -->";
 		if ( (!isset($wordbooker_settings['wordbooker_like_button_show']) && !isset($wordbooker_settings['wordbooker_like_share_too'])) || isset($wordbooker_settings['wordbooker_iframe'])) {
 	echo'<iframe src="https://www.facebook.com/plugins/likebox.php?href='.urlencode(strtolower($url)).'&amp;width='.$width.'&amp;colorscheme='.$scheme.'&amp;show_faces='.$faces.'&amp;border_color=%23'.$border_colour.'&amp;stream='.$stream.'&amp;header='.$header.'&amp;height='.$height.'" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:'.$width.'px; height:'.$height.'px;" allowTransparency="true"></iframe>';
 		}
 		else {
 		echo '<fb:like-box href="'.strtolower($url).'" width="'.$width.'" height="'.$height.'"  colorscheme="'.$scheme.'" show_faces="'.$faces.'" border_color="#'.$border_colour.'" stream="'.$stream.'" header="'.$header.'"></fb:like-box>';
-		}	
-	#	echo '<br /><div class="fb-add-to-timeline" data-show-faces="true" data-mode="button"></div>';
+		}
 		echo $after_widget;
 	}
-	
-	/**
-	 *	update/save function
-	 */	 	
 	function update($new_instance, $old_instance) {
 		$instance = $old_instance;
 		$instance['title'] = strip_tags($new_instance['title']);
@@ -105,15 +93,15 @@ class FacebookWidget extends WP_Widget {
 		$instance['fanpages'] = $new_instance['fanpages'];
 		return $instance;
 	}
-	
+
 	/**
 	 *	admin control form
-	 */	 	
+	 */
 	function form($instance) {
 		global $user_ID,$wpdb,$table_prefix,$blog_id;
 		$result = wordbooker_get_cache($user_ID,'pages',1);
 		$fanpages=unserialize($result->pages);
-		$xx=array('id'=>'FW:254577506873','name'=>'Wordbooker','url'=>'https://www.facebook.com/wordbooker');
+		$xx=array('id'=>'FW:259559517434471','name'=>'Default (Wordbooker)');
 		$fanpages[]=$xx;
 		$default = array( 'title' => __('Fan Page','wordbooker'), 'snorl'=>$user_ID, 'dname'=>'', 'pid'=>'254577506873', 'stream'=>'false', 'connections'=>6, 'width'=>188, 'height'=>260, 'header'=>'false', 'scheme'=>'light' );
 		$instance = wp_parse_args( (array) $instance, $default );
@@ -162,15 +150,16 @@ class FacebookWidget extends WP_Widget {
 
 		echo '<p><label for="'.$title_id.'">'.__('Title of Widget','wordbooker').': </label> <input type="text" class="widefat" id="'.$title_id.'" name="'.$title_name.'" value="'.attribute_escape( $instance['title'] ).'" /></p>';
 		$fanpagelist='';
-		echo "\r\n".'<p><label for="'.$df_id.'">'.__('Fan Page','wordbooker').':  </label>'; 
+		echo "\r\n".'<p><label for="'.$df_id.'">'.__('Fan Page','wordbooker').':  </label>';
 		echo '<select id=id="'.$df_id.'"  name="'.$df_name.'" >';
 		foreach ($fanpages as $fan_page) {
 			$fanpagelist[$fan_page['id']]=$fan_page['url'];
-			if ($fan_page[id]==attribute_escape( $instance['pid'])){ 
+			if(substr($fan_page[id],0,1)!='G'){
+			if ($fan_page[id]==attribute_escape( $instance['pid'])){
 				print '<option selected="yes" value="'.$fan_page[id].'" >'.$fan_page[name].'</option>';}
 			else {
 				print '<option value="'.$fan_page[id].'" >'.$fan_page[name].'</option>';
-			}
+			}}
 		}
 		echo '</select></p>';
 		echo "<input type='hidden' class='widefat' id='".$fanpages_id."' name='".$fanpages_name."' value='".mysql_real_escape_string(serialize($fanpagelist))."' />";
@@ -179,7 +168,7 @@ class FacebookWidget extends WP_Widget {
 
 		echo '<p><label for="'.$stream_id.'">'.__("Include Header ", 'wordbooker'). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX class="widefat"id="'.$header_id.'" name="'.$header_name.'" '.$checked_flag[attribute_escape( $instance['header'])].' /></p>';
-		
+
 		echo '<p><label for="'.$scheme_id.'">'.__('Colour Scheme','wordbooker').': </label> <select id="'.$scheme_id.'" name="'.$scheme_name.'"  >';
 		foreach ($colorscheme as $i => $value) {
 			if ($i==$instance['scheme']){ print '<option selected="yes" value="'.$i.'" >'.$colorscheme[$i].'</option>';}
@@ -200,10 +189,6 @@ class FacebookWidget extends WP_Widget {
 function fbwordbooker_widgets(){
 	register_widget('FacebookWidget');
 }
-
-/* register widget when loading the WP core */
 add_action('widgets_init', 'fbwordbooker_widgets');
-
-}
 
 ?>

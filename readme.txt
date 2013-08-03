@@ -4,8 +4,8 @@ Contributors: SteveAtty
 Tags: facebook, news feed, wall, fan page wall, group wall, crosspost, Facebook Send, Facebook Like, social media, open graph.
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=8XNJMQCYDJT6U&lc=GB&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Requires at least: 3.0
-Tested up to: 3.5.2
-Stable tag: 2.1.34
+Tested up to: 3.6
+Stable tag: 2.1.35
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for.
 
@@ -117,11 +117,24 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 == Changelog ==
 
+= Version 2.1.35 03/08/13 =
+- Confirmed Wordpress 3.6 compatible
+- Changed some of the comment diagnostic message levels to hide them unless diagnostic level set to high.
+- Added multisite checks so that most support information is hidden from non Super Admin users.
+- Fixed the Like Box, and removed groups from available like targets.
+- Added stable version check.
+- Fixed bug where some diagnostic messages went into the wrong display category.
+- Recoded method for pulling pages and groups in the cron to use graph API rather than FQL.
+- Added code to list Network Activated plugins to the plugin list.
+- Fixed code to stop warning being reported by PHP 5.4
+- Added checks to stop Facebook related calls from running where permissions or access tokens are incorrect.
+
+
 = Version 2.1.34 20/07/13 =
 - Comment handling bug fix relating to dates.
 - Fix bug relating to PHP installs without multibyte character support
 - Fix bug where group wall IDs were lost
-- Updated shortcode list to handle a couple more plugins that don't support the shortcode API
+- Updated shortcode list to handle a couple more plugins that don't support the shortcode API.
 
 
 = Version 2.1.33 09/07/13 =
@@ -134,6 +147,7 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 = Version 2.1.32 29/05/13 =
 - Fixed a bug in the token auth swapping code.
+
 
 = Version 2.1.31 18/05/13 =
 - Fix for quotes being mangled on some installs

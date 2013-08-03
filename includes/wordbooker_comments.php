@@ -32,6 +32,11 @@ function wordbooker_poll_comments($userid=0) {
 	$rows = $wpdb->get_results($sql);
 	foreach ($rows as $comment_row) {
 		$comment_user=$comment_row->user_ID;
+		$perms_missing=wordbooker_permissions_ok($comment_user);
+		if ($perms_missing>0) {
+			wordbooker_debugger("Permissions incorrect - please reauthenticate "," ",-3,9) ;
+			return;
+		}
 		$sql1='SELECT count(*) as count FROM '.WORDBOOKER_ERRORLOGS.' WHERE timestamp < DATE_SUB(NOW(), INTERVAL '.($scheds[$wordbooker_settings['wordbooker_comment_cron']]["interval"]*3).' SECOND) and blog_id ='.$blog_id.' and post_id=-3';
 		$rcount = $wpdb->get_results($sql1);
 		sleep(1);
@@ -181,6 +186,8 @@ function wordbooker_get_comments_from_facebook($user_id) {
 			}
 		}
 		if(count($all_comments->data) > 0 ) {
+			remove_action('preprocess_comment', array('spam_captcha','check_comment_captcha'));
+			remove_action('wp_insert_comment', array('spam_captcha','check_comment_akismet'));
 			foreach($all_comments->data as $single_comment) {
 				$s = explode("_",$single_comment->id);
 				$fb_comid=end($s);
@@ -213,7 +220,7 @@ function wordbooker_get_comments_from_facebook($user_id) {
 							'comment_date' => $atime,
 							'comment_date_gmt' => $time,
 							'comment_parent'=> 0,
-							'user_id' => 1,
+							'user_id' => 0,
 						   	'comment_agent' => 'Wordbooker plugin '.WORDBOOKER_CODE_RELEASE,
 							'comment_approved' => $comment_approve,
 						);
