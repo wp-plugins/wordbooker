@@ -33,7 +33,7 @@ function wordbooker_wall_post($post_id,$access_token,$post_title,$post_data,$tar
 	$post_data['access_token']=$access_token;
 	global $user_ID;
 try {
-		$result = wordbooker_fb_stream_pubish($post_data,$target_id);
+		$result = wordbooker_fb_stream_publish($post_data,$target_id);
 		wordbooker_store_post_result($post_id,$result->id,$wpuserid,$fb_uid,$target_id);
 		wordbooker_debugger("Wall Post to ".$target_name." Succeeded - result : ",$result->id,$post_id,90) ;
 	    }

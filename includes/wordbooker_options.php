@@ -170,10 +170,10 @@ function wordbooker_option_manager() {
 		# Populate  the cache table for this user if its not there.
 		$result = $wpdb->get_row("select facebook_id from ".WORDBOOKER_USERDATA." where user_id=".$user_ID);
 		if (strlen($result->facebook_id)<4) {
-			wordbooker_cache_refresh($user_ID,$fbclient);
+			wordbooker_cache_refresh($user_ID);
  		}
 		# If the user saved their config after setting permissions or chose to refresh the cache then lets refresh the cache
-		if ( isset ($_POST["perm_save"])) { wordbooker_cache_refresh($user_ID,$fbclient); }
+		if ( isset ($_POST["perm_save"])) { wordbooker_cache_refresh($user_ID); }
 
 
 	// Lets poll if they want to - we only poll for this user
@@ -233,7 +233,7 @@ cCMn5hzGCAZowggGWAgEBMIGUMIGOMQswCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExFjAUBgNVBAcTDU1
 
 
 function wordbooker_blog_level_options() {
-		global $ol_flash, $wordbooker_settings, $_POST, $wp_rewrite,$user_ID,$wpdb, $blog_id,$wordbooker_user_settings_id,$wordbooker_hook;
+		global $ol_flash, $wordbooker_settings, $_POST, $wp_rewrite,$user_ID,$wpdb, $blog_id,$wordbooker_user_settings_id,$wordbooker_hook, $screen_layout_columns;
 
 		add_meta_box('wb_opt1', __('General Posting Options','wordbooker'),  'wordbooker_blog_posting_options', $wordbooker_hook, 'normal', 'core');
 		add_meta_box('wb_opt2', __('Facebook Like and Send Options','wordbooker'),   'wordbooker_blog_facebook_options', $wordbooker_hook, 'normal', 'core');
@@ -253,7 +253,6 @@ function wordbooker_blog_level_options() {
 ?>
 <div id="poststuff" class="metabox-holder<?php echo 2 == $screen_layout_columns ? ' has-right-sidebar' : ''; ?>">
 <div id="side-info-column" class="inner-sidebar">
-<?php# do_meta_boxes($wordbooker_hook, 'side', $data); ?>
 </div>
 <div id="post-body" class="has-sidebar">
 <div id="post-body-content" class="has-sidebar-content">
@@ -314,6 +313,9 @@ function wordbooker_blog_posting_options() {
 
 		echo '<label for="wb_attribute">'.__("Post Attribute", 'wordbooker'). ' : </label>';
 		echo '<INPUT NAME="wordbooker_settings[wordbooker_attribute]" size=60 maxlength=240 value="'.stripslashes($wordbooker_settings["wordbooker_attribute"]).'"><br />';
+		echo '<label for="wordbooker_excerpt_for_attribute">'.__("Use Post Excerpt as Post Attribute", 'wordbooker'). ' : </label>';
+		if(!isset($wordbooker_settings['wordbooker_excerpt_for_attribute'])) {$wordbooker_settings['wordbooker_excerpt_for_attribute']="off";}
+		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_excerpt_for_attribute]" '.$checked_flag[$wordbooker_settings["wordbooker_excerpt_for_attribute"]].' ><br />';
 		echo '<label for="wb_status_update">'.__("Facebook Status Attribute", 'wordbooker'). ' :</label>';
 		echo' <INPUT NAME="wordbooker_settings[wordbooker_status_update_text]" size=60 maxlength=60 value="'.stripslashes($wordbooker_settings["wordbooker_status_update_text"]).'"> ';
 
@@ -779,12 +781,22 @@ function wordbooker_user_level_options(){
 
 	echo '<label for="wb_status_update">'.__('Facebook Status Text', 'wordbooker').'  : </label> ';
 	if(!isset($wordbookeruser_settings["wordbooker_status_update_text"])) $wordbookeruser_settings["wordbooker_status_update_text"]='';
-		echo '<INPUT NAME="wordbooker_status_update_text" size=60 maxlength=60 value="'.stripslashes($wordbookeruser_settings["wordbooker_status_update_text"]).'"> ';
+		echo '<INPUT NAME="wordbooker_status_update_text" size=60 maxlength=60 value="'.stripslashes($wordbookeruser_settings["wordbooker_status_update_text"]).'"> <br />';
 		//echo '</select><br />';
 
 		echo '<label for="wb_attribute">'.__('Post Attribute', 'wordbooker').' : </label>';
 		if(!isset($wordbookeruser_settings["wordbooker_attribute"])) $wordbookeruser_settings["wordbooker_attribute"]='';
 		echo '<INPUT NAME="wordbooker_attribute" size=60 maxlength=240 value="'.stripslashes($wordbookeruser_settings["wordbooker_attribute"]).'"><br />';
+
+		echo '<label for="wordbooker_excerpt_for_attribute">'.__('Use Post Excerpt for Post Attribute', 'wordbooker').' : </label> ';
+		echo '<select id="wordbooker_excerpt_for_attribute" name="wordbooker_excerpt_for_attribute"  >';
+		if(!isset($wordbookeruser_settings['wordbooker_excerpt_for_attribute'])) {$wordbookeruser_settings['wordbooker_excerpt_for_attribute']="0";}
+       		$arr = array(0=> __("Same as Blog", 'wordbooker'), 100=> __("No", 'wordbooker'),  200=> __("Yes", 'wordbooker'));
+                foreach ($arr as $i => $value) {
+                        if ($i==$wordbookeruser_settings['wordbooker_excerpt_for_attribute']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
+                       else {echo '<option value="'.$i.'" >'.$arr[$i].'</option>';}
+		}
+        echo "</select><br />";
 
 		echo '<label for="wb_action_link">'.__('Action Link Option', 'wordbooker').' : </label><select id="wordbooker_actionlink" name="wordbooker_actionlink"  >';
 		if($wordbookeruser_settings['wordbooker_actionlink']==200) {$wordbookeruser_settings['wordbooker_actionlink']=100;}
