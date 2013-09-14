@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.35
+Version: 2.1.36
 */
 
  /*
@@ -32,13 +32,17 @@ Version: 2.1.35
 #@include("includes/premium.php");
 global $table_prefix, $wp_version,$wpdb,$db_prefix,$wbooker_user_id;
 $wbooker_user_id=0;
+//error_reporting ( E_ALL & ~E_NOTICE & E_STRICT & ~E_DEPRECATED);
+
+
 
 function wordbooker_global_definitions() {
 	global $table_prefix, $wp_version,$wpdb,$db_prefix,$wbooker_user_id;
 	$wbooker_user_id=0;
+
 	define('WORDBOOKER_DEBUG', false);
 	define('WORDBOOKER_TESTING', false);
-	define('WORDBOOKER_CODE_RELEASE',"2.1.35 R00 - Donna Lucrezia");
+	define('WORDBOOKER_CODE_RELEASE',"2.1.36 R00 - Line and Length");
 
 	# For Troubleshooting
 	define('ADVANCED_DEBUG',false);
@@ -750,6 +754,9 @@ function wordbooker_delete_from_commentlogs($post_id,$blog_id) {
 
 function wordbooker_delete_comment_from_commentlogs($comment_id,$blog_id) {
 	global $wpdb;
+		//$results = print_r($comment_id, true);
+	if (is_array($comment_id)) {$comment_id=$comment_id[0];}
+	wordbooker_debugger("Deleting comment : ".$comment_id,' ',-4,99);
 	$result = $wpdb->query('DELETE FROM ' . WORDBOOKER_POSTCOMMENTS . ' WHERE wp_comment_id = ' . $comment_id . ' and blog_id='.$blog_id);
 }
 
@@ -1396,9 +1403,9 @@ function wordbooker_option_support() {
 	if ($hide==1) { echo "<br />"; _e('<li> Multisite is enabled - Please talk to your Super Adminstrator for support information </li>', 'wordbooker'); } else {
 	foreach ($info as $key => $value) {
 		$suffix = '';
-		if (($minvers = $version_errors[$key])) {
-			$suffix = " <span class=\"wordbooker_errorcolor\">" . " (need $key version $minvers or greater)" . " </span>";
-		}
+//		if (($minvers = $version_errors[$key])) {
+	//		$suffix = " <span class=\"wordbooker_errorcolor\">" . " (need $key version $minvers or greater)" . " </span>";
+//		}
 		echo "<li>$key: <b>$value</b>$suffix</li>";
 	}
 	if (!function_exists('simplexml_load_string')) {
@@ -1497,10 +1504,8 @@ function wordbooker_return_images($post_content,$postid,$flag) {
 				$og_image=$junk[0];
 			  }
 			  if(!isset($og_image)) {$og_image=wp_get_attachment_url($attachment->ID);}
-			//  wordbooker_debugger("Adding image",$og_image,$postidD,80) ;
-
-		#	$post_content2 .= ' <img src="' . wp_get_attachment_url($attachment->ID) . '"> ';}
-			$post_content2 .= ' <img src="' . $og_image . '"> ';}
+			$post_content2 .= ' <img src="' . urlencode($og_image) . '"> ';
+		   }
 		}
 	}
 	$processed_content ="!!!!  ".$post_content2."  ".apply_filters('the_content', $post_content)."    !!!";
@@ -2496,12 +2501,13 @@ function wordbooker_post_excerpt($excerpt, $maxlength,$doyoutube=1) {
 	if (!isset($maxlength)) {$maxlength=256;}
 	$excerpt = trim($excerpt);
 	if (function_exists('canal_stats')) $excerpt =canal_stats($excerpt);
+	if (function_exists('canal_trip_stats')) $excerpt =canal_trip_stats($excerpt);
 	if (function_exists('canal_linkify_name')) $excerpt =canal_linkify_name($excerpt);
 	$excerpt=wordbooker_translate($excerpt);
 	# Now lets strip any tags which dont have balanced ends
 	#  Need to put NGgallery tags in there - there are a lot of them and they are all different.
-	$open_tags="[simage,[[CPR,[gallery,[imagebrowser,[slideshow,[tags,[albumtags,[singlepic,[album,[contact-form,[contact-field,[/contact-form,<strong>Google+:</strong>,[aartikel";
-	$close_tags="],]],],],],],],],],],],],Daniel Treadwell</a>.</i>,[/aartikel";
+	$open_tags="[simage,[[CPR,[[CPT,[gallery,[imagebrowser,[slideshow,[tags,[albumtags,[singlepic,[album,[contact-form,[contact-field,[/contact-form,<strong>Google+:</strong>,[aartikel,[jwplayer";
+	$close_tags="],]],]],],],],],],],],],],],Daniel Treadwell</a>.</i>,[/aartikel,]";
 	$open_tag=explode(",",$open_tags);
 	$close_tag=explode(",",$close_tags);
 	foreach (array_keys($open_tag) as $key) {

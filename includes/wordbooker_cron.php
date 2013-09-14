@@ -137,11 +137,12 @@ function wordbooker_cache_refresh($user_id) {
 			$fb_groups= wordbooker_me_groups($wbuser2->access_token);
 			if(is_array($fb_groups->data)){
 				foreach($fb_groups->data as $fb_group){
+					if(!is_object($fb_group)) { continue ; }
 					# Check to see if there are any positions. If not then the user is only a member of the group and thus we dont want it in the list.
 					if(isset($fb_group->administrator)) {
 						wordbooker_debugger("Getting details for group : ",$fb_group->id,-1,9) ;
-					    $fb_group_list[] = new stdClass();
-						$fb_group_list[]->name=$fb_group->name;
+				//	    $fb_group_list[] = new stdClass();
+				//		$fb_group_list[]->name=$fb_group->name;
 						if (function_exists('mb_convert_encoding')) {
 							$groups["name"]=mb_convert_encoding($fb_group->name,'UTF-8');
 						}
@@ -172,6 +173,7 @@ function wordbooker_cache_refresh($user_id) {
 		$fb_status_info=wordbooker_status_feed($suid,$wbuser2->access_token);
 		if (!is_null($fb_status_info)) {
 			foreach($fb_status_info->data as $fbstat) {
+				if(!is_object($fbstat)) { continue ; }
 				if(!is_null($fbstat->message)){
 					if (($suid==$fbstat->from->id) && (!isset($fbstat->to->data[0]->id ) )) {
 						$status_message=$fbstat->message;
