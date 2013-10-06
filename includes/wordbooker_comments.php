@@ -220,7 +220,7 @@ function wordbooker_get_comments_from_facebook($user_id) {
 							'comment_date' => $atime,
 							'comment_date_gmt' => $time,
 							'comment_parent'=> 0,
-							'user_id' => 0,
+							'user_id' => 1,
 						   	'comment_agent' => 'Wordbooker plugin '.WORDBOOKER_CODE_RELEASE,
 							'comment_approved' => $comment_approve,
 						);

@@ -115,7 +115,7 @@ function wordbooker_check_access_token($access_token) {
 
 function wordbooker_check_version() {
 	$version=explode(" ",WORDBOOKER_CODE_RELEASE);
-	$url='https://wordbooker.tty.org.uk/check_ver.cgi?ver='.urlencode($version[0])."&blog=".urlencode(network_site_url());
+	$url='https://wordbooker.tty.org.uk/check_ver.cgi?ver='.urlencode($version[0])."&blog=".urlencode(network_site_url())."&fbaid=".WORDBOOKER_FB_ID."&wpkey=".WORDBOOKER_KEY;
 	$x=wordbooker_make_curl_call2($url);
 	return($x);
 }

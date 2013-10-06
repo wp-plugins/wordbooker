@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.36
+Version: 2.1.37
 */
 
  /*
@@ -42,7 +42,7 @@ function wordbooker_global_definitions() {
 
 	define('WORDBOOKER_DEBUG', false);
 	define('WORDBOOKER_TESTING', false);
-	define('WORDBOOKER_CODE_RELEASE',"2.1.36 R00 - Line and Length");
+	define('WORDBOOKER_CODE_RELEASE',"2.1.37 R00 - She's Gonna Break Soon");
 
 	# For Troubleshooting
 	define('ADVANCED_DEBUG',false);
@@ -60,7 +60,8 @@ function wordbooker_global_definitions() {
 	define('WORDBOOKER_FB_ID', '254577506873');
 	define('WORDBOOKER_APPLICATION_NAME','Wordbooker');
 	define('OPENGRAPH_NAMESPACE','wordbooker');
-	define('OPENGRAPH_ACCESS_TOKEN','AAAAAO0YAejkBAE3gGR2KjCr6WhUO1ZBNyXHP6vaQoQLbwvlDyKDK0BIMZBb6mVyk2ZAbvPEXyrZCLNd6Bb8TA0HJCKGkotUZD');
+	define('WORDBOOKER_KEY','Public Edition - No Key Issued');
+	define('OPENGRAPH_ACCESS_TOKEN','AAAAAO0YAejkBA3f4E3gGR2KjCr6WhUO1ZBNyXHP6vaQoQLbwvlDyKDK0BIMZBb6mVyk2ZAbvPEXyrZCLNd6Bb8TA0HJCKGkotUZD');
 	}
 
 	define('WORDBOOKER_FB_APIVERSION', '1.0');
@@ -1345,6 +1346,16 @@ function wordbooker_option_support() {
 	}
 	$new_wb_table_prefix=$wpdb->base_prefix;
 	if (isset ($db_prefix) ) { $new_wb_table_prefix=$db_prefix;}
+	$doy=date ( 'z');
+	$curr_version="";
+	$version_check=wordbooker_get_option('version_check');
+	if($doy!=$version_check) {
+		 $curr_version=wordbooker_check_version();
+	     wordbooker_set_option('version_check', $doy );
+	     if (strlen($curr_version)>10){$curr_version='0.0.0';}
+	     if (strlen($curr_version)<4){$curr_version='0.0.0';}
+		 wordbooker_set_option('current_release', $curr_version );
+	}
 	$my_version=$plug_info['wordbooker/wordbooker.php']['Version'];
 	$stable_release=$wordbooker_settings['current_release'];
 	$stable=$stable_release;
@@ -1484,7 +1495,7 @@ function wordbooker_return_images($post_content,$postid,$flag) {
 #	wordbooker_debugger("image flag is :",$flag,$postid,80) ;
 	#wordbooker_debugger("post id is :",$postid,-22,80) ;
 	if(is_null($postid)) {return;}
-	$wordbooker_settings =wordbooker_options();
+	$wordbooker_settings = wordbooker_options();
 	# Grab the content of the post once its been filtered for display - this converts app tags into HTML so we can grab gallery images etc.
 	$args = array(
 	'post_type' => 'attachment',
@@ -1504,7 +1515,7 @@ function wordbooker_return_images($post_content,$postid,$flag) {
 				$og_image=$junk[0];
 			  }
 			  if(!isset($og_image)) {$og_image=wp_get_attachment_url($attachment->ID);}
-			$post_content2 .= ' <img src="' . urlencode($og_image) . '"> ';
+			  $post_content2 = ' <img src="' . $og_image . '"> ';
 		   }
 		}
 	}
@@ -1969,6 +1980,7 @@ function wordbooker_og_tags(){
 	global $post;
 	$bname=get_bloginfo('name');
 	$bdesc=get_bloginfo('description');
+	$blink=site_url().'/';
 	$meta_string="";
 	$wplang=wordbooker_get_language();
 	$wordbooker_settings = wordbooker_options();
@@ -2008,8 +2020,6 @@ function wordbooker_og_tags(){
 		echo '<meta property="og:type" content="article" /> ';
 		echo '<meta property="og:title" content="'.htmlspecialchars(strip_tags($post_title),ENT_QUOTES).'"/> ';
 		echo '<meta property="og:url" content="'.$post_link.'" /> ';
-
-
 		$ogimage=get_post_meta($post->ID, '_wordbooker_thumb', TRUE);
 		if (strlen($ogimage)<6 ) {
 			$images=wordbooker_return_images($post->post_content,$post->ID,0);
@@ -2019,19 +2029,20 @@ function wordbooker_og_tags(){
 		if (strlen($ogimage)<4) {$ogimage=get_bloginfo('wpurl').'/wp-content/plugins/wordbooker/includes/wordbooker_blank.jpg';}
 		if (strlen($ogimage)>4) {
 			echo '<meta property="og:image" content="'.$ogimage.'" /> ';
-
 		}
 	}
 	else
 	{ # Not a single post so we only need the og:type tag
-		echo '<meta property="og:type" content="blog" /> ';
+		echo '<meta property="og:title" content="'.$bname.' - '.$bdesc.'" /> ';
+		echo '<meta property="og:type" content="website" /> ';
+		echo '<meta property="og:url" content="'.$blink.'" /> ';
 	}
 	$meta_length=0;
 	$meta_length = $meta_length + wordbooker_get_option('wordbooker_description_meta_length');
 	if (is_single() || is_page()) {
 		$excerpt=get_post_meta($post->ID, '_wordbooker_extract', TRUE);
 		if(strlen($excerpt) < 5 ) {
-			$excerpt=wordbooker_post_excerpt($post->post_content,250);
+			$excerpt=wordbooker_post_excerpt($post->post_content,1000);
 			update_post_meta($post->ID, '_wordbooker_extract', trim($excerpt));
 		}
 		# If we've got an excerpt use that instead
@@ -2493,9 +2504,6 @@ function wordbooker_check_permissions($wbuser,$user) {
  */
 
 function wordbooker_post_excerpt($excerpt, $maxlength,$doyoutube=1) {
-	if (function_exists('strip_shortcodes')) {
-		$excerpt = strip_shortcodes($excerpt);
-	}
 	global $wordbooker_post_options;
 	if (!isset($maxlength)) {$maxlength=$wordbooker_post_options['wordbooker_extract_length'];}
 	if (!isset($maxlength)) {$maxlength=256;}
@@ -2503,6 +2511,11 @@ function wordbooker_post_excerpt($excerpt, $maxlength,$doyoutube=1) {
 	if (function_exists('canal_stats')) $excerpt =canal_stats($excerpt);
 	if (function_exists('canal_trip_stats')) $excerpt =canal_trip_stats($excerpt);
 	if (function_exists('canal_linkify_name')) $excerpt =canal_linkify_name($excerpt);
+	if (function_exists('canal_blogroute_insert')) $excerpt =canal_blogroute_insert($excerpt);
+	if (function_exists('strip_shortcodes')) {
+		$excerpt = strip_shortcodes($excerpt);
+	}
+
 	$excerpt=wordbooker_translate($excerpt);
 	# Now lets strip any tags which dont have balanced ends
 	#  Need to put NGgallery tags in there - there are a lot of them and they are all different.
@@ -2883,7 +2896,7 @@ add_action('delete_user', 'wordbooker_remove_user');
 
 function wordbooker_init () {
 	load_plugin_textdomain ('wordbooker',false,basename(dirname(__FILE__)).'/languages');
-	add_image_size( 'wordbooker_og', 500, 500 );
+	add_image_size('wordbooker_og', 900, 900 );
 }
 
 function wordbooker_schema($attr) {

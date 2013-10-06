@@ -5,7 +5,7 @@ Tags: facebook, news feed, wall, fan page wall, group wall, crosspost, Facebook 
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=8XNJMQCYDJT6U&lc=GB&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Requires at least: 3.0
 Tested up to: 3.6.1
-Stable tag: 2.1.36
+Stable tag: 2.1.37
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for.
 
@@ -96,7 +96,6 @@ Yes, and its also  WP Networked Blogs mode compliant.
 If you're using the Share action link on your posts to Facebook it uses the META DESCRIPTION tag to extract something from your post. If you dont have an SEO system which populates this, or if you dont usally use post excerpts then selecting this option populates the tag with the first couple hundred characters of your post which gives a nice block of text in the post that will appear when people share your post on their wall.
 
 
-
 = How do I report problems or submit feature requests? =
 
 - Use the [Wordbooker Support Forums](http://wordbooker.tty.org.uk/forums/). Either start a new topic, or add to an existing topic. Please don't post any issue you have onto an existing thread unless you are experiencing the same problem.
@@ -116,6 +115,12 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 
 == Changelog ==
+
+= Version 2.1.37 06/10/13 =
+- Changes to comment handling to avoid problems with anti-spam traps
+- Backport of Version checking process from 2.2.0
+- Change to og tag generation to fix some errors under certain circumstances
+
 
 
 = Version 2.1.36 14/09/13 =

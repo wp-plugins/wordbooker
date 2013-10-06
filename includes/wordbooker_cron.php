@@ -15,7 +15,7 @@ function wordbooker_cache_refresh($user_id) {
 	$result = $wpdb->get_row("select facebook_id from ".WORDBOOKER_USERDATA." where user_ID=".$user_id);
 	$uid=$result->facebook_id;
 	$wbuser2= wordbooker_get_userdata($user_id);
-	$wordbooker_settings =get_option('wordbooker_settings');
+	$wordbooker_settings=get_option('wordbooker_settings');
 	$doy=date ( 'z');
 	$curr_version="";
 	$version_check=wordbooker_get_option('version_check');
