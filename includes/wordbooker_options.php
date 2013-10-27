@@ -84,7 +84,9 @@ function wordbooker_option_manager() {
 	if ( isset ($_POST["reset_user_config"])) {wordbooker_delete_userdata(); }
 	$wordbooker_settings=wordbooker_options();
 	if ( isset($wordbooker_settings['wordbooker_disabled'])) { echo "<div align='center'><b> ".__('WARNING : Wordbooker is DISABLED','wordbooker')."</b></div>";} else {
-	if ( isset($wordbooker_settings['wordbooker_fake_publish'])) { echo "<div align='center'><b> ".__('WARNING : Wordbooker is in TEST mode - NO Posts will be made to Facebook','wordbooker')."</b></div>";}}
+		if ( $wordbooker_settings['wordbooker_public_url']>0) {
+		echo "<div align='center'><b> ".__('WARNING : Wordbooker is Running on a potentially NON PUBLIC URL - NO Posts will be made to Facebook','wordbooker')."</b></div>";} else {
+	if ( isset($wordbooker_settings['wordbooker_fake_publish'])) { echo "<div align='center'><b> ".__('WARNING : Wordbooker is in TEST mode - NO Posts will be made to Facebook','wordbooker')."</b></div>";}}}
 	if ($wordbooker_settings['wordbooker_comment_cron']!=wp_get_schedule('wb_comment_job')) {
 	$dummy=wp_clear_scheduled_hook('wb_comment_job');
 	//$sql="Delete from ".WORDBOOKER_POSTCOMMENTS." where in_out='stat'";
