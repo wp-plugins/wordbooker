@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.37
+Version: 2.1.38
 */
 
  /*
@@ -42,7 +42,7 @@ function wordbooker_global_definitions() {
 
 	define('WORDBOOKER_DEBUG', false);
 	define('WORDBOOKER_TESTING', false);
-	define('WORDBOOKER_CODE_RELEASE',"2.1.37 R00 - She's Gonna Break Soon");
+	define('WORDBOOKER_CODE_RELEASE',"2.1.38 R00 - Yellow Hedgerow Dreamscape");
 
 	# For Troubleshooting
 	define('ADVANCED_DEBUG',false);
@@ -1867,12 +1867,16 @@ function wordbooker_short_url($post_id) {
 		return $url;
 	}
 	$url2 = $url;
-	if (function_exists(fts_show_shorturl)) {
+	if (function_exists('fts_show_shorturl')) {
 		$post = get_post($post_id);
 		$url=fts_show_shorturl($post,$output = false);
 	}
-	if (function_exists(wp_ozh_yourls_geturl)) {
+	if (function_exists('wp_ozh_yourls_geturl')) {
 		$url=wp_ozh_yourls_geturl($post_id);
+	}
+	if (function_exists('wpme_get_shortlink')) {
+		$post = get_post($post_id);
+		$url = wpme_get_shortlink($post_id);
 	}
 	if ("!!!".$url."XXXX"=="!!!XXXX") {$url = $url2;}
 	if (stripos($url,'undefined.undefined')) {$url=$url2;}
@@ -1920,7 +1924,7 @@ function parse_wordbooker_attributes($attribute_text,$post_id,$timestamp) {
 function wordbooker_footer($blah)
 {
 	if (is_404()) {
-		echo "\n<!-- Wordbooker code revision : ".WORDBOOKER_CODE_RELEASE." -->\n";
+		echo "\n<!-- 404 Wordbooker code revision : ".WORDBOOKER_CODE_RELEASE." -->\n";
 		return;
 	}
 	$wplang=wordbooker_get_language();
@@ -1932,6 +1936,7 @@ function wordbooker_footer($blah)
 	if (defined('WORDBOOKER_PREMIUM')) {
 		$fb_id=WORDBOOKER_FB_ID;
 	}
+if (!isset($wordbooker_settings['wordbooker_fb_disable_api'])) {
 $efb_script = <<< EOGS
  <div id="fb-root"></div>
      <script type="text/javascript">
@@ -1959,16 +1964,7 @@ $efb_script.= <<< EOGS
       }());
     </script>
 EOGS;
-	if  (isset($wordbooker_settings['wordbooker_like_button_show']) || isset($wordbooker_settings['wordbooker_use_fb_comments']))
-		{
-	if (!isset($wordbooker_settings['wordbooker_fb_disable_api'])) {
 		echo $efb_script;
-	}
-/*
-		 if ( isset($wordbooker_settings['wordbooker_iframe'])) {
-			echo '<script src="http://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"></script>';
-		}
-*/
 	}
 #	echo '\n<script type="text/javascript " defer="defer" > setTimeout("wordbooker_read()",3000); </script> \n';
 	echo "\n<!-- Wordbooker code revision : ".WORDBOOKER_CODE_RELEASE." -->\n";

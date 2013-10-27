@@ -69,7 +69,7 @@ class FacebookWidget extends WP_Widget {
 		if (substr($instance['pid'],0,1)=='G') $url.="groups/";
 		$url.=substr($instance['pid'],3);
 		echo "<!-- Wordbooker FB like box widget -->";
-		if ( (!isset($wordbooker_settings['wordbooker_like_button_show']) && !isset($wordbooker_settings['wordbooker_like_share_too'])) || isset($wordbooker_settings['wordbooker_iframe'])) {
+		if ( isset($wordbooker_settings['wordbooker_iframe'])) {
 	echo'<iframe src="https://www.facebook.com/plugins/likebox.php?href='.urlencode(strtolower($url)).'&amp;width='.$width.'&amp;colorscheme='.$scheme.'&amp;show_faces='.$faces.'&amp;border_color=%23'.$border_colour.'&amp;stream='.$stream.'&amp;header='.$header.'&amp;height='.$height.'" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:'.$width.'px; height:'.$height.'px;" allowTransparency="true"></iframe>';
 		}
 		else {
