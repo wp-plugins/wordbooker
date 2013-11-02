@@ -16,8 +16,18 @@ function wordbooker_poll_comments($userid=0) {
 	$scheds2=wp_get_schedules();
 	$scheds=array_merge($scheds1,$scheds2);
 	$trimtime=(strtotime("now")-($scheds[$wordbooker_settings['wordbooker_comment_cron']]["interval"]*3));
-
-
+	$domain_info=wordbooker_domain_is_private(network_site_url());
+	if($domain_info[2]=='bad') {
+		$wordbooker_settings['wordbooker_public_url']=6;
+		$wordbooker_settings['wordbooker_fake_publish']='on';
+		wordbooker_set_option('wordbooker_fake_publish', $wordbooker_settings['wordbooker_fake_publish']);
+	} else {
+		$wordbooker_settings['wordbooker_public_url']=0;
+	}
+    if ($wordbooker_settings['wordbooker_public_url']>0) {
+		wordbooker_debugger("Non Public URL being used  -Comment handling disabled "," ",-3,9) ;
+		return;
+	 }
 	if (! $wordbooker_settings['wordbooker_comment_handling']) {
 		wordbooker_debugger("Comment handling disabled "," ",-3,9) ;
 		return;
