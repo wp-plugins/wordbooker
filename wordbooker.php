@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.38
+Version: 2.1.39
 */
 
  /*
@@ -42,7 +42,7 @@ function wordbooker_global_definitions() {
 
 	define('WORDBOOKER_DEBUG', false);
 	define('WORDBOOKER_TESTING', false);
-	define('WORDBOOKER_CODE_RELEASE',"2.1.38 R00 - Yellow Hedgerow Dreamscape");
+	define('WORDBOOKER_CODE_RELEASE',"2.1.39 R00 - Lady In The Red Hat");
 
 	# For Troubleshooting
 	define('ADVANCED_DEBUG',false);
@@ -60,7 +60,7 @@ function wordbooker_global_definitions() {
 	define('WORDBOOKER_FB_ID', '254577506873');
 	define('WORDBOOKER_APPLICATION_NAME','Wordbooker');
 	define('OPENGRAPH_NAMESPACE','wordbooker');
-	define('WORDBOOKER_KEY','Public Edition - No Key Issued');
+	define('WORDBOOKER_KEY','Public');
 	define('OPENGRAPH_ACCESS_TOKEN','AAAAAO0YAejkBA3f4E3gGR2KjCr6WhUO1ZBNyXHP6vaQoQLbwvlDyKDK0BIMZBb6mVyk2ZAbvPEXyrZCLNd6Bb8TA0HJCKGkotUZD');
 	}
 
@@ -828,7 +828,7 @@ function wordbooker_delete_from_errorlogs($post_id) {
 function wordbooker_render_errorlogs() {
 	global $user_ID, $wpdb,$blog_id;
 	$diaglevel=wordbooker_get_option('wordbooker_advanced_diagnostics_level');
-#	echo "!!!!".$user_ID;
+	if ($diaglevel>999) {$diaglevel=0;}
 	$count_rows = $wpdb->get_results('SELECT count(*) as count FROM ' . WORDBOOKER_ERRORLOGS . ' WHERE user_ID = ' . $user_ID . '  and blog_id='.$blog_id);
 	$rows = $wpdb->get_results('SELECT * FROM ' . WORDBOOKER_ERRORLOGS . ' WHERE user_ID = ' . $user_ID . '  and blog_id='.$blog_id.' and diag_level >='.$diaglevel.' order by sequence_id asc');
 	if ($count_rows[0]->count >= 1) {
@@ -1270,6 +1270,32 @@ function wordbooker_version_ok($currentvers, $minimumvers) {
 	return true;
 }
 
+function wordbooker_FILTER_FLAG_NO_LOOPBACK_RANGE($value) {
+    // Fails validation for the following loopback IPv4 range: 127.0.0.0/8
+    // This flag does not apply to IPv6 addresses
+    return filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? $value :
+        (((ip2long($value) & 0xff000000) == 0x7f000000) ? FALSE : $value);
+}
+
+function wordbooker_domain_is_private($url)
+{
+	//$url='http://212.159.61.36/fred';
+	//$url='http://192.168.0.26:8808/fred';
+	//$url='http://::1/fred';
+	//$url='http://';
+	$exploded_url=parse_url($url);
+	$site_domain=$exploded_url['host'];
+	if (strlen($site_domain) <2 ) {return array($site_domain,'Domain','bad');}
+	if ($site_domain==':') {return array('IPV6 Local Host','IP address','bad');}
+	if(filter_var($site_domain, FILTER_VALIDATE_IP)){
+		if(filter_var($site_domain,  FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE) && filter_var($site_domain, FILTER_CALLBACK, array('options' =>'wordbooker_FILTER_FLAG_NO_LOOPBACK_RANGE'))) {
+			$return=array($site_domain,'IP Address','good'); } else {$return=array($site_domain,'IP Address','bad'); }
+		return $return;
+	} else {
+		if (strtolower($site_domain)=='localhost')  {return array($site_domain,'Domain','bad');} else {
+		return array($site_domain,'Domain','good');}
+	}
+}
 
 function wordbooker_option_support() {
 	global $wp_version,$wpdb,$user_ID,$facebook2;
@@ -1373,10 +1399,20 @@ function wordbooker_option_support() {
 	$ver_col=array(0=>'green',1=>'black', 2=>'blue', 3=>'yellow',4=>'orange',5=>'red',6=>'red');
 	if(strlen($stable_release)<6) { $stable_release='Stable Version information not verified';}
 	if ($stable_release=='0.0.0') { $stable_release='Unable to obtain stable version information';}
+	$domain_info=wordbooker_domain_is_private(network_site_url());
+	if($domain_info[2]=='bad') {
+		$wordbooker_settings['wordbooker_public_url']=6;
+		$wordbooker_settings['wordbooker_fake_publish']='on';
+		wordbooker_set_option('wordbooker_fake_publish', $wordbooker_settings['wordbooker_fake_publish']);
+	} else {
+		$wordbooker_settings['wordbooker_public_url']=0;
+	}
+	wordbooker_set_option('wordbooker_public_url', $wordbooker_settings['wordbooker_public_url']);
 	$info = array(
 		'Wordbooker' => "<span style='color:".$ver_col[$ver_diff]."';>".$plug_info['wordbooker/wordbooker.php']['Version']."</span>",
 		'Wordbooker Code Base' => WORDBOOKER_CODE_RELEASE,
 		'Wordbooker Current Stable Release' =>$stable_release,
+		'Blog Domain'=>"<span style='color:".$ver_col[$wordbooker_settings['wordbooker_public_url']]."';>".$domain_info[0]." ( ".$domain_info[1]." ) </span>",
 		'Wordbooker ID'=>WORDBOOKER_FB_ID,
 		'Wordbooker Schema' => $wordbooker_settings['schema_vers'],
 		'WordPress' => $wp_version,
@@ -1860,18 +1896,18 @@ function wordbooker_get_language() {
 
 
 function wordbooker_short_url($post_id) {
-	# This provides short_url responses by checking for various functions and using
+	# This provides short_urls from various plugins
 	$wordbooker_settings =wordbooker_options();
 	$url = get_permalink($post_id);
 	if (isset($wordbooker_settings["wordbooker_disable_shorties"])) {
 		return $url;
 	}
 	$url2 = $url;
-	if (function_exists('fts_show_shorturl')) {
+	if (function_exists(fts_show_shorturl)) {
 		$post = get_post($post_id);
 		$url=fts_show_shorturl($post,$output = false);
 	}
-	if (function_exists('wp_ozh_yourls_geturl')) {
+	if (function_exists(wp_ozh_yourls_geturl)) {
 		$url=wp_ozh_yourls_geturl($post_id);
 	}
 	if (function_exists('wpme_get_shortlink')) {
@@ -1927,6 +1963,7 @@ function wordbooker_footer($blah)
 		echo "\n<!-- 404 Wordbooker code revision : ".WORDBOOKER_CODE_RELEASE." -->\n";
 		return;
 	}
+	if (!isset($wordbooker_settings['wordbooker_fb_disable_api'])) {
 	$wplang=wordbooker_get_language();
 	$wordbooker_settings = wordbooker_options();
 	$fb_id=$wordbooker_settings["fb_comment_app_id"];
@@ -1936,7 +1973,6 @@ function wordbooker_footer($blah)
 	if (defined('WORDBOOKER_PREMIUM')) {
 		$fb_id=WORDBOOKER_FB_ID;
 	}
-if (!isset($wordbooker_settings['wordbooker_fb_disable_api'])) {
 $efb_script = <<< EOGS
  <div id="fb-root"></div>
      <script type="text/javascript">
@@ -1964,8 +2000,13 @@ $efb_script.= <<< EOGS
       }());
     </script>
 EOGS;
-		echo $efb_script;
+	echo $efb_script;
 	}
+/*
+		 if ( isset($wordbooker_settings['wordbooker_iframe'])) {
+			echo '<script src="http://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"></script>';
+		}
+*/
 #	echo '\n<script type="text/javascript " defer="defer" > setTimeout("wordbooker_read()",3000); </script> \n';
 	echo "\n<!-- Wordbooker code revision : ".WORDBOOKER_CODE_RELEASE." -->\n";
 return $blah;
@@ -2820,6 +2861,8 @@ function wordbooker_debugger($method,$error_msg,$post_id,$level=9) {
 	global $user_ID,$post_ID,$wpdb,$blog_id,$post,$wbooker_user_id,$comment_user,$wb_user_id;
 	$usid=1;
 	$usid=$user_ID;
+	$loglevel=wordbooker_get_option('wordbooker_advanced_diagnostics_level');
+	if ($loglevel>999) {return;}
 	#var_dump($wbooker_user_id);
 	if (isset($user_ID)) {$usid=$user_ID;}
 	if (isset($post_id) && ($post_id>=1)){

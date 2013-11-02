@@ -83,6 +83,17 @@ function wordbooker_option_manager() {
 	echo '<h2>'.WORDBOOKER_APPLICATION_NAME." ".__('Options Page','wordbooker').' </h2>';
 	if ( isset ($_POST["reset_user_config"])) {wordbooker_delete_userdata(); }
 	$wordbooker_settings=wordbooker_options();
+	$domain_info=wordbooker_domain_is_private(network_site_url());
+	if($domain_info[2]=='bad') {
+		$wordbooker_settings['wordbooker_public_url']=6;
+		$wordbooker_settings['wordbooker_fake_publish']='on';
+		wordbooker_set_option('wordbooker_fake_publish', $wordbooker_settings['wordbooker_fake_publish']);
+		wordbooker_set_option('wordbooker_public_url', $wordbooker_settings['wordbooker_public_url']);
+	}
+	else {
+		$wordbooker_settings['wordbooker_public_url']=0;
+	}
+	wordbooker_set_option('wordbooker_public_url', $wordbooker_settings['wordbooker_public_url']);
 	if ( isset($wordbooker_settings['wordbooker_disabled'])) { echo "<div align='center'><b> ".__('WARNING : Wordbooker is DISABLED','wordbooker')."</b></div>";} else {
 		if ( $wordbooker_settings['wordbooker_public_url']>0) {
 		echo "<div align='center'><b> ".__('WARNING : Wordbooker is Running on a potentially NON PUBLIC URL - NO Posts will be made to Facebook','wordbooker')."</b></div>";} else {
@@ -226,7 +237,9 @@ cCMn5hzGCAZowggGWAgEBMIGUMIGOMQswCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExFjAUBgNVBAcTDU1
 
         }
 	 else {
-		wordbooker_option_setup($wbuser);
+		 if ($wordbooker_settings['wordbooker_public_url']<=5) {
+			wordbooker_option_setup($wbuser);
+		}
 		wordbooker_render_errorlogs();
 		wordbooker_option_support();
 	}
@@ -597,7 +610,7 @@ function wordbooker_blog_advanced_options() {
 		echo "</select><br />";
 		}
 		if (!isset($wordbooker_settings['wordbooker_advanced_diagnostics_level'])) {$wordbooker_settings['wordbooker_advanced_diagnostics_level']=10;}
-		$arr = array(0=> __("Show Everything and I mean everything",'wordbooker'),10=> __("Show everything but Cache Diagnostics",'wordbooker'),90=> __("Show result of major actions",'wordbooker'),99 => __("Don't show anything apart from Fatal errors",'wordbooker'),999 => __("Disabled (Show nothing at all)",'wordbooker'));
+		$arr = array(0=> __("Show Everything and I mean everything",'wordbooker'),10=> __("Show everything but Cache Diagnostics",'wordbooker'),90=> __("Show result of major actions",'wordbooker'),99 => __("Don't show anything apart from Fatal errors",'wordbooker'),999 => __("Disabled (Show nothing at all)",'wordbooker'),9999 => __("Do not log messages",'wordbooker'));
 		echo '<p><label for="wb_advanced_diagnostics_level">'.__("Post Diagnostics display level", 'wordbooker'). ' : </label><select id="wordbooker_advanced_diagnostics_level" name="wordbooker_settings[wordbooker_advanced_diagnostics_level]"  >';
          foreach ($arr as $i => $value) {
                         if ($i==$wordbooker_settings['wordbooker_advanced_diagnostics_level']){ echo '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}

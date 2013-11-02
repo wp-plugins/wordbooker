@@ -4,8 +4,8 @@ Contributors: SteveAtty
 Tags: facebook, news feed, wall, fan page wall, group wall, crosspost, Facebook Send, Facebook Like, social media, open graph.
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=8XNJMQCYDJT6U&lc=GB&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Requires at least: 3.0
-Tested up to: 3.6.1
-Stable tag: 2.1.38
+Tested up to: 3.7.1
+Stable tag: 2.1.39
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for.
 
@@ -115,6 +115,12 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 
 == Changelog ==
+
+= Version 2.1.39 02/11/13 =
+- Added a Do Not Log option for diagnostic logging - this turns logging OFF totally
+- Added checks for FB "not usable" urls - such as localhost, private IP address ranges etc.
+- Confirmed Wordpress 3.7.1 compatibility
+
 
 = Version 2.1.38 27/10/13 =
 - Fixed an obscure bug in the social widget
