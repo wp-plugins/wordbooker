@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.1.39
+Version: 2.1.40
 */
 
  /*
@@ -42,7 +42,7 @@ function wordbooker_global_definitions() {
 
 	define('WORDBOOKER_DEBUG', false);
 	define('WORDBOOKER_TESTING', false);
-	define('WORDBOOKER_CODE_RELEASE',"2.1.39 R00 - Lady In The Red Hat");
+	define('WORDBOOKER_CODE_RELEASE',"2.1.40 R00 - Don't Let Me Down Gently");
 
 	# For Troubleshooting
 	define('ADVANCED_DEBUG',false);
@@ -1963,9 +1963,9 @@ function wordbooker_footer($blah)
 		echo "\n<!-- 404 Wordbooker code revision : ".WORDBOOKER_CODE_RELEASE." -->\n";
 		return;
 	}
+	$wordbooker_settings = wordbooker_options();
 	if (!isset($wordbooker_settings['wordbooker_fb_disable_api'])) {
 	$wplang=wordbooker_get_language();
-	$wordbooker_settings = wordbooker_options();
 	$fb_id=$wordbooker_settings["fb_comment_app_id"];
 	if (strlen($fb_id)<6) {
 	$fb_id=WORDBOOKER_FB_ID;
