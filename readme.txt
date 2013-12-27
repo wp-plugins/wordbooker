@@ -4,8 +4,8 @@ Contributors: SteveAtty
 Tags: facebook, news feed, wall, fan page wall, group wall, crosspost, Facebook Send, Facebook Like, social media, open graph.
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=8XNJMQCYDJT6U&lc=GB&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Requires at least: 3.0
-Tested up to: 3.6.1
-Stable tag: 2.1.37
+Tested up to: 3.8
+Stable tag: 2.2.0
 
 This plugin allows you to cross-post your blog posts to your Facebook Wall and to any Facebook Fan Page / Group that you are an administrator for.
 
@@ -20,12 +20,12 @@ NOTE : You MUST have the PHP Curl module enabled and configured in such a way th
 
 == IMPORTANT ==
 
-Wordbooker 2.0 is a completely new implementation of most of the original Wordbooker functionality. You will need to revisit the Options screen to reset your configuration
+When ever you upgrade Wordbooker you should visit the Wordbooker Options Screen to make sure that any configuration changes are applied correctly. Failure to do so may make Wordbooker function in unexpected ways.
 
 
-== Upgrading Wordbooker from Version 1.x ==
+== Upgrading Wordbooker from Version 2.1.x ==
 
-If you are upgrading from version 1.x then DO NOT deactivate the plugin before you upgrade as this will remove all the settings and remove the tables which means you will loose all your posting/comment history. To upgrade Wordbooker to Version 2 you should download the latest version of the plugin, delete the wordbooker folder on the server and then then upload the wordbooker folder into your wp-plugins folder. Once you've done that you need to go into the Plugins menu and DE-ACTIVATE and the RE-ACTIVATE Wordbooker. People running Networked Blogs can do a Network Activation at this point. PLEASE NOTE:  Version 2 does not, at the moment import information about posts made in Version 1.x but I am looking to add it as an option in a future release if there is a demand for it.
+Upgrading from 2.1.x to 2.2 requires no special actions.
 
 
 == Installation ==
@@ -116,11 +116,39 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 == Changelog ==
 
+= Version 2.2.0 27/12/13 =
+- Base release of Version 2.2
+- Confirmed Wordpress 3.8 compatible
+- Adds Support for controlling posts to Facebook using custom Post Types and Categories
+- Adds Support for controlling posts to Facebook using Tags
+- Adds Support for WP_HTTP for Facebook API calls
+- Adds Support for appsecret_proof calls to Facebook
+- Follows FB privacy for retrieved Status Messages (Only Public Status updates will be used to update Wordbooker.)
+- Adds support for new the Facebook Share Button
+- Better handling of Short URLs for posted urls - with new Advanced Option to support this
+- Adds support for shipping of Access tokens between Wordbooker Installs
+- Adds easy linking to Facebook Friend's profiles
+- Rationalisation of code into sub blocks with controlled loading.
+
+
+= Version 2.1.40 03/11/13 =
+- Fixed bug in the FB API initialization logic which meant it ran when it shouldn't have done
+
+
+= Version 2.1.39 02/11/13 =
+- Added a Do Not Log option for diagnostic logging - this turns logging OFF totally
+- Added checks for FB "not usable" urls - such as localhost, private IP address ranges etc.
+- Confirmed Wordpress 3.7.1 compatibility
+
+
+= Version 2.1.38 27/10/13 =
+- Fixed an obscure bug in the social widget
+- Confirmed Wordpress 3.7 compatibility
+
 = Version 2.1.37 06/10/13 =
 - Changes to comment handling to avoid problems with anti-spam traps
 - Backport of Version checking process from 2.2.0
 - Change to og tag generation to fix some errors under certain circumstances
-
 
 
 = Version 2.1.36 14/09/13 =
@@ -535,6 +563,9 @@ There will be conflicts with other plugins providing Facebook Like/Send Share fu
 
 
 == Upgrade Notice ==
+
+= 2.2 =
+Base release of Version 2.2. Lots of minor bug fixes plus some new major features.
 
 = 2.1.27 =
 Fixes problem with Fulltext index. Fixes problems with user settings getting lost.
