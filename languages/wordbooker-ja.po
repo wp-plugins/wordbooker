@@ -8,19 +8,13 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2012-05-25 07:52+0900\n"
+"PO-Revision-Date: 2012-08-19 04:03+0900\n"
 "Last-Translator: Shohei Tanaka <tanaka@makemarket.net>\n"
 "Language-Team: Shohei Tanaka <tanaka@makemarket.net>\n"
-"X-Poedit-Language: Japanese\n"
+"Language: ja\n"
 
-#: wordbooker.php:212
-#: wordbooker.php:231
-#: wordbooker.php:259
-#: wordbooker.php:277
-#: wordbooker.php:294
-#: wordbooker.php:306
-#: wordbooker.php:319
-#: wordbooker.php:332
+#: wordbooker.php:212 wordbooker.php:231 wordbooker.php:259 wordbooker.php:277
+#: wordbooker.php:294 wordbooker.php:306 wordbooker.php:319 wordbooker.php:332
 msgid "Failed to create "
 msgstr "作成に失敗しました。"
 
@@ -49,12 +43,20 @@ msgid "Clear Diagnostic Messages"
 msgstr "状況判断メッセージの消去"
 
 #: wordbooker.php:953
-msgid "Wordbooker needs the CURL PHP extension to work. Please install / enable it and try again"
-msgstr "WordbookerはCURLのPHP機能拡張が必要です。インストールするか利用可能の設定にして、再度挑戦して下さい。"
+msgid ""
+"Wordbooker needs the CURL PHP extension to work. Please install / enable it "
+"and try again"
+msgstr ""
+"WordbookerはCURLのPHP機能拡張が必要です。インストールするか利用可能の設定にし"
+"て、再度挑戦して下さい。"
 
 #: wordbooker.php:956
-msgid "Wordbooker needs the JSON PHP extension.  Please install / enable it and try again "
-msgstr "WordbookerはJSONのPHP機能拡張が必要です。インストールするか利用可能の設定にして、再度挑戦して下さい。"
+msgid ""
+"Wordbooker needs the JSON PHP extension.  Please install / enable it and try "
+"again "
+msgstr ""
+"WordbookerはJSONのPHP機能拡張が必要です。インストールするか利用可能の設定にし"
+"て、再度挑戦して下さい。"
 
 #: wordbooker.php:960
 msgid "Your PHP install is missing <code>simplexml_load_string()</code> "
@@ -77,16 +79,24 @@ msgid "Setup"
 msgstr "設定"
 
 #: wordbooker.php:1084
-msgid "Secure link ( may require you to add a new certificate for wordbooker.tty.org.uk ) Also you may get a warning about passing data on a non secure connection :"
-msgstr "Facebookの認証のためのリンクです。SSL処理されたwordbooker.tty.org.ukを経由して認証されます。まれにセキュリティー警告が出る場合がございます。"
+msgid ""
+"Secure link ( may require you to add a new certificate for wordbooker.tty."
+"org.uk ) Also you may get a warning about passing data on a non secure "
+"connection :"
+msgstr ""
+"Facebookの認証のためのリンクです。SSL処理されたwordbooker.tty.org.ukを経由し"
+"て認証されます。まれにセキュリティー警告が出る場合がございます。"
 
 #: wordbooker.php:1084
 msgid "Authorise Wordbooker"
 msgstr "Wordbookerを認可してください"
 
 #: wordbooker.php:1088
-msgid "Wordbooker should now be authorised. Please click on the Reload Page Button"
-msgstr "WordbookerのFacebook承認が完了しました。横の「ページを更新」ボタンをクリックして下さい。"
+msgid ""
+"Wordbooker should now be authorised. Please click on the Reload Page Button"
+msgstr ""
+"WordbookerのFacebook承認が完了しました。横の「ページを更新」ボタンをクリック"
+"して下さい。"
 
 #: wordbooker.php:1089
 msgid "Reload Page"
@@ -101,8 +111,12 @@ msgid "Wordbooker appears to be configured and working just fine"
 msgstr "Wordbookerは正常に構成され表示されているようです。"
 
 #: wordbooker.php:1172
-msgid "If you like, you can start over from the beginning (this does not delete your posting and comment history)"
-msgstr "必要であれば、最初からやり直すことができます（これはあなたの投稿やコメントの履歴を削除しません）"
+msgid ""
+"If you like, you can start over from the beginning (this does not delete "
+"your posting and comment history)"
+msgstr ""
+"必要であれば、最初からやり直すことができます（これはあなたの投稿やコメントの"
+"履歴を削除しません）"
 
 #: wordbooker.php:1176
 msgid "Wordbooker is able to connect to Facebook"
@@ -128,8 +142,7 @@ msgstr "サポート"
 msgid "For feature requests, bug reports, and general support :"
 msgstr "機能のリクエスト、バグレポート、および一般的なサポート："
 
-#: wordbooker.php:1215
-#: wordbooker.php:1216
+#: wordbooker.php:1215 wordbooker.php:1216
 msgid "Check the "
 msgstr "次のサイトをチェックして下さい。"
 
@@ -187,7 +200,9 @@ msgstr "よくある質問"
 
 #: wordbooker.php:1224
 msgid "Please provide the following information about your installation:"
-msgstr "もし何か問い合わせをする場合は以下のあなたの現在のシステム状況（インストール環境）をご提供下さい。"
+msgstr ""
+"もし何か問い合わせをする場合は以下のあなたの現在のシステム状況（インストール"
+"環境）をご提供下さい。"
 
 #: wordbooker.php:1249
 msgid "Curl is not installed"
@@ -203,7 +218,8 @@ msgstr "Curlは利用可能でFacebookにアクセスできます。全て大丈
 
 #: wordbooker.php:1304
 msgid "<li>XML: your PHP is missing <code>simplexml_load_string()</code></li>"
-msgstr "<li>XML: PHPが見当たりません。<code>simplexml_load_string()</code></li>"
+msgstr ""
+"<li>XML: PHPが見当たりません。<code>simplexml_load_string()</code></li>"
 
 #: wordbooker.php:1316
 msgid "<li> Active Plugins : <b></li>"
@@ -213,8 +229,7 @@ msgstr "<li>利用中のプラグイン:<b></li>"
 msgid "Your system does not meet the"
 msgstr "あなたのシステムは次の要件で合っていません。："
 
-#: wordbooker.php:1347
-#: wordbooker.php:1355
+#: wordbooker.php:1347 wordbooker.php:1355
 msgid "WordPress minimum requirements"
 msgstr "WordPressの最小要件"
 
@@ -319,15 +334,18 @@ msgid "Every 2 Hours"
 msgstr "2時間毎"
 
 #: includes/wordbooker_wb_widget.php:33
-msgid "Allows you to have one or more Facebook Status widgets in your sidebar. The widget picks up the user id of the person who drags it onto the side bar"
-msgstr "1つ以上のフェイスブック状況のサイドバーウィジェットを利用できます。ウィジェットはサイドバーにドラッグした人のIDを利用します。"
+msgid ""
+"Allows you to have one or more Facebook Status widgets in your sidebar. The "
+"widget picks up the user id of the person who drags it onto the side bar"
+msgstr ""
+"1つ以上のフェイスブック状況のサイドバーウィジェットを利用できます。ウィジェッ"
+"トはサイドバーにドラッグした人のIDを利用します。"
 
 #: includes/wordbooker_wb_widget.php:81
 msgid "Facebook Status"
 msgstr "Facebookの現状（状況）"
 
-#: includes/wordbooker_wb_widget.php:91
-#: includes/wordbooker_fb_widget.php:163
+#: includes/wordbooker_wb_widget.php:91 includes/wordbooker_fb_widget.php:163
 msgid "Title of Widget"
 msgstr "ウィジェットの名前"
 
@@ -392,11 +410,16 @@ msgid "about"
 msgstr ""
 
 #: includes/wordbooker_fb_widget.php:37
-msgid "Allows you to have multiple Like/Fan boxes. Fan pages cane be picked from a dropdown list in the options. Each user gets the choice of all the FB Fan pages they administer"
-msgstr "複数のLike/FBボックスを持つことができます。 FBページは、オプションでドロップダウンリストから選ぶことができます。 各々のユーザーは、それらのすべてのFBページの選択が出来ます。"
+msgid ""
+"Allows you to have multiple Like/Fan boxes. Fan pages cane be picked from a "
+"dropdown list in the options. Each user gets the choice of all the FB Fan "
+"pages they administer"
+msgstr ""
+"複数のLike/FBボックスを持つことができます。 FBページは、オプションでドロップ"
+"ダウンリストから選ぶことができます。 各々のユーザーは、それらのすべてのFBペー"
+"ジの選択が出来ます。"
 
-#: includes/wordbooker_fb_widget.php:118
-#: includes/wordbooker_fb_widget.php:165
+#: includes/wordbooker_fb_widget.php:118 includes/wordbooker_fb_widget.php:165
 msgid "Fan Page"
 msgstr "フェイスブックページ"
 
@@ -432,13 +455,11 @@ msgstr "ウィジェットの枠の色"
 msgid " (Application)"
 msgstr "（アプリケーション）"
 
-#: includes/wordbooker_options.php:25
-#: includes/wordbooker_options.php:113
+#: includes/wordbooker_options.php:25 includes/wordbooker_options.php:113
 msgid "Posted a new post on their blog"
 msgstr "ブログの新しい投稿を投稿する。"
 
-#: includes/wordbooker_options.php:26
-#: includes/wordbooker_options.php:115
+#: includes/wordbooker_options.php:26 includes/wordbooker_options.php:115
 msgid ": New blog post :  %title% - %link%"
 msgstr "新しいブログを投稿する: \"%title%\" - %link%"
 
@@ -453,7 +474,8 @@ msgstr "警告：Wordbookerが使えません。"
 
 #: includes/wordbooker_options.php:85
 #: includes/wordbooker_posting_options.php:80
-msgid "WARNING : Wordbooker is in TEST mode - NO Posts will be made to Facebook"
+msgid ""
+"WARNING : Wordbooker is in TEST mode - NO Posts will be made to Facebook"
 msgstr "警告：Wordbookerはテストモードです。フェイスブックに更新されません。"
 
 #: includes/wordbooker_options.php:142
@@ -496,13 +518,11 @@ msgstr "ブログ全体の設定を保存します"
 msgid "Reset to system Defaults"
 msgstr "初期値に戻します"
 
-#: includes/wordbooker_options.php:220
-#: includes/wordbooker_options.php:590
+#: includes/wordbooker_options.php:220 includes/wordbooker_options.php:590
 msgid "Default Publish Post to Facebook"
 msgstr "基本は一般ウォールに投稿します。"
 
-#: includes/wordbooker_options.php:223
-#: includes/wordbooker_options.php:599
+#: includes/wordbooker_options.php:223 includes/wordbooker_options.php:599
 msgid "Default Publish Page to Facebook"
 msgstr "基本は一般ページに投稿します。"
 
@@ -522,20 +542,17 @@ msgstr "Wordbookerユーザー以外からの投稿"
 msgid "Allow non Wordbooker users to chose to publish a post"
 msgstr "Wordbookerユーザーでなくても投稿を公開する記事を選べれるようにします。"
 
-#: includes/wordbooker_options.php:246
-#: includes/wordbooker_options.php:682
+#: includes/wordbooker_options.php:246 includes/wordbooker_options.php:682
 #: includes/wordbooker_posting_options.php:153
 msgid "Length of Extract"
 msgstr "表示される文字数"
 
-#: includes/wordbooker_options.php:247
-#: includes/wordbooker_options.php:683
+#: includes/wordbooker_options.php:247 includes/wordbooker_options.php:683
 #: includes/wordbooker_posting_options.php:154
 msgid "256 (Default) "
 msgstr "256 (標準) "
 
-#: includes/wordbooker_options.php:253
-#: includes/wordbooker_options.php:694
+#: includes/wordbooker_options.php:253 includes/wordbooker_options.php:694
 msgid "Post Attribute"
 msgstr "以下の文言を投稿します。"
 
@@ -551,14 +568,12 @@ msgstr "設定するリンクオプション"
 msgid "Share Link "
 msgstr "共有リンク"
 
-#: includes/wordbooker_options.php:259
-#: includes/wordbooker_options.php:698
+#: includes/wordbooker_options.php:259 includes/wordbooker_options.php:698
 #: includes/wordbooker_posting_options.php:162
 msgid "Read Full Article"
 msgstr "すべての記事を読む"
 
-#: includes/wordbooker_options.php:265
-#: includes/wordbooker_options.php:705
+#: includes/wordbooker_options.php:265 includes/wordbooker_options.php:705
 msgid "Enable Extended description for Share Link"
 msgstr "共有リンクの拡張説明を有効にする"
 
@@ -566,18 +581,15 @@ msgstr "共有リンクの拡張説明を有効にする"
 msgid "Length of Description Meta-Tag"
 msgstr "詳細メタタグの長さ"
 
-#: includes/wordbooker_options.php:283
-#: includes/wordbooker_options.php:287
-#: includes/wordbooker_options.php:592
-#: includes/wordbooker_options.php:601
+#: includes/wordbooker_options.php:283 includes/wordbooker_options.php:287
+#: includes/wordbooker_options.php:592 includes/wordbooker_options.php:601
 #: includes/wordbooker_options.php:707
 #: includes/wordbooker_posting_options.php:186
 #: includes/wordbooker_posting_options.php:207
 msgid "No"
 msgstr "いいえ"
 
-#: includes/wordbooker_options.php:283
-#: includes/wordbooker_options.php:287
+#: includes/wordbooker_options.php:283 includes/wordbooker_options.php:287
 #: includes/wordbooker_options.php:707
 #: includes/wordbooker_posting_options.php:186
 #: includes/wordbooker_posting_options.php:207
@@ -592,14 +604,12 @@ msgstr "投稿の上部"
 msgid "Below Post"
 msgstr "投稿の下部"
 
-#: includes/wordbooker_options.php:284
-#: includes/wordbooker_options.php:285
+#: includes/wordbooker_options.php:284 includes/wordbooker_options.php:285
 #: includes/wordbooker_options.php:457
 msgid "Defined by theme template"
 msgstr "テーマ・テンプレートに定義される"
 
-#: includes/wordbooker_options.php:284
-#: includes/wordbooker_options.php:285
+#: includes/wordbooker_options.php:284 includes/wordbooker_options.php:285
 #: includes/wordbooker_options.php:457
 msgid "Defined by Tag in post"
 msgstr "投稿のタグに定義される"
@@ -694,7 +704,7 @@ msgstr "ワードプレスコメント管理設定"
 
 #: includes/wordbooker_options.php:417
 msgid "Never "
-msgstr ""
+msgstr "利用しない"
 
 #: includes/wordbooker_options.php:418
 msgid "Manual Polling "
@@ -862,7 +872,8 @@ msgid "Check the following Custom Post Meta tags for images"
 msgstr "画像に付けるメタタグの設定を確認して下さい。"
 
 #: includes/wordbooker_options.php:543
-msgid "Use Image from Custom Meta instead of Featured Image for Open Graph image"
+msgid ""
+"Use Image from Custom Meta instead of Featured Image for Open Graph image"
 msgstr "オープングラフのイメージに変わってカスタムメタからイメージを使う。"
 
 #: includes/wordbooker_options.php:546
@@ -894,13 +905,12 @@ msgid "User Level Settings"
 msgstr "ユーザーレベル設定"
 
 #: includes/wordbooker_options.php:582
-msgid "If set, these options will override the Blog Level options for this user"
+msgid ""
+"If set, these options will override the Blog Level options for this user"
 msgstr "設定されたら、ブログの設定に上書きされます。"
 
-#: includes/wordbooker_options.php:592
-#: includes/wordbooker_options.php:601
-#: includes/wordbooker_options.php:698
-#: includes/wordbooker_options.php:707
+#: includes/wordbooker_options.php:592 includes/wordbooker_options.php:601
+#: includes/wordbooker_options.php:698 includes/wordbooker_options.php:707
 msgid "Same as Blog"
 msgstr "ブログと同じ"
 
@@ -924,8 +934,7 @@ msgstr "ステータス更新として"
 msgid "As a Link"
 msgstr "リンクとして"
 
-#: includes/wordbooker_options.php:623
-#: includes/wordbooker_options.php:659
+#: includes/wordbooker_options.php:623 includes/wordbooker_options.php:659
 #: includes/wordbooker_posting_options.php:98
 #: includes/wordbooker_posting_options.php:131
 msgid "Post to the following Wall"
@@ -987,12 +996,28 @@ msgid "Donate"
 msgstr "募金"
 
 #: includes/wordbooker_options.php:757
-msgid "You're using the Premium options in Wordbooker. You really should contribute something to the support and development of this plugin.  Please provide your FB Id number and your website when making payment so your details can be added to the <a href='http://wordbooker.tty.org.uk/thanks/'>'Thanks'</a>  list on the web site"
-msgstr "あなたはWordbookerのプレミアムオプションを使っています。このプラグインの開発とサポートに対して何かしらの貢献をして下さい。支払いの際にあなたのFBidとサイトを登録して頂けたら<a href='http://wordbooker.tty.org.uk/thanks/'>'Thanks'</a> listに掲載させて頂きます。"
+msgid ""
+"You're using the Premium options in Wordbooker. You really should contribute "
+"something to the support and development of this plugin.  Please provide "
+"your FB Id number and your website when making payment so your details can "
+"be added to the <a href='http://wordbooker.tty.org.uk/thanks/'>'Thanks'</a>  "
+"list on the web site"
+msgstr ""
+"あなたはWordbookerのプレミアムオプションを使っています。このプラグインの開発"
+"とサポートに対して何かしらの貢献をして下さい。支払いの際にあなたのFBidとサイ"
+"トを登録して頂けたら<a href='http://wordbooker.tty.org.uk/thanks/'>'Thanks'</"
+"a> listに掲載させて頂きます。"
 
 #: includes/wordbooker_options.php:759
-msgid "If you've found this extension useful then please feel free to donate to its support and future development. Please provide your FB Id number and your website when making payment so your details can be added to the <a href='http://wordbooker.tty.org.uk/thanks/'>'Thanks'</a> page on the Website"
-msgstr "もしあなたがこのプラグインを気に入って頂けたらサポートと開発に援助して下さい。支払いの際にFB idをWEBサイトを登録して頂けたら<a href='http://wordbooker.tty.org.uk/thanks/'>'Thanks'</a>ページに掲載させて頂きます。"
+msgid ""
+"If you've found this extension useful then please feel free to donate to its "
+"support and future development. Please provide your FB Id number and your "
+"website when making payment so your details can be added to the <a "
+"href='http://wordbooker.tty.org.uk/thanks/'>'Thanks'</a> page on the Website"
+msgstr ""
+"もしあなたがこのプラグインを気に入って頂けたらサポートと開発に援助して下さ"
+"い。支払いの際にFB idをWEBサイトを登録して頂けたら<a href='http://wordbooker."
+"tty.org.uk/thanks/'>'Thanks'</a>ページに掲載させて頂きます。"
 
 #: includes/wordbooker_posting_options.php:18
 #: includes/wordbooker_posting_options.php:19
@@ -1064,10 +1089,157 @@ msgid "http://wordbooker.tty.org.uk"
 msgstr ""
 
 #. Description of the plugin/theme
-msgid "Provides integration between your blog and your Facebook account. Navigate to <a href=\"options-general.php?page=wordbooker\">Settings &rarr; Wordbooker</a> for configuration."
-msgstr "ブログとあなたのフェイスブックアカウントを統合します。<a href=\"options-general.php?page=wordbooker\">設定 &rarr; Wordbooker</a> にて設定を完了して下さい。"
+msgid ""
+"Provides integration between your blog and your Facebook account. Navigate "
+"to <a href=\"options-general.php?page=wordbooker\">Settings &rarr; "
+"Wordbooker</a> for configuration."
+msgstr ""
+"ブログとあなたのフェイスブックアカウントを統合します。<a href=\"options-"
+"general.php?page=wordbooker\">設定 &rarr; Wordbooker</a> にて設定を完了して下"
+"さい。"
 
 #. Author of the plugin/theme
 msgid "Steve Atty"
 msgstr ""
 
+#: includes/wordbooker.php:1197
+msgid "Your current Facebook Access token will expire on"
+msgstr "あなたの現在のFacebook Access tokenの期限は次の期日のようです。"
+
+#: includes/wordbooker_options.php:863
+msgid "Limit Friend tagging to "
+msgstr "限定投稿（閲覧除外）設定"
+
+#: includes/wordbooker_options.php:863
+msgid "No Friends (Disabled) "
+msgstr "除外なし"
+
+#: includes/wordbooker_options.php:866
+msgid "All friends"
+msgstr "全て除外"
+
+#: includes/wordbooker_options.php:373
+msgid "Include a Facebook Share button in blog"
+msgstr "シェアボタンをブログに付ける"
+
+#: includes/wordbooker_options.php:377
+msgid " Facebook Share - Display Button"
+msgstr "Facebookシェア - ボタンの配置位置"
+
+#: includes/wordbooker_options.php:383
+msgid "Show Facebook Share button on front page"
+msgstr "トップページでFacebookシェアボタンの表示させる"
+
+#: includes/wordbooker_options.php:386
+msgid "Show Facebook Share button on Category pages"
+msgstr "カテゴリーページでFacebookシェアボタンの表示させる"
+
+#: includes/wordbooker_options.php:389
+msgid "Show Facebook Share button on Pages"
+msgstr "固有ページでFacebookシェアボタンの表示させる"
+
+#: includes/wordbooker_options.php:392
+msgid "Show Facebook Share button in each post"
+msgstr "各投稿でFacebookシェアボタンの表示させる"
+
+#: includes/wordbooker_options.php:394
+msgid "Don't show Facebook Share button on Sticky Posts"
+msgstr ""
+"特定の投稿を先頭に固定する「Sticky Posts」でFacebookシェアボタンの表示させな"
+"い"
+
+#: includes/wordbooker_options.php:397
+msgid "Share on Facebook"
+msgstr "シェア"
+
+#: includes/wordbooker_options.php:398
+msgid "Text for the Share Button"
+msgstr "シェアボタンで表示のテキスト"
+
+#: includes/wordbooker_options.php:187
+msgid "Post Type / Post Category and Tag Options"
+msgstr "投稿タイプ／投稿カテゴリーとタグオプション"
+
+#: includes/wordbooker_options.php:673
+msgid "Show sub categories"
+msgstr "サブカテゴリーの表示"
+
+#: includes/wordbooker_options.php:680
+msgid "Only process Excludes when posting"
+msgstr "投稿する場合にのみプロセスは除外"
+
+#: includes/wordbooker_posting_options.php:185
+msgid "Use Wordpress Excerpt for Wall Post"
+msgstr "Wordpressの要約部分をウォール投稿に使う"
+
+#: includes/wordbooker_posting_options.php:186
+msgid "Facebook Post Attribute line"
+msgstr "Facebookでの投稿表示文言"
+
+#: includes/wordbooker_posting_options.php:223
+msgid "Show Facebook Share for this Post"
+msgstr "この投稿でシェアボタンを表示する"
+
+#: includes/wordbooker_options.php:659
+msgid "Excluded Post Types"
+msgstr "除外する投稿種類"
+
+#: includes/wordbooker_options.php:659
+msgid "Included Post Types"
+msgstr "対応している投稿種類"
+
+#: includes/wordbooker_options.php:680
+msgid "Excluded Category Types"
+msgstr "除外するカテゴリー"
+
+#: includes/wordbooker_options.php:680
+msgid "Included Category Types"
+msgstr "対応しているカテゴリー"
+
+#: includes/wordbooker_options.php:682
+msgid "Excluded Tag Types"
+msgstr "除外するタグ"
+
+#: includes/wordbooker_options.php:682
+msgid "Included Tag Types"
+msgstr "対応しているタグ"
+
+#: includes/wordbooker_posting_options.php:25
+msgid "Facebook Friend Link and Notify"
+msgstr "Facebookの友達のリンクおよび通知"
+
+#: includes/wordbooker_posting_options.php:260
+msgid "Start typing a friends name here"
+msgstr "友人の名前をここでタイプしてください"
+
+#: includes/wordbooker_posting_options.php:261
+msgid "Add Friend to notify list"
+msgstr "通知リストに友人を追加する"
+
+#: includes/wordbooker_posting_options.php:261
+msgid "'Add Friend to Post"
+msgstr "投稿に友人を追加する"
+
+#: includes/wordbooker_posting_options.php:261
+msgid "Add Friend to both Post and notify"
+msgstr "投稿と通知の両方に友人を追加する"
+
+#: includes/wordbooker_posting_options.php:262
+msgid "Remove Friend from notify list"
+msgstr "通知リストから友人を除外する"
+
+#: includes/wordbooker_posting_options.php:262
+msgid "Remove Friend from Post"
+msgstr "投稿から友人を除外する"
+
+#: includes/wordbooker_posting_options.php:262
+msgid "Remove Friend from both post and notify"
+msgstr "投稿と通知の両方から友人を除外する"
+
+#: includes/wordbooker_posting_options.php:263
+msgid "Post a notification on the following friends walls"
+msgstr "友人のウォールに通知を投稿する"
+
+#: includes/wordbooker_posting_options.php:264
+msgid "Notify Message"
+msgstr "通知メッセージ"

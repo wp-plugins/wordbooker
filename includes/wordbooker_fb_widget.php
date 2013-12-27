@@ -46,7 +46,6 @@ class FacebookWidget extends WP_Widget {
 		echo "<p>";
 		$height = $instance['height'];
 		$width = $instance['width'];
-		$connections=$instance['connections'];
 		$border_colour=$instance['border_colour'];
 		$scheme=$instance['scheme'];
 		$stream="false";
@@ -103,7 +102,7 @@ class FacebookWidget extends WP_Widget {
 		$fanpages=unserialize($result->pages);
 		$xx=array('id'=>'FW:259559517434471','name'=>'Default (Wordbooker)');
 		$fanpages[]=$xx;
-		$default = array( 'title' => __('Fan Page','wordbooker'), 'snorl'=>$user_ID, 'dname'=>'', 'pid'=>'254577506873', 'stream'=>'false', 'connections'=>6, 'width'=>188, 'height'=>260, 'header'=>'false', 'scheme'=>'light' );
+		$default = array( 'title' => __('Fan Page','wordbooker'), 'snorl'=>$user_ID, 'dname'=>'', 'pid'=>'254577506873', 'stream'=>'false', 'width'=>188, 'height'=>260, 'header'=>'false', 'scheme'=>'light' );
 		$instance = wp_parse_args( (array) $instance, $default );
 
 		$title_id = $this->get_field_id('title');
@@ -146,25 +145,32 @@ class FacebookWidget extends WP_Widget {
 		$checked_flag=array('on'=>'checked','off'=>'', 'true'=>'checked', 'false'=>'');
 		if (!is_numeric($instance['width']) || $instance['width'] <0) {$instance['width']=188;}
 		if (!is_numeric($instance['height']) || $instance['height'] <0) {$instance['height']=260;}
+		if (!isset($instance['stream'])) {$instance['stream']='off';}
+		if (!isset($instance['header'])) {$instance['header']='off';}
+		if (!isset($instance['faces'])) {$instance['faces']='off';}
+		if (strlen($instance['stream'])==0) {$instance['stream']='off';}
+		if (strlen($instance['header'])==0) {$instance['header']='off';}
+		if (strlen($instance['faces'])==0) {$instance['faces']='off';}
+		if (!isset($instance['border_colour'])) {$instance['border_colour']='000000';}
 		echo '<input type="hidden" class="widefat" id="'.$snorl_id.'" name="'.$snorl_name.'" value="'.attribute_escape( $instance['snorl'] ).'" /></p>';
 
 		echo '<p><label for="'.$title_id.'">'.__('Title of Widget','wordbooker').': </label> <input type="text" class="widefat" id="'.$title_id.'" name="'.$title_name.'" value="'.attribute_escape( $instance['title'] ).'" /></p>';
-		$fanpagelist='';
+	//	$fanpagelist='';
 		echo "\r\n".'<p><label for="'.$df_id.'">'.__('Fan Page','wordbooker').':  </label>';
 		echo '<select id=id="'.$df_id.'"  name="'.$df_name.'" >';
 		foreach ($fanpages as $fan_page) {
-			$fanpagelist[$fan_page['id']]=$fan_page['url'];
-			if(substr($fan_page[id],0,1)!='G'){
-			if ($fan_page[id]==attribute_escape( $instance['pid'])){
-				print '<option selected="yes" value="'.$fan_page[id].'" >'.$fan_page[name].'</option>';}
+		//	$fanpagelist[$fan_page['id']]=$fan_page['url'];
+			if(substr($fan_page['id'],0,1)!='G'){
+			if ($fan_page['id']==attribute_escape( $instance['pid'])){
+				print '<option selected="yes" value="'.$fan_page['id'].'" >'.$fan_page['name'].'</option>';}
 			else {
-				print '<option value="'.$fan_page[id].'" >'.$fan_page[name].'</option>';
+				print '<option value="'.$fan_page['id'].'" >'.$fan_page['name'].'</option>';
 			}}
 		}
 		echo '</select></p>';
-		echo "<input type='hidden' class='widefat' id='".$fanpages_id."' name='".$fanpages_name."' value='".mysql_real_escape_string(serialize($fanpagelist))."' />";
+	//	echo "<input type='hidden' class='widefat' id='".$fanpages_id."' name='".$fanpages_name."' value='".mysql_real_escape_string(serialize($fanpagelist))."' />";
 		echo '<p><label for="'.$stream_id.'">'.__("Include Stream ", 'wordbooker'). ' : </label>';
-		echo '<INPUT TYPE=CHECKBOX class="widefat"id="'.$stream_id.'" name="'.$stream_name.'" '.$checked_flag[attribute_escape( $instance['stream'])].' /></p>';
+		echo '<INPUT TYPE=CHECKBOX class="widefat"id="'.$stream_id.'" name="'.$stream_name.'" '.$checked_flag[attribute_escape($instance['stream'])].' /></p>';
 
 		echo '<p><label for="'.$stream_id.'">'.__("Include Header ", 'wordbooker'). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX class="widefat"id="'.$header_id.'" name="'.$header_name.'" '.$checked_flag[attribute_escape( $instance['header'])].' /></p>';

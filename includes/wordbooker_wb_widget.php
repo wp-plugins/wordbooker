@@ -1,41 +1,15 @@
 <?php
-
 /*
 Description: Facebook Status Widget. Needs Wordbook installing to work.
 Author: Stephen Atty
 Author URI: http://canalplan.blogdns.com/steve
-Version: 2.1
+Version: 2.2
 */
 
-/*
- * Copyright 2011 Steve Atty (email : posty@tty.org.uk)
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 51
- * Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
-#global $wp_version;
-
 class WordbookWidget extends WP_Widget {
-
 	function WordbookWidget() {
 		parent::WP_Widget('wordbooker_widget', 'Wordbooker FB Status ', array('description' => __('Allows you to have one or more Facebook Status widgets in your sidebar. The widget picks up the user id of the person who drags it onto the side bar','wordbooker') , 'class' => 'WordbookWidget'));
 	}
-
-	/**
-	 * display widget
-	 */
 	function widget($args, $instance) {
 		extract($args, EXTR_SKIP);
 		global  $wpdb, $user_ID,$table_prefix,$blog_id;
@@ -43,25 +17,27 @@ class WordbookWidget extends WP_Widget {
 		$result = wordbooker_get_cache($userid);
 		echo $before_widget;
 		echo "<!-- Wordbooker FB Status Widget -->";
-		$name=$result->name;
+		if(is_object($result)) {
+			$name=$result->name;
          	if (strlen($instance['dname']) >0 ) $name=$instance['dname'];
-		$title = empty($instance['title']) ? '&nbsp;' : apply_filters('widget_title', $instance['title']);
-		if ( !empty( $title ) ) { echo $before_title . $title . $after_title; };
-                echo '<br /><div class="facebook_picture" align="center">';
-                echo '<a href="'.$result->url.'" target="facebook">';
-                echo '<img src="'. $result->pic.'" alt=" FB photo for '.$name.'" /></a>';
-                echo '</div>';
-
-                if ($result->status) {
-			$current_offset=0;
-		#	$current_offset = get_option('gmt_offset');
-                	echo '<p><br /><a href="'.$result->url.'">'.$name.'</a> : ';
-			echo '<i>'.$result->status.'</i><br />';
-       			if ($instance['df']=='fbt') {
-         			echo '('.wordbooker_nicetime($result->updated+(3600*$current_offset)).').';
-			}
-         		else {
-				echo '('.date($instance['df'], $result->updated+(3600*$current_offset)).').';
+			$title = empty($instance['title']) ? '&nbsp;' : apply_filters('widget_title', $instance['title']);
+			if ( !empty( $title ) ) { echo $before_title . $title . $after_title; };
+					echo '<br /><div class="facebook_picture" align="center">';
+					echo '<a href="'.$result->url.'" target="facebook">';
+					echo '<img src="'. $result->pic.'" alt=" FB photo for '.$name.'" /></a>';
+					echo '</div>';
+					if ($result->status) {
+				$current_offset=0;
+			//  $current_offset = get_option('gmt_offset');
+						echo '<div align="center"><a href="'.$result->url.'">'.$name.'</a> </div>';
+				echo '<i>'.preg_replace('/(\n)+/','<br /><br />',$result->status).'</i><br /><br /><div align="center">';
+					if ($instance['df']=='fbt') {
+						echo '('.wordbooker_nicetime($result->updated+(3600*$current_offset)).').';
+				}
+					else {
+					echo '('.date($instance['df'], $result->updated+(3600*$current_offset)).').';
+				}
+			echo "</div>";
 			}
 		}
 		echo "</p>".$after_widget;
@@ -98,7 +74,7 @@ class WordbookWidget extends WP_Widget {
 		$dl24=date('l F j, G:i');
 		$ds24=date('D M j, G:i');
 		$drfc=date('r');
-		$arr = array('D M j, g:i a'=> $ds12,  'l F j, g:i a'=> $dl12, 'D M j, G:i'=>$ds24, 'l F j, G:i'=>$dl24,fbt=>__("Facebook Text style",'wordbooker'), r =>$drfc);
+		$arr = array('D M j, g:i a'=> $ds12,  'l F j, g:i a'=> $dl12, 'D M j, G:i'=>$ds24, 'l F j, G:i'=>$dl24,'fbt'=>__("Facebook Text style",'wordbooker'), 'r'=>$drfc);
 		foreach ($arr as $i => $value) {
 		if ($i==attribute_escape( $instance['df'])){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
 		else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
@@ -107,53 +83,38 @@ class WordbookWidget extends WP_Widget {
 	}
 }
 
-/* register widget when loading the WP core */
 add_action('widgets_init', 'wordbooker_widgets');
 $plugin_dir = basename(dirname(__FILE__));
-#load_plugin_textdomain( 'wordbook', 'wp-content/plugins/' . $plugin_dir, $plugin_dir );
 
 function wordbooker_widgets(){
 	register_widget('WordbookWidget');
 }
 
-
-function wordbooker_nicetime($date)
-{
-
+function wordbooker_nicetime($date){
     $periods         = array(__("second",'wordbooker'), __("minute",'wordbooker'), __("hour",'wordbooker'), __("day",'wordbooker'), __("week",'wordbooker'), __("month",'wordbooker'), __("year",'wordbooker'), __("decade",'wordbooker'));
     $lengths         = array("60","60","24","7","4.35","12","10");
-
     $now             = time();
     $unix_date         = $date;
-
        // check validity of date
     if(empty($unix_date)) {
         return "Bad date";
     }
-
     // is it future date or past date
     if($now > $unix_date) {
         $difference     = $now - $unix_date;
         $tense         = __("ago", 'wordbooker');
-
     } else {
         $difference     = $unix_date - $now;
         $tense         = __("from now", 'wordbooker');
     }
-
     for($j = 0; $difference >= $lengths[$j] && $j < count($lengths)-1; $j++) {
         $difference /= $lengths[$j];
     }
-
     $difference = round($difference);
-
     if($difference != 1) {
         $periods[$j].= "s";
     } else {$difference=__("an",'wordbooker');}
 
     return __("about",'wordbooker')." $difference $periods[$j] {$tense}";
 }
-
-
-
 ?>
