@@ -961,7 +961,7 @@ msgstr "Veröffentliche diese Seite bei Facebook"
 
 #: includes/wordbooker_posting_options.php:80
 msgid "The following options override the defaults set on the options page"
-msgstr "Die nachfolgenden Optionen überschreiben die Standardeinstellungen"
+msgstr "Die nachfolgenden Optionen überschreiben die <a HREF=\"http://www.traxy.de/wp-admin/options-general.php?page=wordbooker\">Standardeinstellungen</a>."
 
 #: includes/wordbooker_posting_options.php:87
 msgid "Personal Wall"
