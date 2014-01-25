@@ -490,18 +490,18 @@ function wordbooker_renew_access_token($userid=null) {
 function get_check_session(){
 	global $facebook2,$user_ID;
 	# This function basically checks for a stored session and if we have one it returns it, If we have no stored session then it gets one and stores it
-	# OK lets go to the database and see if we have a session stored
 
-	wordbooker_debugger("Getting Userdata "," ",0) ;
+	# OK lets go to the database and see if we have a session stored
+	wordbooker_debugger("Getting Userdata ",$user_ID,0) ;
 	$session = wordbooker_get_userdata($user_ID);
 	if(!isset($session->access_token)){$session=new stdClass(); $session->access_token='1234';}
 	if (strlen($session->access_token)>5) {
-		wordbooker_debugger("Session found. Check validity "," ",0) ;
+		wordbooker_debugger("Session found. Check validity ",$session->facebook_id,0) ;
 		# We have a session ID so lets not get a new one
 		# Put some session checking in here to make sure its valid
 		try {
-		wordbooker_debugger("Calling Facebook API : get current user "," ",0) ;
-		$ret_code=wordbooker_me($session->facebook_id,$session->access_token);
+		wordbooker_debugger("Calling Facebook API : get current user ",$session->facebook_id,0) ;
+		$ret_code= (string) wordbooker_me($session->facebook_id,$session->access_token);
 		}
 		catch (Exception $e) {
 		# We don't have a good session so
@@ -514,6 +514,7 @@ function get_check_session(){
 	else
 	{
 		# Are we coming back from a login with a session set?
+		# This is for premium which does it all internally using the POST back from Facebook
 		if (!defined('WORDBOOKER_PREMIUM')) {
 			if(isset($_POST['session'])){
 				$zz=htmlspecialchars_decode ($_POST['session'])."<br>";
@@ -522,6 +523,7 @@ function get_check_session(){
 				$session->expires=0;
 			}
 		} else {
+		# This is for regular which gets a stream back in the URL
 		if (isset($_REQUEST['code'])){
 			$x=wordbooker_get_access_token_from_code($_REQUEST['code']);
 			$xx=explode("&expires=",$x);
@@ -530,23 +532,25 @@ function get_check_session(){
 			$session->expires=0;
 			if ($xx[1]>0) {$session->expires=time()+$xx[1];}
 		}
+		# Lets Build up our session
 		if (!isset($session->facebook_id)){$session->facebook_id=NULL;}
 		if (!isset($session->access_token)){$session->access_token=NULL;}
 		if (!isset($session->session_key)){$session->session_key=NULL;}
 		if (!isset($session->sig)){$session->sig=NULL;}
 		if (!isset($session->uid)){$session->uid=NULL;}
 		try {
+			wordbooker_debugger("Checking Session Status ",$session->facebook_id,0) ;
 			$ret_code=wordbooker_me_status($session->facebook_id,$session->access_token);
 		}
 		catch (Exception $e) {
 		# We don't have a good session so
 			wordbooker_debugger("User Session invalid - clear down data "," ",0) ;
 		}
-		wordbooker_debugger("Checking session (2) "," ",0) ;
+		wordbooker_debugger("Checking session pass 2 "," ",0) ;
 		if (strlen($session->access_token)>5){
-		wordbooker_debugger("Session found. Store it "," ",0) ;
+		wordbooker_debugger("Session found. Store it ",(string) $ret_code->id,0) ;
 			# Yes! so lets store it
-		wordbooker_set_userdata(NULL, NULL, NULL,$session,$ret_code->id);
+		wordbooker_set_userdata(NULL, NULL, NULL,$session, (string) $ret_code->id);
 			return $session->access_token;
 		}
 	}
@@ -867,6 +871,17 @@ function wordbooker_option_support() {
 		if ($ver_diff>5) {$ver_diff=6;}
 		$ver_diff=round($ver_diff,0);
 	}
+	$woint = "9223372036854775807";
+	$wpint = intval($int);
+	if ($woint == 9223372036854775807) {
+	  /* 64bit */
+	 $wpbit = 64;
+	}
+	elseif ($woint == 2147483647) {
+	  /* 32bit */
+	  $wpbit = 32;
+	}
+	$wpbit .=' Bit';
 	wordbooker_set_option('version_difference', $ver_diff );
 	$ver_col=array(0=>'green',1=>'black', 2=>'blue', 3=>'yellow',4=>'orange',5=>'red',6=>'red');
 	if(strlen($stable_release)<6) { $stable_release='Stable Version information not verified';}
@@ -904,6 +919,7 @@ function wordbooker_option_support() {
 		'SimpleXML library' => $sxmlvers." (". WORDBOOKER_SIMPLEXML.")",
 		'HTTP Output Character Encoding'=>$http_coding,
 		'Internal PHP Character Encoding'=>$int_coding,
+		'64 or 32 bit'=>$wpbit,
 		'MySQL' => $mysqlvers,
 		);
 	$version_errors = array();

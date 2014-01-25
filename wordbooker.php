@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.2.0
+Version: 2.2.1
 */
 
  /*
@@ -38,7 +38,7 @@ $wbooker_user_id=0;
 function wordbooker_global_definitions() {
 	global $table_prefix, $wp_version,$wpdb,$db_prefix,$wbooker_user_id;
 	$wbooker_user_id=0;
-	define('WORDBOOKER_CODE_RELEASE',"2.2.0 - Birds & Planes");
+	define('WORDBOOKER_CODE_RELEASE',"2.2.1 - Listen To Seashells They Know Everything");
 	# For Troubleshooting
 	define('ADVANCED_DEBUG',false);
 	define('WORDBOOKER_DEBUG', false);

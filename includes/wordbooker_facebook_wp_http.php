@@ -152,7 +152,7 @@ function wordbooker_get_access_token_from_code($code) {
 
 function wordbooker_check_access_token($access_token) {
 	if (!defined('WORDBOOKER_FB_ACCESS_TOKEN')) {$access='254577506873|szBVgLKb2hvtvSkMeSMTkaPnGFM'; } else {$access=WORDBOOKER_FB_ACCESS_TOKEN;}
-	 $url='https://graph.facebook.com/debug_token?input_token='.$access_token.'&access_token='.$access;
+	 $url='https://graph.facebook.com/debug_token?input_token='.$access_token.'&access_token='.$access.'&format=JSON-STRINGS';
 	 try {
 	$x=wordbooker_make_http_call($url);
 	}
@@ -173,7 +173,7 @@ function wordbooker_status_feed($fb_id,$access_token) {
 	if (!isset($fb_id)){$fb_id='me';}
 	if (!defined('WORDBOOKER_FB_SECRET')) {$app_secret=WORDBOOKER_SETTINGS_HEX; } else {$app_secret=WORDBOOKER_FB_SECRET;}
 	$appsecret_proof= hash_hmac('sha256', $access_token, $app_secret);
-    $url = 'https://graph.facebook.com/'.$fb_id.'/feed/?access_token='.$access_token.'&appsecret_proof='.$appsecret_proof.'&format=JSON&limit=10';
+    $url = 'https://graph.facebook.com/'.$fb_id.'/feed/?access_token='.$access_token.'&appsecret_proof='.$appsecret_proof.'&format=JSON-STRINGS&limit=10';
 	$x=wordbooker_make_http_call($url);
     return($x);
 }
@@ -239,7 +239,6 @@ function wordbooker_make_http_call($url) {
 		$error_string = $response->get_error_message();
 		 throw new Exception($error_string); return;
 		}
-
 		$x=json_decode($response['body']);
 		  if (isset($x->error_msg)) {
 		  $error=$x->error_msg;}
@@ -248,6 +247,7 @@ function wordbooker_make_http_call($url) {
 		  if (isset($error)) {
 			  throw new Exception($error);
 		  }
+//var_dump($x);
 		return $x;
 }
 
@@ -276,6 +276,7 @@ function wordbooker_make_http_call2($url) {
 			  throw new Exception($error);
 		  }
 		  if (is_null($x)) {$x=$response['body'];}
+	//	  var_dump($x);
 		return $x;
 }
 

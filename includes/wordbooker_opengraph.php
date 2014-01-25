@@ -473,6 +473,20 @@ function wordbooker_append_post($post_cont) {
 	return $post_cont2;
 }
 
+function display_wordbooker_fb_comment() {
+	global $post;
+	if(!is_single || is_front_page() && !is_category() && !is_archive() && !is_home()){return;}
+	$wordbooker_settings = wordbooker_options();
+	if (!isset($wordbooker_settings['wordbooker_use_fb_comments'])) { return;}
+	$wordbooker_post_options= get_post_meta($post->ID, '_wordbooker_options', true);
+	if ( isset($wordbooker_post_options['wordbooker_use_facebook_comments'])) {
+		$post_link = get_permalink($post->ID);
+		$checked_flag=array('on'=>'true','off'=>'false');
+		$comment_code= '<fb:comments href="'.$post_link.'" num_posts="'.$wordbooker_settings['fb_comment_box_count'].'" width="'.$wordbooker_settings['fb_comment_box_size'].'" notify="'.$checked_flag[$wordbooker_settings['fb_comment_box_notify']].'" colorscheme="'.$wordbooker_settings['wb_comment_colorscheme'].'" ></fb:comments>';
+		echo $comment_code;
+	}
+}
+
 function wordbooker_fb_comment_inline() {
 	global $post;
 	if(!is_single()){return;}

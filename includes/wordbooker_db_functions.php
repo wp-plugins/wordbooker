@@ -76,7 +76,7 @@ function wordbooker_get_userdata($user_id) {
 function wordbooker_set_userdata($onetime_data, $facebook_error,$secret, $session,$facebook_id) {
 	global $user_ID, $wpdb,$blog_id;
 	wordbooker_delete_userdata();
-	$sql= $wpdb->prepare("INSERT INTO " . WORDBOOKER_USERDATA . " (user_ID, onetime_data, facebook_error, secret, session_key, uid, expires, access_token, sig,blog_id,facebook_id	) VALUES (%d,%s,%s,%s,%s,%s,%s,%s,%s,%d,%d)", $user_ID, serialize($onetime_data), serialize($facebook_error),  serialize($secret),  serialize($session->session_key), serialize($session->uid), serialize($session->expires), serialize($session->access_token), serialize($session->sig), $blog_id,$facebook_id);
+	$sql= $wpdb->prepare("INSERT INTO " . WORDBOOKER_USERDATA . " (user_ID, onetime_data, facebook_error, secret, session_key, uid, expires, access_token, sig,blog_id,facebook_id	) VALUES (%d,%s,%s,%s,%s,%s,%s,%s,%s,%d,%s)", $user_ID, serialize($onetime_data), serialize($facebook_error),  serialize($secret),  serialize($session->session_key), serialize($session->uid), serialize($session->expires), serialize($session->access_token), serialize($session->sig), $blog_id,$facebook_id);
 	$result = $wpdb->query($sql);
 }
 
