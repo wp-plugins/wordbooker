@@ -64,6 +64,60 @@ function wordbooker_delete_comment_from_facebook($comment_id,$blog_id){
 	}
 }
 
+function wordbooker_get_comments_from_fb_box() {
+	global $wpdb,$blog_id,$post;
+	$url = get_permalink();
+	$comments = wordbooker_fb_get_box_comments($url);
+	if(!isset($comments->$url)) {return "";}
+	$wordbooker_settings=get_option('wordbooker_settings');
+	$commemail=$wordbooker_settings['wordbooker_comment_email'];
+	$comment_approve=0;
+	if (isset($wordbooker_settings['wordbooker_comment_approve'])) {$comment_approve=1;}
+	$output = '<noscript> <ol class="commentlist">';
+	$current_offset = get_option('gmt_offset');
+	foreach ($comments->$url->comments->data as $key => $single_comment) {
+		$ts = strtotime($single_comment->created_time);
+		$output.= '<li id="'.esc_attr( 'fb-comment-'.$key ).'">';
+		$output.='<p><a href="'.esc_url('http://www.facebook.com/'.$single_comment->from->id,array('http','https')) .'"> '.esc_html( $single_comment->from->name ).' </a>:</p>';
+		$output.='<p class="commentdata">'.date('F jS, Y',$ts) .' at '.date('g:i a',$ts).'</p> ';
+		$output.=$single_comment->message.' </li>';
+		if (isset($wordbooker_settings['fb_comment_box_import'])) {
+			$sql=$wpdb->prepare("Select fb_comment_id from ".WORDBOOKER_POSTCOMMENTS." where fb_comment_id=%s",$single_comment->id);
+			$commq=$wpdb->query($sql);
+			if(!$commq) {
+				$time = date("Y-m-d H:i:s",$ts);
+				$atime = date("Y-m-d H:i:s",$ts+(3600*$current_offset));
+				$data = array(
+					'comment_post_ID' => $post->ID,
+					'comment_author' => $single_comment->from->name,
+					'comment_author_email' => $commemail,
+					'comment_author_url' => 'https://www.facebook.com/'.$single_comment->from->id,
+					'comment_content' =>$single_comment->message,
+					'comment_author_IP' => '127.0.0.1',
+					'comment_date' => $atime,
+					'comment_date_gmt' => $time,
+					'comment_parent'=> 0,
+					'user_id' => 1,
+					'comment_agent' => 'Wordbooker plugin '.WORDBOOKER_CODE_RELEASE,
+					'comment_approved' => $comment_approve,
+				);
+				$data = apply_filters('preprocess_comment', $data);
+				$data['comment_parent'] = isset($data['comment_parent']) ? absint($data['comment_parent']) : 0;
+				$parent_status = ( 0 < $data['comment_parent'] ) ? wp_get_comment_status($data['comment_parent']) : '';
+				$data['comment_parent'] = ( 'approved' == $parent_status || 'unapproved' == $parent_status ) ? $data['comment_parent'] : 0;
+				$newComment= wp_insert_comment($data);
+				update_comment_meta($newComment, "fb_uid", $single_comment->from->id);
+				update_comment_meta($newComment, “akismet_result”, true);
+				$user_id=0;
+				$sql=$wpdb->prepare("Insert into ".WORDBOOKER_POSTCOMMENTS." (fb_post_id,user_id,comment_timestamp,wp_post_id,blog_id,wp_comment_id,fb_comment_id,in_out) values (%s,%d,%d,%d,%d,%d,%s,'in' )",$single_comment->id,$user_id,strtotime($single_comment->created_time),$post->ID,$blog_id,$newComment,$single_comment->id);
+				$commq2=$wpdb->query($sql);
+			}
+		}
+	}
+	$output.= '</ol></noscript>';
+	return $output;
+}
+
 function wordbooker_debugger($method,$error_msg,$post_id,$level=9) {
 	if (WORDBOOKER_NEVER_LOG) { return;}
 	global $user_ID,$post_ID,$wpdb,$blog_id,$post,$wbooker_user_id,$comment_user,$wb_user_id;

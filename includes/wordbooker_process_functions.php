@@ -399,7 +399,10 @@ function wordbooker_fbclient_publishaction($wbuser,$post_id,$wpuserid) {
 		wordbooker_debugger("Posting Failed : Access Token is not valid ",$at->data->error->message,$post_id,99) ;
 		return;
 	}
+	$action_links_back=$action_links;
 	foreach($posting_array as $posting_target) {
+		$action_links=$action_links_back;
+		$wordbooker_fb_post['actions'] =json_encode($action_links);
 		$access_token='dummy access token';
 		$wbuser->pages[]=array( 'id'=>'PW:'.$wbuser->facebook_id, 'name'=>"Personal Wall",'access_token'=>$wbuser->access_token);
 		if(is_array($wbuser->pages)){
@@ -413,6 +416,11 @@ function wordbooker_fbclient_publishaction($wbuser,$post_id,$wpuserid) {
 		if ($posting_target['target_active']=='X') { unset($posting_target['target_active']);}
  		if (isset($posting_target['target_active'])) {
 			$target_type=substr($posting_target['target'],0,2);
+			if ( $target_type='GW' ) {
+				wordbooker_debugger("Group Walls can only use Read Entire Article for the Action Link","",$post_id,90) ;
+				$action_links = array('name' => __('Read entire article', 'wordbooker'),'link' => $post_data['post_link_share']);
+				$wordbooker_fb_post['actions'] =json_encode($action_links);
+			}
 			if ($access_token=='dummy access token') {$access_token=$wbuser->access_token;}
 			if (is_null($access_token)) {
 				wordbooker_debugger("Posting to ".$target_name." (".$posting_target['target_id'].") failed as there is no access token","",$post_id,90) ;

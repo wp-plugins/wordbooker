@@ -135,7 +135,7 @@ function wordbooker_post_comments_to_facebook($user_id) {
 				wordbooker_debugger("Failed to post comment to Facebook : ".$error_msg,$row->fb_post_id,-3,98);
 				if ($err_no=100) {
 					$sql= $wpdb->prepare("DELETE FROM ".WORDBOOKER_POSTCOMMENTS." where fb_post_id =%d and blog_id=%d", $row->fb_post_id,$blog_id);
-					$result = $wpdb->query($sql);
+				#	$result = $wpdb->query($sql);
 				}
 			}
 			if (strlen($x->id)>2){
@@ -193,7 +193,7 @@ function wordbooker_get_comments_from_facebook($user_id) {
 			wordbooker_debugger("Failed to get comment from Facebook : ".$error_msg,$row->fb_post_id,-3,98);
 			if ($err_no=100) {
 				$sql= $wpdb->prepare("DELETE FROM ".WORDBOOKER_POSTCOMMENTS." where fb_post_id =%d and blog_id=%d", $row->fb_post_id,$blog_id);
-				$result = $wpdb->query($sql);
+			#	$result = $wpdb->query($sql);
 			}
 		}
 		if(count($all_comments->data) > 0 ) {

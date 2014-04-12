@@ -85,6 +85,10 @@ function wordbooker_inner_custom_box() {
 			foreach (array_keys($post_meta) as $key) {
 				$wordbooker_settings[$key]=$post_meta[$key];
 			}
+//var_dump($post_meta);
+//echo '<br /><br />';
+//var_dump($wordbooker_settings);
+//echo '<br /><br />';
 		}
 	}
 	if( !isset($wordbooker_settings['wordbooker_primary_type'])) {$wordbooker_settings['wordbooker_primary_type']=1;}

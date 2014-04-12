@@ -676,7 +676,7 @@ function wordbooker_blog_advanced_options() {
 		echo '<label for="wb_wordbooker_fb_rec_act">'.__("Include FB Recent activity on Wordbooker Options page", 'wordbooker'). ' : </label>';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_fb_rec_act]" '.$checked_flag[$wordbooker_settings["wordbooker_fb_rec_act"]].' ></P><p>';
 
-		echo '<label for="wb_facebook_gravatars">'.__("Do not replace Gravtars with Facebook Photos", 'wordbooker'). ' : </label>';
+		echo '<label for="wb_facebook_gravatars">'.__("Do not replace Gravatars with Facebook Photos", 'wordbooker'). ' : </label>';
 		if(!isset($wordbooker_settings["wordbooker_no_facebook_gravatars"])) $wordbooker_settings["wordbooker_no_facebook_gravatars"]='off';
 		echo '<INPUT TYPE=CHECKBOX NAME="wordbooker_settings[wordbooker_no_facebook_gravatars]" '.$checked_flag[$wordbooker_settings["wordbooker_no_facebook_gravatars"]].' ></P><p>';
 

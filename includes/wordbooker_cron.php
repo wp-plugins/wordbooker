@@ -125,7 +125,7 @@ function wordbooker_cache_refresh($user_id) {
 			}
 				else
 			{
-					$pages["name"]=$pageinfo->$page_access->name;
+					$pages["name"]=$page_access->name;
 				}
 			wordbooker_debugger("Page info for page ID ".$page_access->id,$pages["name"],-1,9) ;
 			if (!defined('WORDBOOKER_PREMIUM')) {} else {
@@ -306,10 +306,10 @@ function wordbooker_cache_refresh($user_id) {
 	//	$fb_profile_info=wordbooker_get_fb_id($suid,$wbuser2->access_token);
 		wordbooker_debugger("Setting Status Name as  : ",$fb_profile_info->name,-1,9) ;
 		$sql="insert into ".WORDBOOKER_USERSTATUS." set name='".$wpdb->escape($fb_profile_info->name)."'";
-		$private=array("SELF","CUSTOM","ALL_FRIENDS");
+		$private=array("SELF","CUSTOM");
 		if (isset($status_time)) {
 			if (in_array($privacy,$private)) {
-				wordbooker_debugger("Privacy is SELF / CUSTOM or Friends Only - not updating status"," ",-1,9);
+				wordbooker_debugger("Privacy is ".$privacy."- so not updating status"," ",-1,9);
 			}
 			else {
 				wordbooker_debugger("Setting status as  : ",$wpdb->escape($status_message),-1,9) ;

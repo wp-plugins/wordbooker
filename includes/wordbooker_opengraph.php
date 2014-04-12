@@ -187,7 +187,9 @@ function display_wordbooker_fb_share() {
 	$do_share=0;
 	$wordbooker_post_options= get_post_meta($post->ID, '_wordbooker_options', true);
 	if (!isset($wordbooker_settings['wordbooker_share_on'])) {return ;}
-	if ($wordbooker_post_options['wordbooker_share_button_post']==2 && !is_page()) {return ;}
+	if (!isset($wordbooker_post_options['wordbooker_share_button_post'])) {$wordbooker_post_options['wordbooker_share_button_post']=1;}
+	if (!isset($wordbooker_post_options['wordbooker_share_button_page'])) {$wordbooker_post_options['wordbooker_share_button_page']=1;}
+	if ($wordbooker_post_options['wordbooker_share_button_post']==2 && is_single()) {return ;}
 	if ($wordbooker_post_options['wordbooker_share_button_page']==2 && is_page()) {return ;}
 	if (isset($wordbooker_settings['wordbooker_share_button_post']) && is_single()  ) {$do_share=1;}
 	if (isset($wordbooker_settings['wordbooker_share_button_page']) && is_page() )  {$do_share=1;}
@@ -231,7 +233,9 @@ function wordbooker_fb_share_inline() {
 	$do_share=0;
 	$wordbooker_post_options= get_post_meta($post->ID, '_wordbooker_options', true);
 	if (!isset($wordbooker_settings['wordbooker_share_on'])) {return ;}
-	if ($wordbooker_post_options['wordbooker_share_button_post']==2 && !is_page()) {return ;}
+	if (!isset($wordbooker_post_options['wordbooker_share_button_post'])) {$wordbooker_post_options['wordbooker_share_button_post']=1;}
+	if (!isset($wordbooker_post_options['wordbooker_share_button_page'])) {$wordbooker_post_options['wordbooker_share_button_page']=1;}
+	if ($wordbooker_post_options['wordbooker_share_button_post']==2 && is_single()) {return ;}
 	if ($wordbooker_post_options['wordbooker_share_button_page']==2 && is_page()) {return ;}
 	if (isset($wordbooker_settings['wordbooker_share_button_post']) && is_single() && !is_front_page() ) {$do_share=1;}
 	if (isset($wordbooker_settings['wordbooker_share_button_page']) && is_page()  && !is_front_page() )  {$do_share=1;}
@@ -471,7 +475,10 @@ function wordbooker_append_post($post_cont) {
 
 	if ($wordbooker_settings['wordbooker_comment_location']=='bottom') { $post_cont2=$post_cont2."<div class='wb_fb_comment'><br/>".$comment_code."</div>"; }
 	return $post_cont2;
+
+
 }
+
 
 function display_wordbooker_fb_comment() {
 	global $post;
@@ -484,6 +491,8 @@ function display_wordbooker_fb_comment() {
 		$checked_flag=array('on'=>'true','off'=>'false');
 		$comment_code= '<fb:comments href="'.$post_link.'" num_posts="'.$wordbooker_settings['fb_comment_box_count'].'" width="'.$wordbooker_settings['fb_comment_box_size'].'" notify="'.$checked_flag[$wordbooker_settings['fb_comment_box_notify']].'" colorscheme="'.$wordbooker_settings['wb_comment_colorscheme'].'" ></fb:comments>';
 		echo $comment_code;
+		echo  wordbooker_get_comments_from_fb_box();
+
 	}
 }
 
@@ -497,6 +506,7 @@ function wordbooker_fb_comment_inline() {
 		$post_link = get_permalink($post->ID);
 		$checked_flag=array('on'=>'true','off'=>'false');
 		$comment_code= '<fb:comments href="'.$post_link.'" num_posts="'.$wordbooker_settings['fb_comment_box_count'].'" width="'.$wordbooker_settings['fb_comment_box_size'].'" notify="'.$checked_flag[$wordbooker_settings['fb_comment_box_notify']].'" colorscheme="'.$wordbooker_settings['wb_comment_colorscheme'].'" ></fb:comments>';
+		$comment_code .= wordbooker_get_comments_from_fb_box();
 		return $comment_code;
 	}
 }

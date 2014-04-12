@@ -181,7 +181,7 @@ function wordbooker_fb_pemissions($fb_id,$access_token) {
 function wordbooker_fb_get_comments($fb_id,$access_token) {
 	if (!defined('WORDBOOKER_FB_SECRET')) {$app_secret=WORDBOOKER_SETTINGS_HEX; } else {$app_secret=WORDBOOKER_FB_SECRET;}
 	$appsecret_proof= hash_hmac('sha256', $access_token, $app_secret);
-    $url = 'https://graph.facebook.com/'.$fb_id.'/comments?access_token='.$access_token.'&appsecret_proof='.$appsecret_proof;
+    $url = 'https://graph.facebook.com/'.$fb_id.'/comments?access_token='.$access_token.'&limit=2000&appsecret_proof='.$appsecret_proof;
 	$x=wordbooker_make_curl_call($url);
     return($x);
 }

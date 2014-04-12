@@ -5,7 +5,7 @@ Plugin URI: http://wordbooker.tty.org.uk
 Description: Provides integration between your blog and your Facebook account. Navigate to <a href="options-general.php?page=wordbooker">Settings &rarr; Wordbooker</a> for configuration.
 Author: Steve Atty
 Author URI: http://wordbooker.tty.org.uk
-Version: 2.2.1
+Version: 2.2.2
 */
 
  /*
@@ -38,7 +38,7 @@ $wbooker_user_id=0;
 function wordbooker_global_definitions() {
 	global $table_prefix, $wp_version,$wpdb,$db_prefix,$wbooker_user_id;
 	$wbooker_user_id=0;
-	define('WORDBOOKER_CODE_RELEASE',"2.2.1 - Listen To Seashells They Know Everything");
+	define('WORDBOOKER_CODE_RELEASE',"2.2.2 - Chemedzevana");
 	# For Troubleshooting
 	define('ADVANCED_DEBUG',false);
 	define('WORDBOOKER_DEBUG', false);
@@ -360,62 +360,13 @@ function wordbooker_header($blah){
 	if (is_404()) {return;}
 	global $post;
 	# Stops the code firing on non published posts
-	if ('publish' != get_post_status($post->ID)) {return;}
+	if (!is_object($post) || 'publish' != get_post_status($post->ID)) {return;}
 	$wordbooker_settings = wordbooker_options();
 	# Now we just call the wordbooker_og_tags function.
 	if (!isset ( $wordbooker_settings['wordbooker_fb_disable_og'])) { wordbooker_og_tags(); }
 	return $blah;
 }
 
-function wordbooker_get_comments_from_fb_box($comment_approve,$commemail,$fb_comment_box_import) {
-	global $wpdb,$blog_id,$post;
-	$url = get_permalink();
-	$comments = wordbooker_fb_get_box_comments($url);
-	if(!isset($comments->$url)) {return "";}
-	$output = '<noscript><ol class="commentlist">';
-	$current_offset = get_option('gmt_offset');
-	foreach ($comments->$url->comments->data as $key => $single_comment) {
-		$ts = strtotime($single_comment->created_time);
-		$output.= '<li id="'.esc_attr( 'fb-comment-'.$key ).'">';
-		$output.='<p><a href="'.esc_url('http://www.facebook.com/'.$single_comment->from->id,array('http','https')) .'"> '.esc_html( $single_comment->from->name ).' </a>:</p>';
-		$output.='<p class="commentdata">'.date('F jS, Y',$ts) .' at '.date('g:i a',$ts).'</p> ';
-		$output.=$single_comment->message.' </li>';
-		if ($fb_comment_box_import==1){
-			$sql=$wprdb->prepare("Select fb_comment_id from ".WORDBOOKER_POSTCOMMENTS." where fb_comment_id=%s",$single_comment->id);
-			$commq=$wpdb->query($sql);
-			if(!$commq) {
-				$time = date("Y-m-d H:i:s",$ts);
-				$atime = date("Y-m-d H:i:s",$ts+(3600*$current_offset));
-				$data = array(
-					'comment_post_ID' => $post->ID,
-					'comment_author' => $single_comment->from->name,
-					'comment_author_email' => $commemail,
-					'comment_author_url' => 'https://www.facebook.com/'.$single_comment->from->id,
-					'comment_content' =>$single_comment->message,
-					'comment_author_IP' => '127.0.0.1',
-					'comment_date' => $atime,
-					'comment_date_gmt' => $time,
-					'comment_parent'=> 0,
-					'user_id' => 1,
-					'comment_agent' => 'Wordbooker plugin '.WORDBOOKER_CODE_RELEASE,
-					'comment_approved' => $comment_approve,
-				);
-				$data = apply_filters('preprocess_comment', $data);
-				$data['comment_parent'] = isset($data['comment_parent']) ? absint($data['comment_parent']) : 0;
-				$parent_status = ( 0 < $data['comment_parent'] ) ? wp_get_comment_status($data['comment_parent']) : '';
-				$data['comment_parent'] = ( 'approved' == $parent_status || 'unapproved' == $parent_status ) ? $data['comment_parent'] : 0;
-				$newComment= wp_insert_comment($data);
-				update_comment_meta($newComment, "fb_uid", $single_comment->from->id);
-				update_comment_meta($newComment, “akismet_result”, true);
-				$user_id=0;
-				$sql=$wpdb->prepare("Insert into ".WORDBOOKER_POSTCOMMENTS." (fb_post_id,user_id,comment_timestamp,wp_post_id,blog_id,wp_comment_id,fb_comment_id,in_out) values (%s,%d,%d,%d,%d,%d,%s,'in' )",$single_comment->id,$user_id,strtotime($single_comment->created_time),$post->ID,$blog_id,$newComment,$single_comment->id);
-				$commq2=$wpdb->query($sql);
-			}
-		}
-	}
-	$output.= '</ol></noscript>';
-	return $output;
-}
 
 function wordbooker_fb_link_friend($atts,$content=null) {
 	$fburl='<a href="https://www.facebook.com/'.$atts['id'].'">'.$atts['name'].'</a>';
