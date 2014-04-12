@@ -1,43 +1,3 @@
-/* 20 Aug 2006: This started off as wordbooker_actb.js from
-http://www.codeproject.com/jscript/jswordbooker_actb.asp.
-
-But it didn't work without the addEvent stuff that was in the demo page.  Web
-browsing suggests that this widely distributed stuff is from another source.
-There is a warning about it at quirksmode, but I think I should be immune from
-it.  So that was added at the top.
-
-Then I hacked in a hook to do server lookups.  This is the code that uses my
-new wordbooker_actb_lastdownload variable.
-
-Then I wrote the download code.  This is a combination of the demo at
-http://www.w3schools.com/xml/tryit.asp?filename=try_xmlhttprequest_js1
-(although modified to move the state change function into a closure) and the
-"explode" function from http://textsnippets.com/
-
-This makes it a huge bag of code with mixed copyrights.  I'm comfortable
-saying that the creative commons license that applies to the original wordbooker_actb
-code can be taken as applying to this derivative work, but if you wanted to
-use this in something that costs real money, you'd better check with your
-lawyers
-
-1 Sept 2006 - I noticed a mountain of errors from the Firefox CSS Parser.
-Changing the "=" to ":" in wordbooker_actb_hStyle prevented this, and made the
-highlighted part bold as well!
-
-1 Sept 2006 - added a default of "sans-serif" to the "arial narrow" font
-family, for those of us who don't have arial.
-
-4 Nov 2006 - made "tab" leave the box without selection: much more how I'd
-like it to work
-
-August 2008 - changed the format to work better with names coming from SQL
-
-April 2009 - fixed (in a messy way) a bug where the top element didn't
-show in some browsers
-
-June 2009 - Added UTF8 accented character folding - so each entry has
-a "disp"lay and a "match" version
-*/
 
 function addEvent(obj,event_name,func_name){
   if (obj.attachEvent){
@@ -131,7 +91,7 @@ function setCaret(obj,l){
   if (obj.setSelectionRange){
     obj.setSelectionRange(l,l);
   }else if(obj.createTextRange){
-    m = obj.createTextRange();    
+    m = obj.createTextRange();
     m.moveStart('character',l);
     m.collapse();
     m.select();
@@ -142,7 +102,7 @@ function setSelection(obj,s,e){
   if (obj.setSelectionRange){
     obj.setSelectionRange(s,e);
   }else if(obj.createTextRange){
-    m = obj.createTextRange();    
+    m = obj.createTextRange();
     m.moveStart('character',s);
     m.moveEnd('character',e);
     m.select();
@@ -222,12 +182,12 @@ function wordbooker_actb(obj,ca,path){
   var wordbooker_actb_caretmove = false;
   this.wordbooker_actb_keywords = new Array();
   /* ---- Private Variables---- */
-  
+
   this.wordbooker_actb_keywords = ca;
   var wordbooker_actb_self = this;
 
   wordbooker_actb_curr = obj;
-  
+
   addEvent(wordbooker_actb_curr,"focus",wordbooker_actb_setup);
   function wordbooker_actb_setup(){
     addEvent(document,"keydown",wordbooker_actb_checkkey);
@@ -274,7 +234,7 @@ function wordbooker_actb(obj,ca,path){
     return tobuild;
   }
   function wordbooker_actb_generate(){
-    if (document.getElementById('tat_table')){ wordbooker_actb_display = false;document.body.removeChild(document.getElementById('tat_table')); } 
+    if (document.getElementById('tat_table')){ wordbooker_actb_display = false;document.body.removeChild(document.getElementById('tat_table')); }
     if (wordbooker_actb_kwcount == 0){
       wordbooker_actb_display = false;
       return;
@@ -611,7 +571,7 @@ function wordbooker_actb(obj,ca,path){
         } else {
           return true;
         }
-        break;      
+        break;
       case 13:
         if (wordbooker_actb_display) {
           wordbooker_actb_caretmove = 1;
@@ -630,7 +590,7 @@ function wordbooker_actb(obj,ca,path){
   function wordbooker_actb_tocomplete(kc){
     if (kc == 38 || kc == 40 || kc == 13) return;
     var i;
-    if (wordbooker_actb_display){ 
+    if (wordbooker_actb_display){
       var word = 0;
       var c = 0;
       for (var i=0;i<=wordbooker_actb_self.wordbooker_actb_keywords.length;i++){
@@ -642,7 +602,7 @@ function wordbooker_actb(obj,ca,path){
       }
       wordbooker_actb_pre = word;
     }else{ wordbooker_actb_pre = -1};
-    
+
     if (wordbooker_actb_curr.value == ''){
       wordbooker_actb_mouse_on_list = 0;
       wordbooker_actb_removedisp();
@@ -651,7 +611,7 @@ function wordbooker_actb(obj,ca,path){
     if (wordbooker_actb_self.wordbooker_actb_delimiter.length > 0){
       caret_pos_start = getCaretStart(wordbooker_actb_curr);
       caret_pos_end = getCaretEnd(wordbooker_actb_curr);
-      
+
       delim_split = '';
       for (i=0;i<wordbooker_actb_self.wordbooker_actb_delimiter.length;i++){
         delim_split += wordbooker_actb_self.wordbooker_actb_delimiter[i];
@@ -680,7 +640,7 @@ function wordbooker_actb(obj,ca,path){
         }
         l+=wordbooker_actb_delimwords[i].length + 1;
       }
-      var ot = wordbooker_actb_delimwords[wordbooker_actb_cdelimword].trim(); 
+      var ot = wordbooker_actb_delimwords[wordbooker_actb_cdelimword].trim();
       var t = wordbooker_actb_delimwords[wordbooker_actb_cdelimword].addslashes().trim();
     }else{
       var ot = wordbooker_actb_curr.value;
@@ -700,7 +660,7 @@ function wordbooker_actb(obj,ca,path){
       Download_Candidates(t,wordbooker_actb_self);
     } else if(t.match(wordbooker_actb_self.wordbooker_actb_lastdownload) == null) {
       Download_Candidates(t,wordbooker_actb_self);
-    }          
+    }
     wordbooker_actb_total = 0;
     wordbooker_actb_tomake = false;
     wordbooker_actb_kwcount = 0;
@@ -740,21 +700,21 @@ function wordbooker_actb(obj,ca,path){
             wordbooker_actb_self.wordbooker_actb_keywords = explode('#',response);
 	    wordbooker_actb_self.wordbooker_actb_lastdownload = t;
             wordbooker_actb_tocomplete(0);  // dummy value
-          } 
+          }
         }
       };
-
-     xmlhttp.open("GET","/wp-content/plugins/wordbooker/wordbooker_get_friend.php?match="+t+"&userid="+userid,true)
+ //    xmlhttp.open("GET","../wp-content/plugins/wordbooker/includes/wordbooker_get_friend.php?match="+t+"&userid="+userid,true)
+		xmlhttp.open("GET",wpcontent+"/wordbooker/includes/wordbooker_get_friend.php?match="+t+"&userid="+userid,true)
       xmlhttp.send(null)
     }
   }
-  
+
   function explode(separator, string) {
     var list = new Array();
-  
+
     if (separator == null) return false;
     if (string == null) return false;
-  
+
     var currentStringPosition = 0;
     while (currentStringPosition<string.length) {
       var nextIndex = string.indexOf(separator, currentStringPosition);
@@ -773,41 +733,41 @@ function wordbooker_actb(obj,ca,path){
   }
   return this;
 }
-  
+
 /* This table is made by merging and capitalising two tables by
  * Andreas Gohr(andi@splitbrain.org) taken from his UTF helper
  * functions.  These are released under the GPL. */
 
 var UTF8_table = {
-    'à':'a', 'ô':'o', 'ď':'d', 'ḟ':'f', 'ë':'e', 'š':'s', 'ơ':'o', 
-    'ß':'ss','ă':'a', 'ř':'r', 'ț':'t', 'ň':'n', 'ā':'a', 'ķ':'k', 
-    'ŝ':'s', 'ỳ':'y', 'ņ':'n', 'ĺ':'l', 'ħ':'h', 'ṗ':'p', 'ó':'o', 
-    'ú':'u', 'ě':'e', 'é':'e', 'ç':'c', 'ẁ':'w', 'ċ':'c', 'õ':'o', 
-    'ṡ':'s', 'ø':'o', 'ģ':'g', 'ŧ':'t', 'ș':'s', 'ė':'e', 'ĉ':'c', 
-    'ś':'s', 'î':'i', 'ű':'u', 'ć':'c', 'ę':'e', 'ŵ':'w', 'ṫ':'t', 
-    'ū':'u','č':'c', 'ö':'oe', 'è':'e', 'ŷ':'y', 'ą':'a', 'ł':'l', 
-    'ų':'u', 'ů':'u', 'ş':'s', 'ğ':'g', 'ļ':'l', 'ƒ':'f', 'ž':'z', 
-    'ẃ':'w', 'ḃ':'b', 'å':'a', 'ì':'i', 'ï':'i', 'ḋ':'d', 'ť':'t', 
-    'ŗ':'r', 'ä':'ae', 'í':'i', 'ŕ':'r', 'ê':'e', 'ü':'ue', 'ò':'o', 
-    'ē':'e','ñ':'n', 'ń':'n', 'ĥ':'h', 'ĝ':'g', 'đ':'d', 'ĵ':'j', 
-    'ÿ':'y', 'ũ':'u', 'ŭ':'u', 'ư':'u', 'ţ':'t', 'ý':'y', 'ő':'o', 
-    'â':'a', 'ľ':'l', 'ẅ':'w', 'ż':'z', 'ī':'i', 'ã':'a', 'ġ':'g', 
-    'ṁ':'m', 'ō':'o', 'ĩ':'i', 'ù':'u', 'į':'i', 'ź':'z', 'á':'a', 
+    'à':'a', 'ô':'o', 'ď':'d', 'ḟ':'f', 'ë':'e', 'š':'s', 'ơ':'o',
+    'ß':'ss','ă':'a', 'ř':'r', 'ț':'t', 'ň':'n', 'ā':'a', 'ķ':'k',
+    'ŝ':'s', 'ỳ':'y', 'ņ':'n', 'ĺ':'l', 'ħ':'h', 'ṗ':'p', 'ó':'o',
+    'ú':'u', 'ě':'e', 'é':'e', 'ç':'c', 'ẁ':'w', 'ċ':'c', 'õ':'o',
+    'ṡ':'s', 'ø':'o', 'ģ':'g', 'ŧ':'t', 'ș':'s', 'ė':'e', 'ĉ':'c',
+    'ś':'s', 'î':'i', 'ű':'u', 'ć':'c', 'ę':'e', 'ŵ':'w', 'ṫ':'t',
+    'ū':'u','č':'c', 'ö':'oe', 'è':'e', 'ŷ':'y', 'ą':'a', 'ł':'l',
+    'ų':'u', 'ů':'u', 'ş':'s', 'ğ':'g', 'ļ':'l', 'ƒ':'f', 'ž':'z',
+    'ẃ':'w', 'ḃ':'b', 'å':'a', 'ì':'i', 'ï':'i', 'ḋ':'d', 'ť':'t',
+    'ŗ':'r', 'ä':'ae', 'í':'i', 'ŕ':'r', 'ê':'e', 'ü':'ue', 'ò':'o',
+    'ē':'e','ñ':'n', 'ń':'n', 'ĥ':'h', 'ĝ':'g', 'đ':'d', 'ĵ':'j',
+    'ÿ':'y', 'ũ':'u', 'ŭ':'u', 'ư':'u', 'ţ':'t', 'ý':'y', 'ő':'o',
+    'â':'a', 'ľ':'l', 'ẅ':'w', 'ż':'z', 'ī':'i', 'ã':'a', 'ġ':'g',
+    'ṁ':'m', 'ō':'o', 'ĩ':'i', 'ù':'u', 'į':'i', 'ź':'z', 'á':'a',
     'û':'u', 'þ':'th', 'ð':'dh', 'æ':'ae', 'µ':'u',
-    'À':'A', 'Ô':'O', 'Ď':'D', 'Ḟ':'F', 'Ë':'E', 'Š':'S', 'Ơ':'O', 
-    'ß':'SS','Ă':'A', 'Ř':'R', 'Ț':'T', 'Ň':'N', 'ā':'A', 'Ķ':'K', 
-    'Ŝ':'S', 'Ỳ':'Y', 'Ņ':'N', 'Ĺ':'L', 'ħ':'H', 'Ṗ':'P', 'Ó':'O', 
-    'Ú':'U', 'ě':'E', 'É':'E', 'Ç':'C', 'Ẁ':'W', 'Ċ':'C', 'Õ':'O', 
-    'Ṡ':'S', 'Ø':'O', 'Ģ':'G', 'ŧ':'T', 'Ș':'S', 'Ė':'E', 'Ĉ':'C', 
-    'Ś':'S', 'Î':'I', 'Ű':'U', 'Ć':'C', 'Ę':'E', 'Ŵ':'W', 'Ṫ':'T', 
-    'ū':'U', 'Č':'C', 'Ö':'OE', 'È':'E', 'Ŷ':'Y', 'Ą':'A', 'ł':'L', 
-    'Ų':'U', 'Ů':'U', 'Ş':'S', 'Ğ':'G', 'Ļ':'L', 'Ƒ':'F', 'Ž':'Z', 
-    'Ẃ':'W', 'Ḃ':'B', 'Å':'A', 'Ì':'I', 'Ï':'I', 'Ḋ':'D', 'Ť':'T', 
-    'Ŗ':'R', 'Ä':'AE', 'Í':'I', 'Ŕ':'R', 'Ê':'E', 'Ü':'UE', 'Ò':'O', 
-    'ē':'E', 'Ñ':'N', 'Ń':'N', 'Ĥ':'H', 'Ĝ':'G', 'đ':'D', 'Ĵ':'J', 
-    'Ÿ':'Y', 'Ũ':'U', 'Ŭ':'U', 'Ư':'U', 'Ţ':'T', 'Ý':'Y', 'Ő':'O', 
-    'Â':'A', 'Ľ':'L', 'Ẅ':'W', 'Ż':'Z', 'ī':'I', 'Ã':'A', 'Ġ':'G', 
-    'Ṁ':'M', 'ō':'O', 'Ĩ':'I', 'Ù':'U', 'Į':'I', 'Ź':'Z', 'Á':'A', 
+    'À':'A', 'Ô':'O', 'Ď':'D', 'Ḟ':'F', 'Ë':'E', 'Š':'S', 'Ơ':'O',
+    'ß':'SS','Ă':'A', 'Ř':'R', 'Ț':'T', 'Ň':'N', 'ā':'A', 'Ķ':'K',
+    'Ŝ':'S', 'Ỳ':'Y', 'Ņ':'N', 'Ĺ':'L', 'ħ':'H', 'Ṗ':'P', 'Ó':'O',
+    'Ú':'U', 'ě':'E', 'É':'E', 'Ç':'C', 'Ẁ':'W', 'Ċ':'C', 'Õ':'O',
+    'Ṡ':'S', 'Ø':'O', 'Ģ':'G', 'ŧ':'T', 'Ș':'S', 'Ė':'E', 'Ĉ':'C',
+    'Ś':'S', 'Î':'I', 'Ű':'U', 'Ć':'C', 'Ę':'E', 'Ŵ':'W', 'Ṫ':'T',
+    'ū':'U', 'Č':'C', 'Ö':'OE', 'È':'E', 'Ŷ':'Y', 'Ą':'A', 'ł':'L',
+    'Ų':'U', 'Ů':'U', 'Ş':'S', 'Ğ':'G', 'Ļ':'L', 'Ƒ':'F', 'Ž':'Z',
+    'Ẃ':'W', 'Ḃ':'B', 'Å':'A', 'Ì':'I', 'Ï':'I', 'Ḋ':'D', 'Ť':'T',
+    'Ŗ':'R', 'Ä':'AE', 'Í':'I', 'Ŕ':'R', 'Ê':'E', 'Ü':'UE', 'Ò':'O',
+    'ē':'E', 'Ñ':'N', 'Ń':'N', 'Ĥ':'H', 'Ĝ':'G', 'đ':'D', 'Ĵ':'J',
+    'Ÿ':'Y', 'Ũ':'U', 'Ŭ':'U', 'Ư':'U', 'Ţ':'T', 'Ý':'Y', 'Ő':'O',
+    'Â':'A', 'Ľ':'L', 'Ẅ':'W', 'Ż':'Z', 'ī':'I', 'Ã':'A', 'Ġ':'G',
+    'Ṁ':'M', 'ō':'O', 'Ĩ':'I', 'Ù':'U', 'Į':'I', 'Ź':'Z', 'Á':'A',
     'Û':'U', 'Þ':'TH', 'Ð':'DH', 'Æ':'AE',
 };
 
